@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<app version="1">
+	<name>CavEX</name>
+	<version>Alpha 0.1.0</version>
+	<release_date>20221110000000</release_date>
+	<coder>ByteBit/xtreme8000</coder>
+	<short_description></short_description>
+	<long_description>https://github.com/xtreme8000/CavEX</long_description>
+	<ahb_access/>
+</app>
