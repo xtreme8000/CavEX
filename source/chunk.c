@@ -491,12 +491,10 @@ void chunk_check_built(struct chunk* c) {
 			if(vertices > 0 && vertices <= 0xFFFF * 4) {
 				displaylist_init(c->mesh + k, vertices, 3 * 2 + 2 * 1 + 1);
 
-				displaylist_begin(c->mesh + k);
-				GX_Begin(GX_QUADS, GX_VTXFMT0, vertices);
+				displaylist_begin(c->mesh + k, GX_QUADS, GX_VTXFMT0, vertices);
 				chunk_rebuild(c, c->mesh + k, light_data, false,
 							  k >= 6 && k != 12, (k == 12) ? SIDE_MAX : (k % 6),
 							  k == 12);
-				GX_End();
 				displaylist_end(c->mesh + k);
 				c->has_displist[k] = true;
 			} else {

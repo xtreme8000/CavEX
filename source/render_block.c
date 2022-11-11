@@ -56,132 +56,180 @@ static inline void render_block_side_adv(struct displaylist* d, int16_t x,
 
 	switch(side) {
 		case SIDE_LEFT: { // x minus
-			GX_Position3s16(x, y, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[8], level_table_1, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
-			GX_Position3s16(x, y + height, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[9], level_table_1, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			GX_Position3s16(x, y + height, z + width);
-			GX_Color1x8(DIM_LIGHT(vertex_light[10], level_table_1, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
-			GX_Position3s16(x, y, z + width);
-			GX_Color1x8(DIM_LIGHT(vertex_light[11], level_table_1, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
+			displaylist_pos(d, x, y, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[8], level_table_1,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
+			displaylist_pos(d, x, y + height, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[9], level_table_1,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
+			displaylist_pos(d, x, y + height, z + width);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[10], level_table_1,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
+			displaylist_pos(d, x, y, z + width);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[11], level_table_1,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
 		} break;
 		case SIDE_RIGHT: { // x positive
-			GX_Position3s16(x, y, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[12], level_table_1, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
-			GX_Position3s16(x, y, z + width);
-			GX_Color1x8(DIM_LIGHT(vertex_light[15], level_table_1, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
-			GX_Position3s16(x, y + height, z + width);
-			GX_Color1x8(DIM_LIGHT(vertex_light[14], level_table_1, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			GX_Position3s16(x, y + height, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[13], level_table_1, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
+			displaylist_pos(d, x, y, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[12], level_table_1,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
+			displaylist_pos(d, x, y, z + width);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[15], level_table_1,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
+			displaylist_pos(d, x, y + height, z + width);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[14], level_table_1,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
+			displaylist_pos(d, x, y + height, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[13], level_table_1,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
 		} break;
 		case SIDE_TOP: { // y positive
-			GX_Position3s16(x, y, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[4], NULL, false, luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			GX_Position3s16(x + width, y, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[5], NULL, false, luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
-			GX_Position3s16(x + width, y, z + height);
-			GX_Color1x8(DIM_LIGHT(vertex_light[6], NULL, false, luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
-			GX_Position3s16(x, y, z + height);
-			GX_Color1x8(DIM_LIGHT(vertex_light[7], NULL, false, luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
+			displaylist_pos(d, x, y, z);
+			displaylist_color(
+				d, DIM_LIGHT(vertex_light[4], NULL, false, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
+			displaylist_pos(d, x + width, y, z);
+			displaylist_color(
+				d, DIM_LIGHT(vertex_light[5], NULL, false, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
+			displaylist_pos(d, x + width, y, z + height);
+			displaylist_color(
+				d, DIM_LIGHT(vertex_light[6], NULL, false, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
+			displaylist_pos(d, x, y, z + height);
+			displaylist_color(
+				d, DIM_LIGHT(vertex_light[7], NULL, false, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
 		} break;
 		case SIDE_BOTTOM: { // y negative
-			GX_Position3s16(x, y, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[0], level_table_0, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
-			GX_Position3s16(x, y, z + height);
-			GX_Color1x8(DIM_LIGHT(vertex_light[3], level_table_0, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			GX_Position3s16(x + width, y, z + height);
-			GX_Color1x8(DIM_LIGHT(vertex_light[2], level_table_0, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
-			GX_Position3s16(x + width, y, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[1], level_table_0, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
+			displaylist_pos(d, x, y, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[0], level_table_0,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
+			displaylist_pos(d, x, y, z + height);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[3], level_table_0,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
+			displaylist_pos(d, x + width, y, z + height);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[2], level_table_0,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
+			displaylist_pos(d, x + width, y, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[1], level_table_0,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
 		} break;
 		case SIDE_FRONT: { // z minus
-			GX_Position3s16(x, y, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[16], level_table_2, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
-			GX_Position3s16(x + width, y, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[17], level_table_2, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
-			GX_Position3s16(x + width, y + height, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[18], level_table_2, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			GX_Position3s16(x, y + height, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[19], level_table_2, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
+			displaylist_pos(d, x, y, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[16], level_table_2,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
+			displaylist_pos(d, x + width, y, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[17], level_table_2,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
+			displaylist_pos(d, x + width, y + height, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[18], level_table_2,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
+			displaylist_pos(d, x, y + height, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[19], level_table_2,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
 		} break;
 		case SIDE_BACK: { // z positive
-			GX_Position3s16(x, y, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[20], level_table_2, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
-			GX_Position3s16(x, y + height, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[23], level_table_2, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			GX_Position3s16(x + width, y + height, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[22], level_table_2, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
-			GX_Position3s16(x + width, y, z);
-			GX_Color1x8(DIM_LIGHT(vertex_light[21], level_table_2, shade_sides,
-								  luminance));
-			GX_TexCoord2u8(tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
-						   tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
+			displaylist_pos(d, x, y, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[20], level_table_2,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
+			displaylist_pos(d, x, y + height, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[23], level_table_2,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
+			displaylist_pos(d, x + width, y + height, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[22], level_table_2,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
+			displaylist_pos(d, x + width, y, z);
+			displaylist_color(d,
+							  DIM_LIGHT(vertex_light[21], level_table_2,
+										shade_sides, luminance));
+			displaylist_texcoord(
+				d, tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
+				tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
 		} break;
 		default: break;
 	}
@@ -266,31 +314,31 @@ size_t render_block_cross(struct displaylist* d, struct block_info* this,
 						 << 4)
 			| this->block->sky_light;
 
-		GX_Position3s16(x, y, z);
-		GX_Color1x8(light);
-		GX_TexCoord2u8(tex_x, tex_y + 16);
-		GX_Position3s16(x, y + BLK_LEN, z);
-		GX_Color1x8(light);
-		GX_TexCoord2u8(tex_x, tex_y);
-		GX_Position3s16(x + BLK_LEN, y + BLK_LEN, z + BLK_LEN);
-		GX_Color1x8(light);
-		GX_TexCoord2u8(tex_x + 16, tex_y);
-		GX_Position3s16(x + BLK_LEN, y, z + BLK_LEN);
-		GX_Color1x8(light);
-		GX_TexCoord2u8(tex_x + 16, tex_y + 16);
+		displaylist_pos(d, x, y, z);
+		displaylist_color(d, light);
+		displaylist_texcoord(d, tex_x, tex_y + 16);
+		displaylist_pos(d, x, y + BLK_LEN, z);
+		displaylist_color(d, light);
+		displaylist_texcoord(d, tex_x, tex_y);
+		displaylist_pos(d, x + BLK_LEN, y + BLK_LEN, z + BLK_LEN);
+		displaylist_color(d, light);
+		displaylist_texcoord(d, tex_x + 16, tex_y);
+		displaylist_pos(d, x + BLK_LEN, y, z + BLK_LEN);
+		displaylist_color(d, light);
+		displaylist_texcoord(d, tex_x + 16, tex_y + 16);
 
-		GX_Position3s16(x + BLK_LEN, y, z);
-		GX_Color1x8(light);
-		GX_TexCoord2u8(tex_x, tex_y + 16);
-		GX_Position3s16(x + BLK_LEN, y + BLK_LEN, z);
-		GX_Color1x8(light);
-		GX_TexCoord2u8(tex_x, tex_y);
-		GX_Position3s16(x, y + BLK_LEN, z + BLK_LEN);
-		GX_Color1x8(light);
-		GX_TexCoord2u8(tex_x + 16, tex_y);
-		GX_Position3s16(x, y, z + BLK_LEN);
-		GX_Color1x8(light);
-		GX_TexCoord2u8(tex_x + 16, tex_y + 16);
+		displaylist_pos(d, x + BLK_LEN, y, z);
+		displaylist_color(d, light);
+		displaylist_texcoord(d, tex_x, tex_y + 16);
+		displaylist_pos(d, x + BLK_LEN, y + BLK_LEN, z);
+		displaylist_color(d, light);
+		displaylist_texcoord(d, tex_x, tex_y);
+		displaylist_pos(d, x, y + BLK_LEN, z + BLK_LEN);
+		displaylist_color(d, light);
+		displaylist_texcoord(d, tex_x + 16, tex_y);
+		displaylist_pos(d, x, y, z + BLK_LEN);
+		displaylist_color(d, light);
+		displaylist_texcoord(d, tex_x + 16, tex_y + 16);
 	}
 
 	return 2;
@@ -348,106 +396,106 @@ size_t render_block_torch(struct displaylist* d, struct block_info* this,
 
 		switch(side) {
 			case SIDE_LEFT:
-				GX_Position3s16(x * BLK_LEN + 112 + s1x, y * BLK_LEN + s3,
+				displaylist_pos(d, x * BLK_LEN + 112 + s1x, y * BLK_LEN + s3,
 								z * BLK_LEN + s1y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_1, true, 0));
-				GX_TexCoord2u8(tex_x, tex_y + 16);
-				GX_Position3s16(x * BLK_LEN + 112 + s1x + s2x,
+				displaylist_color(d, DIM_LIGHT(light, level_table_1, true, 0));
+				displaylist_texcoord(d, tex_x, tex_y + 16);
+				displaylist_pos(d, x * BLK_LEN + 112 + s1x + s2x,
 								y * BLK_LEN + BLK_LEN + s3,
 								z * BLK_LEN + s1y + s2y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_1, true, 0));
-				GX_TexCoord2u8(tex_x, tex_y);
-				GX_Position3s16(x * BLK_LEN + 112 + s1x + s2x,
+				displaylist_color(d, DIM_LIGHT(light, level_table_1, true, 0));
+				displaylist_texcoord(d, tex_x, tex_y);
+				displaylist_pos(d, x * BLK_LEN + 112 + s1x + s2x,
 								y * BLK_LEN + BLK_LEN + s3,
 								z * BLK_LEN + BLK_LEN + s1y + s2y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_1, true, 0));
-				GX_TexCoord2u8(tex_x + 16, tex_y);
-				GX_Position3s16(x * BLK_LEN + 112 + s1x, y * BLK_LEN + s3,
+				displaylist_color(d, DIM_LIGHT(light, level_table_1, true, 0));
+				displaylist_texcoord(d, tex_x + 16, tex_y);
+				displaylist_pos(d, x * BLK_LEN + 112 + s1x, y * BLK_LEN + s3,
 								z * BLK_LEN + BLK_LEN + s1y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_1, true, 0));
-				GX_TexCoord2u8(tex_x + 16, tex_y + 16);
+				displaylist_color(d, DIM_LIGHT(light, level_table_1, true, 0));
+				displaylist_texcoord(d, tex_x + 16, tex_y + 16);
 				break;
 			case SIDE_RIGHT:
-				GX_Position3s16(x * BLK_LEN + 144 + s1x, y * BLK_LEN + s3,
+				displaylist_pos(d, x * BLK_LEN + 144 + s1x, y * BLK_LEN + s3,
 								z * BLK_LEN + s1y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_1, true, 0));
-				GX_TexCoord2u8(tex_x + 16, tex_y + 16);
-				GX_Position3s16(x * BLK_LEN + 144 + s1x, y * BLK_LEN + s3,
+				displaylist_color(d, DIM_LIGHT(light, level_table_1, true, 0));
+				displaylist_texcoord(d, tex_x + 16, tex_y + 16);
+				displaylist_pos(d, x * BLK_LEN + 144 + s1x, y * BLK_LEN + s3,
 								z * BLK_LEN + BLK_LEN + s1y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_1, true, 0));
-				GX_TexCoord2u8(tex_x, tex_y + 16);
-				GX_Position3s16(x * BLK_LEN + 144 + s1x + s2x,
+				displaylist_color(d, DIM_LIGHT(light, level_table_1, true, 0));
+				displaylist_texcoord(d, tex_x, tex_y + 16);
+				displaylist_pos(d, x * BLK_LEN + 144 + s1x + s2x,
 								y * BLK_LEN + BLK_LEN + s3,
 								z * BLK_LEN + BLK_LEN + s1y + s2y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_1, true, 0));
-				GX_TexCoord2u8(tex_x, tex_y);
-				GX_Position3s16(x * BLK_LEN + 144 + s1x + s2x,
+				displaylist_color(d, DIM_LIGHT(light, level_table_1, true, 0));
+				displaylist_texcoord(d, tex_x, tex_y);
+				displaylist_pos(d, x * BLK_LEN + 144 + s1x + s2x,
 								y * BLK_LEN + BLK_LEN + s3,
 								z * BLK_LEN + s1y + s2y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_1, true, 0));
-				GX_TexCoord2u8(tex_x + 16, tex_y);
+				displaylist_color(d, DIM_LIGHT(light, level_table_1, true, 0));
+				displaylist_texcoord(d, tex_x + 16, tex_y);
 				break;
 			case SIDE_BACK:
-				GX_Position3s16(x * BLK_LEN + s1x, y * BLK_LEN + s3,
+				displaylist_pos(d, x * BLK_LEN + s1x, y * BLK_LEN + s3,
 								z * BLK_LEN + 144 + s1y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_2, true, 0));
-				GX_TexCoord2u8(tex_x, tex_y + 16);
-				GX_Position3s16(x * BLK_LEN + s1x + s2x,
+				displaylist_color(d, DIM_LIGHT(light, level_table_2, true, 0));
+				displaylist_texcoord(d, tex_x, tex_y + 16);
+				displaylist_pos(d, x * BLK_LEN + s1x + s2x,
 								y * BLK_LEN + BLK_LEN + s3,
 								z * BLK_LEN + 144 + s1y + s2y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_2, true, 0));
-				GX_TexCoord2u8(tex_x, tex_y);
-				GX_Position3s16(x * BLK_LEN + BLK_LEN + s1x + s2x,
+				displaylist_color(d, DIM_LIGHT(light, level_table_2, true, 0));
+				displaylist_texcoord(d, tex_x, tex_y);
+				displaylist_pos(d, x * BLK_LEN + BLK_LEN + s1x + s2x,
 								y * BLK_LEN + BLK_LEN + s3,
 								z * BLK_LEN + 144 + s1y + s2y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_2, true, 0));
-				GX_TexCoord2u8(tex_x + 16, tex_y);
-				GX_Position3s16(x * BLK_LEN + BLK_LEN + s1x, y * BLK_LEN + s3,
-								z * BLK_LEN + 144 + s1y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_2, true, 0));
-				GX_TexCoord2u8(tex_x + 16, tex_y + 16);
+				displaylist_color(d, DIM_LIGHT(light, level_table_2, true, 0));
+				displaylist_texcoord(d, tex_x + 16, tex_y);
+				displaylist_pos(d, x * BLK_LEN + BLK_LEN + s1x,
+								y * BLK_LEN + s3, z * BLK_LEN + 144 + s1y);
+				displaylist_color(d, DIM_LIGHT(light, level_table_2, true, 0));
+				displaylist_texcoord(d, tex_x + 16, tex_y + 16);
 				break;
 			case SIDE_FRONT:
-				GX_Position3s16(x * BLK_LEN + s1x, y * BLK_LEN + s3,
+				displaylist_pos(d, x * BLK_LEN + s1x, y * BLK_LEN + s3,
 								z * BLK_LEN + 112 + s1y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_2, true, 0));
-				GX_TexCoord2u8(tex_x + 16, tex_y + 16);
-				GX_Position3s16(x * BLK_LEN + BLK_LEN + s1x, y * BLK_LEN + s3,
-								z * BLK_LEN + 112 + s1y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_2, true, 0));
-				GX_TexCoord2u8(tex_x, tex_y + 16);
-				GX_Position3s16(x * BLK_LEN + BLK_LEN + s1x + s2x,
+				displaylist_color(d, DIM_LIGHT(light, level_table_2, true, 0));
+				displaylist_texcoord(d, tex_x + 16, tex_y + 16);
+				displaylist_pos(d, x * BLK_LEN + BLK_LEN + s1x,
+								y * BLK_LEN + s3, z * BLK_LEN + 112 + s1y);
+				displaylist_color(d, DIM_LIGHT(light, level_table_2, true, 0));
+				displaylist_texcoord(d, tex_x, tex_y + 16);
+				displaylist_pos(d, x * BLK_LEN + BLK_LEN + s1x + s2x,
 								y * BLK_LEN + BLK_LEN + s3,
 								z * BLK_LEN + 112 + s1y + s2y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_2, true, 0));
-				GX_TexCoord2u8(tex_x, tex_y);
-				GX_Position3s16(x * BLK_LEN + s1x + s2x,
+				displaylist_color(d, DIM_LIGHT(light, level_table_2, true, 0));
+				displaylist_texcoord(d, tex_x, tex_y);
+				displaylist_pos(d, x * BLK_LEN + s1x + s2x,
 								y * BLK_LEN + BLK_LEN + s3,
 								z * BLK_LEN + 112 + s1y + s2y);
-				GX_Color1x8(DIM_LIGHT(light, level_table_2, true, 0));
-				GX_TexCoord2u8(tex_x + 16, tex_y);
+				displaylist_color(d, DIM_LIGHT(light, level_table_2, true, 0));
+				displaylist_texcoord(d, tex_x + 16, tex_y);
 				break;
 			case SIDE_TOP:
-				GX_Position3s16(x * BLK_LEN + 112 + s1x + s2x * 10 / 16,
+				displaylist_pos(d, x * BLK_LEN + 112 + s1x + s2x * 10 / 16,
 								y * BLK_LEN + 160 + s3,
 								z * BLK_LEN + 112 + s1y + s2y * 10 / 16);
-				GX_Color1x8(light);
-				GX_TexCoord2u8(tex_x + 7, tex_y + 6);
-				GX_Position3s16(x * BLK_LEN + 144 + s1x + s2x * 10 / 16,
+				displaylist_color(d, light);
+				displaylist_texcoord(d, tex_x + 7, tex_y + 6);
+				displaylist_pos(d, x * BLK_LEN + 144 + s1x + s2x * 10 / 16,
 								y * BLK_LEN + 160 + s3,
 								z * BLK_LEN + 112 + s1y + s2y * 10 / 16);
-				GX_Color1x8(light);
-				GX_TexCoord2u8(tex_x + 9, tex_y + 6);
-				GX_Position3s16(x * BLK_LEN + 144 + s1x + s2x * 10 / 16,
+				displaylist_color(d, light);
+				displaylist_texcoord(d, tex_x + 9, tex_y + 6);
+				displaylist_pos(d, x * BLK_LEN + 144 + s1x + s2x * 10 / 16,
 								y * BLK_LEN + 160 + s3,
 								z * BLK_LEN + 144 + s1y + s2y * 10 / 16);
-				GX_Color1x8(light);
-				GX_TexCoord2u8(tex_x + 9, tex_y + 8);
-				GX_Position3s16(x * BLK_LEN + 112 + s1x + s2x * 10 / 16,
+				displaylist_color(d, light);
+				displaylist_texcoord(d, tex_x + 9, tex_y + 8);
+				displaylist_pos(d, x * BLK_LEN + 112 + s1x + s2x * 10 / 16,
 								y * BLK_LEN + 160 + s3,
 								z * BLK_LEN + 144 + s1y + s2y * 10 / 16);
-				GX_Color1x8(light);
-				GX_TexCoord2u8(tex_x + 7, tex_y + 8);
+				displaylist_color(d, light);
+				displaylist_texcoord(d, tex_x + 7, tex_y + 8);
 				break;
 			default: break;
 		}
@@ -503,7 +551,7 @@ size_t render_block_fluid(struct displaylist* d, struct block_info* this,
 	return 1;
 }
 
-size_t render_block_rail(struct displaylist* d, struct block_info* this,
+size_t render_block_rail(struct displaylist* dl, struct block_info* this,
 						 enum side side, struct block_info* it,
 						 uint8_t* vertex_light, bool count_only) {
 	if(side != SIDE_TOP)
@@ -556,23 +604,29 @@ size_t render_block_rail(struct displaylist* d, struct block_info* this,
 			}
 		}
 
-		GX_Position3s16(x * BLK_LEN, y * BLK_LEN + a, z * BLK_LEN);
-		GX_Color1x8(DIM_LIGHT(vertex_light[4], NULL, false, luminance));
-		GX_TexCoord2u8(tex_coords[(tex_rotate + 0) % 4][0],
-					   tex_coords[(tex_rotate + 0) % 4][1]);
-		GX_Position3s16(x * BLK_LEN + BLK_LEN, y * BLK_LEN + b, z * BLK_LEN);
-		GX_Color1x8(DIM_LIGHT(vertex_light[5], NULL, false, luminance));
-		GX_TexCoord2u8(tex_coords[(tex_rotate + 1) % 4][0],
-					   tex_coords[(tex_rotate + 1) % 4][1]);
-		GX_Position3s16(x * BLK_LEN + BLK_LEN, y * BLK_LEN + c,
+		displaylist_pos(dl, x * BLK_LEN, y * BLK_LEN + a, z * BLK_LEN);
+		displaylist_color(dl,
+						  DIM_LIGHT(vertex_light[4], NULL, false, luminance));
+		displaylist_texcoord(dl, tex_coords[(tex_rotate + 0) % 4][0],
+							 tex_coords[(tex_rotate + 0) % 4][1]);
+		displaylist_pos(dl, x * BLK_LEN + BLK_LEN, y * BLK_LEN + b,
+						z * BLK_LEN);
+		displaylist_color(dl,
+						  DIM_LIGHT(vertex_light[5], NULL, false, luminance));
+		displaylist_texcoord(dl, tex_coords[(tex_rotate + 1) % 4][0],
+							 tex_coords[(tex_rotate + 1) % 4][1]);
+		displaylist_pos(dl, x * BLK_LEN + BLK_LEN, y * BLK_LEN + c,
 						z * BLK_LEN + BLK_LEN);
-		GX_Color1x8(DIM_LIGHT(vertex_light[6], NULL, false, luminance));
-		GX_TexCoord2u8(tex_coords[(tex_rotate + 2) % 4][0],
-					   tex_coords[(tex_rotate + 2) % 4][1]);
-		GX_Position3s16(x * BLK_LEN, y * BLK_LEN + d, z * BLK_LEN + BLK_LEN);
-		GX_Color1x8(DIM_LIGHT(vertex_light[7], NULL, false, luminance));
-		GX_TexCoord2u8(tex_coords[(tex_rotate + 3) % 4][0],
-					   tex_coords[(tex_rotate + 3) % 4][1]);
+		displaylist_color(dl,
+						  DIM_LIGHT(vertex_light[6], NULL, false, luminance));
+		displaylist_texcoord(dl, tex_coords[(tex_rotate + 2) % 4][0],
+							 tex_coords[(tex_rotate + 2) % 4][1]);
+		displaylist_pos(dl, x * BLK_LEN, y * BLK_LEN + d,
+						z * BLK_LEN + BLK_LEN);
+		displaylist_color(dl,
+						  DIM_LIGHT(vertex_light[7], NULL, false, luminance));
+		displaylist_texcoord(dl, tex_coords[(tex_rotate + 3) % 4][0],
+							 tex_coords[(tex_rotate + 3) % 4][1]);
 	}
 
 	return 1;
