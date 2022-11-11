@@ -277,6 +277,8 @@ static void chunk_vertex_light(struct chunk* c, uint8_t* light_data) {
 									   c->z + z - 1),
 				};
 
+				// TODO: clean up horrible code
+
 				int shade_table[5] = {0, 1, 3, 5, 0};
 
 				int sum_sky, sum_torch, count;
@@ -342,22 +344,20 @@ static void chunk_vertex_light(struct chunk* c, uint8_t* light_data) {
 	}
 }
 
-static size_t chunk_rebuild(struct chunk* c, struct displaylist* d,
-							uint8_t* light_data, bool count_only,
-							bool transparent, enum side side_only,
-							bool double_sided_only) {
+static void chunk_rebuild(struct chunk* c, struct displaylist* d,
+						  uint8_t* light_data, bool count_only,
+						  size_t* vertices) {
 	assert(c && d && light_data);
 
-	size_t visible_faces = 0;
+	for(int k = 0; k < 13; k++)
+		vertices[k] = 0;
 
 	for(c_coord_t y = 0; y < CHUNK_SIZE; y++) {
 		for(c_coord_t z = 0; z < CHUNK_SIZE; z++) {
 			for(c_coord_t x = 0; x < CHUNK_SIZE; x++) {
 				struct block_data local = chunk_get_block(c, x, y, z);
 
-				if(blocks[local.type]
-				   && transparent == blocks[local.type]->transparent
-				   && double_sided_only == blocks[local.type]->double_sided) {
+				if(blocks[local.type]) {
 					struct block_info local_info = (struct block_info) {
 						.block = &local,
 						.world = c->world,
@@ -419,9 +419,8 @@ static size_t chunk_rebuild(struct chunk* c, struct displaylist* d,
 								   + 2],
 					};
 
-					for(int k = 0; k < ((side_only == SIDE_MAX) ? 6 : 1); k++) {
-						enum side s = (side_only == SIDE_MAX) ? (enum side)k :
-																side_only;
+					for(int k = 0; k < SIDE_MAX; k++) {
+						enum side s = (enum side)k;
 
 						int ox, oy, oz;
 						blocks_side_offset(s, &ox, &oy, &oz);
@@ -441,9 +440,9 @@ static size_t chunk_rebuild(struct chunk* c, struct displaylist* d,
 						bool face_visible = true;
 
 						if(blocks[neighbours.type]
-						   && ((!transparent
+						   && ((!blocks[local.type]->transparent
 								&& !blocks[neighbours.type]->transparent)
-							   || transparent)) {
+							   || blocks[local.type]->transparent)) {
 							struct face_occlusion* a
 								= blocks[local.type]->getSideMask(
 									&local_info, s, &neighbours_info);
@@ -455,17 +454,26 @@ static size_t chunk_rebuild(struct chunk* c, struct displaylist* d,
 							face_visible = face_occlusion_test(a, b);
 						}
 
+						int dp_index = k;
+
+						if(blocks[local.type]->transparent)
+							dp_index += 6;
+
+						if(blocks[local.type]->double_sided)
+							dp_index = 12;
+
 						if(face_visible)
-							visible_faces += blocks[local.type]->renderBlock(
-								d, &local_info, s, &neighbours_info,
-								vertex_light, count_only);
+							vertices[dp_index]
+								+= blocks[local.type]->renderBlock(
+									   d + dp_index, &local_info, s,
+									   &neighbours_info, vertex_light,
+									   count_only)
+								* 4;
 					}
 				}
 			}
 		}
 	}
-
-	return visible_faces;
 }
 
 void chunk_check_built(struct chunk* c) {
@@ -479,27 +487,29 @@ void chunk_check_built(struct chunk* c) {
 		chunk_vertex_light(c, light_data);
 
 		for(int k = 0; k < 13; k++) {
-			if(c->has_displist[k])
+			if(c->has_displist[k]) {
 				displaylist_destroy(c->mesh + k);
-
-			size_t vertices
-				= chunk_rebuild(c, c->mesh + k, light_data, true,
-								k >= 6 && k != 12,
-								(k == 12) ? SIDE_MAX : (k % 6), k == 12)
-				* 4;
-
-			if(vertices > 0 && vertices <= 0xFFFF * 4) {
-				displaylist_init(c->mesh + k, vertices, 3 * 2 + 2 * 1 + 1);
-
-				displaylist_begin(c->mesh + k, GX_QUADS, GX_VTXFMT0, vertices);
-				chunk_rebuild(c, c->mesh + k, light_data, false,
-							  k >= 6 && k != 12, (k == 12) ? SIDE_MAX : (k % 6),
-							  k == 12);
-				displaylist_end(c->mesh + k);
-				c->has_displist[k] = true;
-			} else {
 				c->has_displist[k] = false;
 			}
+		}
+
+		size_t vertices[13];
+		chunk_rebuild(c, c->mesh, light_data, true, vertices);
+
+		for(int k = 0; k < 13; k++) {
+			if(vertices[k] > 0 && vertices[k] <= 0xFFFF * 4) {
+				displaylist_init(c->mesh + k, vertices[k], 3 * 2 + 2 * 1 + 1);
+				displaylist_begin(c->mesh + k, GX_QUADS, GX_VTXFMT0,
+								  vertices[k]);
+				c->has_displist[k] = true;
+			}
+		}
+
+		chunk_rebuild(c, c->mesh, light_data, false, vertices);
+
+		for(int k = 0; k < 13; k++) {
+			if(c->has_displist[k])
+				displaylist_end(c->mesh + k);
 		}
 
 		free(light_data);
