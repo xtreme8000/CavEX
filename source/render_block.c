@@ -4,6 +4,7 @@
 #include "block/blocks.h"
 #include "chunk.h"
 #include "render_block.h"
+#include "util.h"
 
 #define BLK_LEN 256
 
@@ -301,8 +302,10 @@ size_t render_block_cross(struct displaylist* d, struct block_info* this,
 
 		if(blocks[this->block->type]
 			   ->render_block_data.cross_random_displacement) {
-			x += rand() % 129 - 64;
-			z += rand() % 129 - 64;
+			uint32_t seed
+				= hash_u32(this->x) ^ hash_u32(this->y) ^ hash_u32(this->z);
+			x += (seed & 0xFFFF) % 129 - 64;
+			z += (seed >> 16) % 129 - 64;
 		}
 
 		uint8_t tex
