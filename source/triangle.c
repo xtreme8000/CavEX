@@ -138,6 +138,8 @@ struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
 	return res ? *res : NULL;
 }
 
+struct chunk* world_chunk_cache = NULL;
+
 struct chunk* world_find_chunk(struct world* w, w_coord_t x, w_coord_t y,
 							   w_coord_t z) {
 	assert(w);
@@ -149,7 +151,17 @@ struct chunk* world_find_chunk(struct world* w, w_coord_t x, w_coord_t y,
 	int cy = y / CHUNK_SIZE;
 	int cz = z < 0 ? ((z + 1) / CHUNK_SIZE - 1) : z / CHUNK_SIZE;
 
+	if(world_chunk_cache
+	   && CHUNK_TO_ID(cx, cy, cz)
+		   == CHUNK_TO_ID(world_chunk_cache->x / CHUNK_SIZE,
+						  world_chunk_cache->y / CHUNK_SIZE,
+						  world_chunk_cache->z / CHUNK_SIZE))
+		return world_chunk_cache;
+
 	struct chunk** res = dict_chunks_get(chunks, CHUNK_TO_ID(cx, cy, cz));
+
+	if(res)
+		world_chunk_cache = *res;
 
 	return res ? *res : NULL;
 }
@@ -642,7 +654,7 @@ int main(void) {
 	VIDEO_SetBlack(false);
 	VIDEO_Flush();
 
-	assert(fatInitDefault());
+	fatInitDefault();
 
 	fifoBuffer = MEM_K0_TO_K1(memalign(32, FIFO_SIZE));
 	memset(fifoBuffer, 0, FIFO_SIZE);

@@ -77,6 +77,12 @@ struct face_occlusion* face_occlusion_rect(int size) {
 bool face_occlusion_test(struct face_occlusion* a, struct face_occlusion* b) {
 	bool is_empty_a = true;
 
+	if(a == face_occlusion_empty())
+		return true;
+
+	if(a == face_occlusion_full() && b == face_occlusion_full())
+		return false;
+
 	for(size_t k = 0; k < FACE_OCCLUSION_ARR_LENGTH; k++) {
 		if(a->mask[k]) {
 			is_empty_a = false;

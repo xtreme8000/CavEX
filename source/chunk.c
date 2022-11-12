@@ -13,8 +13,6 @@
 #define CHUNK_LIGHT_INDEX(x, y, z)                                             \
 	((x) + ((z) + (y) * (CHUNK_SIZE + 2)) * (CHUNK_SIZE + 2))
 
-extern void log_num(int x, int offset, bool flip);
-
 void chunk_init(struct chunk* c, struct world* world, w_coord_t x, w_coord_t y,
 				w_coord_t z) {
 	assert(c && world);
@@ -62,9 +60,9 @@ static struct block_data chunk_lookup_block(struct chunk* c, w_coord_t x,
 	assert(c);
 	struct chunk* other = c;
 
-	if(x < c->x || y < c->y || z < c->z || x >= c->x + CHUNK_SIZE
-	   || y >= c->y + CHUNK_SIZE || z >= c->z + CHUNK_SIZE)
-		other = world_find_chunk(c->world, x, y, z);
+	if(x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE
+	   || z >= CHUNK_SIZE)
+		other = world_find_chunk(c->world, c->x + x, c->y + y, c->z + z);
 
 	return other ? chunk_get_block(other, x & CHUNK_SIZE_BITS,
 								   y & CHUNK_SIZE_BITS, z & CHUNK_SIZE_BITS) :
@@ -245,36 +243,24 @@ static void chunk_vertex_light(struct chunk* c, uint8_t* light_data) {
 		for(c_coord_t z = 0; z < CHUNK_SIZE + 2; z++) {
 			for(c_coord_t x = 0; x < CHUNK_SIZE + 2; x++) {
 				struct block_data b1[4] = {
-					chunk_lookup_block(c, c->x + x + 0, c->y + y - 1,
-									   c->z + z + 0),
-					chunk_lookup_block(c, c->x + x - 1, c->y + y - 1,
-									   c->z + z + 0),
-					chunk_lookup_block(c, c->x + x + 0, c->y + y - 1,
-									   c->z + z - 1),
-					chunk_lookup_block(c, c->x + x - 1, c->y + y - 1,
-									   c->z + z - 1),
+					chunk_lookup_block(c, x + 0, y - 1, z + 0),
+					chunk_lookup_block(c, x - 1, y - 1, z + 0),
+					chunk_lookup_block(c, x + 0, y - 1, z - 1),
+					chunk_lookup_block(c, x - 1, y - 1, z - 1),
 				};
 
 				struct block_data b2[4] = {
-					chunk_lookup_block(c, c->x + x - 1, c->y + y + 0,
-									   c->z + z + 0),
-					chunk_lookup_block(c, c->x + x - 1, c->y + y - 1,
-									   c->z + z + 0),
-					chunk_lookup_block(c, c->x + x - 1, c->y + y + 0,
-									   c->z + z - 1),
-					chunk_lookup_block(c, c->x + x - 1, c->y + y - 1,
-									   c->z + z - 1),
+					chunk_lookup_block(c, x - 1, y + 0, z + 0),
+					b1[1],
+					chunk_lookup_block(c, x - 1, y + 0, z - 1),
+					b1[3],
 				};
 
 				struct block_data b3[4] = {
-					chunk_lookup_block(c, c->x + x + 0, c->y + y + 0,
-									   c->z + z - 1),
-					chunk_lookup_block(c, c->x + x - 1, c->y + y + 0,
-									   c->z + z - 1),
-					chunk_lookup_block(c, c->x + x + 0, c->y + y - 1,
-									   c->z + z - 1),
-					chunk_lookup_block(c, c->x + x - 1, c->y + y - 1,
-									   c->z + z - 1),
+					chunk_lookup_block(c, x + 0, y + 0, z - 1),
+					b2[2],
+					b1[2],
+					b1[3],
 				};
 
 				// TODO: clean up horrible code
@@ -366,58 +352,8 @@ static void chunk_rebuild(struct chunk* c, struct displaylist* d,
 						.z = c->z + z,
 					};
 
-					uint8_t vertex_light[24] = {
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 0) * 3
-								   + 0],
-						light_data[CHUNK_LIGHT_INDEX(x + 1, y + 0, z + 0) * 3
-								   + 0],
-						light_data[CHUNK_LIGHT_INDEX(x + 1, y + 0, z + 1) * 3
-								   + 0],
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 1) * 3
-								   + 0],
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 2, z + 0) * 3
-								   + 0],
-						light_data[CHUNK_LIGHT_INDEX(x + 1, y + 2, z + 0) * 3
-								   + 0],
-						light_data[CHUNK_LIGHT_INDEX(x + 1, y + 2, z + 1) * 3
-								   + 0],
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 2, z + 1) * 3
-								   + 0],
-
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 0) * 3
-								   + 1],
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 1, z + 0) * 3
-								   + 1],
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 1, z + 1) * 3
-								   + 1],
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 1) * 3
-								   + 1],
-						light_data[CHUNK_LIGHT_INDEX(x + 2, y + 0, z + 0) * 3
-								   + 1],
-						light_data[CHUNK_LIGHT_INDEX(x + 2, y + 1, z + 0) * 3
-								   + 1],
-						light_data[CHUNK_LIGHT_INDEX(x + 2, y + 1, z + 1) * 3
-								   + 1],
-						light_data[CHUNK_LIGHT_INDEX(x + 2, y + 0, z + 1) * 3
-								   + 1],
-
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 0) * 3
-								   + 2],
-						light_data[CHUNK_LIGHT_INDEX(x + 1, y + 0, z + 0) * 3
-								   + 2],
-						light_data[CHUNK_LIGHT_INDEX(x + 1, y + 1, z + 0) * 3
-								   + 2],
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 1, z + 0) * 3
-								   + 2],
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 2) * 3
-								   + 2],
-						light_data[CHUNK_LIGHT_INDEX(x + 1, y + 0, z + 2) * 3
-								   + 2],
-						light_data[CHUNK_LIGHT_INDEX(x + 1, y + 1, z + 2) * 3
-								   + 2],
-						light_data[CHUNK_LIGHT_INDEX(x + 0, y + 1, z + 2) * 3
-								   + 2],
-					};
+					uint8_t vertex_light[24];
+					bool light_loaded = count_only;
 
 					for(int k = 0; k < SIDE_MAX; k++) {
 						enum side s = (enum side)k;
@@ -425,8 +361,8 @@ static void chunk_rebuild(struct chunk* c, struct displaylist* d,
 						int ox, oy, oz;
 						blocks_side_offset(s, &ox, &oy, &oz);
 
-						struct block_data neighbours = chunk_lookup_block(
-							c, c->x + x + ox, c->y + y + oy, c->z + z + oz);
+						struct block_data neighbours
+							= chunk_lookup_block(c, x + ox, y + oy, z + oz);
 
 						struct block_info neighbours_info
 							= (struct block_info) {
@@ -462,13 +398,92 @@ static void chunk_rebuild(struct chunk* c, struct displaylist* d,
 						if(blocks[local.type]->double_sided)
 							dp_index = 12;
 
-						if(face_visible)
+						if(face_visible) {
+							if(!light_loaded) {
+								light_loaded = true;
+								vertex_light[0] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 0) * 3
+									 + 0];
+								vertex_light[1] = light_data
+									[CHUNK_LIGHT_INDEX(x + 1, y + 0, z + 0) * 3
+									 + 0];
+								vertex_light[2] = light_data
+									[CHUNK_LIGHT_INDEX(x + 1, y + 0, z + 1) * 3
+									 + 0];
+								vertex_light[3] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 1) * 3
+									 + 0];
+								vertex_light[4] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 2, z + 0) * 3
+									 + 0];
+								vertex_light[5] = light_data
+									[CHUNK_LIGHT_INDEX(x + 1, y + 2, z + 0) * 3
+									 + 0];
+								vertex_light[6] = light_data
+									[CHUNK_LIGHT_INDEX(x + 1, y + 2, z + 1) * 3
+									 + 0];
+								vertex_light[7] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 2, z + 1) * 3
+									 + 0];
+
+								vertex_light[8] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 0) * 3
+									 + 1];
+								vertex_light[9] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 1, z + 0) * 3
+									 + 1];
+								vertex_light[10] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 1, z + 1) * 3
+									 + 1];
+								vertex_light[11] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 1) * 3
+									 + 1];
+								vertex_light[12] = light_data
+									[CHUNK_LIGHT_INDEX(x + 2, y + 0, z + 0) * 3
+									 + 1];
+								vertex_light[13] = light_data
+									[CHUNK_LIGHT_INDEX(x + 2, y + 1, z + 0) * 3
+									 + 1];
+								vertex_light[14] = light_data
+									[CHUNK_LIGHT_INDEX(x + 2, y + 1, z + 1) * 3
+									 + 1];
+								vertex_light[15] = light_data
+									[CHUNK_LIGHT_INDEX(x + 2, y + 0, z + 1) * 3
+									 + 1];
+
+								vertex_light[16] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 0) * 3
+									 + 2];
+								vertex_light[17] = light_data
+									[CHUNK_LIGHT_INDEX(x + 1, y + 0, z + 0) * 3
+									 + 2];
+								vertex_light[18] = light_data
+									[CHUNK_LIGHT_INDEX(x + 1, y + 1, z + 0) * 3
+									 + 2];
+								vertex_light[19] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 1, z + 0) * 3
+									 + 2];
+								vertex_light[20] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 0, z + 2) * 3
+									 + 2];
+								vertex_light[21] = light_data
+									[CHUNK_LIGHT_INDEX(x + 1, y + 0, z + 2) * 3
+									 + 2];
+								vertex_light[22] = light_data
+									[CHUNK_LIGHT_INDEX(x + 1, y + 1, z + 2) * 3
+									 + 2];
+								vertex_light[23] = light_data
+									[CHUNK_LIGHT_INDEX(x + 0, y + 1, z + 2) * 3
+									 + 2];
+							}
+
 							vertices[dp_index]
 								+= blocks[local.type]->renderBlock(
 									   d + dp_index, &local_info, s,
 									   &neighbours_info, vertex_light,
 									   count_only)
 								* 4;
+						}
 					}
 				}
 			}
