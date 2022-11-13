@@ -107,6 +107,7 @@ struct block block_chest = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_locked_chest = {
@@ -123,4 +124,5 @@ struct block block_locked_chest = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };

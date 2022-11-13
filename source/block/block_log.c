@@ -64,4 +64,5 @@ struct block block_log = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = true,
 };

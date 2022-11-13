@@ -54,4 +54,5 @@ struct block block_cactus = {
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = false,
+	.flammable = false,
 };

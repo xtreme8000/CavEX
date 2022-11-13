@@ -42,4 +42,5 @@ struct block block_red_mushroom = {
 	.can_see_through = true,
 	.render_block_data.cross_random_displacement = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };

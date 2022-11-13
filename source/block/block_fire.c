@@ -37,8 +37,9 @@ struct block block_fire = {
 	.transparent = true,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
-	.luminance = 0,
+	.luminance = 15,
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = false,
+	.flammable = false,
 };

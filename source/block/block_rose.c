@@ -42,4 +42,5 @@ struct block block_rose = {
 	.can_see_through = true,
 	.render_block_data.cross_random_displacement = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };

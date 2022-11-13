@@ -55,6 +55,7 @@ struct block block_coalore = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_ironore = {
@@ -71,6 +72,7 @@ struct block block_ironore = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_goldore = {
@@ -87,6 +89,7 @@ struct block block_goldore = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_diamondore = {
@@ -103,6 +106,7 @@ struct block block_diamondore = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_redstoneore = {
@@ -119,6 +123,7 @@ struct block block_redstoneore = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_lapisore = {
@@ -135,4 +140,5 @@ struct block block_lapisore = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };

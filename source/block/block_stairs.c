@@ -56,4 +56,5 @@ struct block block_stairs = {
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = true,
+	.flammable = true,
 };

@@ -50,6 +50,7 @@ struct block block_tallgrass = {
 	.can_see_through = true,
 	.render_block_data.cross_random_displacement = true,
 	.ignore_lighting = false,
+	.flammable = true,
 };
 
 struct block block_deadbush = {
@@ -67,4 +68,5 @@ struct block block_deadbush = {
 	.can_see_through = true,
 	.render_block_data.cross_random_displacement = false,
 	.ignore_lighting = false,
+	.flammable = true,
 };

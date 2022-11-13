@@ -49,4 +49,5 @@ struct block block_workbench = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };

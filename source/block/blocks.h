@@ -86,6 +86,7 @@ struct block {
 	bool double_sided;
 	bool can_see_through;
 	bool ignore_lighting;
+	bool flammable;
 	union {
 		bool cross_random_displacement;
 		bool rail_curved_possible;

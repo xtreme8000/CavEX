@@ -43,7 +43,7 @@ void blocks_init() {
 	blocks[32] = &block_deadbush;
 	// piston
 	// piston head
-	// wool
+	// wool (flammable)
 	// moving piston head
 	blocks[37] = &block_flower;
 	blocks[38] = &block_rose;
@@ -54,12 +54,12 @@ void blocks_init() {
 	blocks[43] = &block_double_slab;
 	blocks[44] = &block_slab;
 	blocks[45] = &block_bricks;
-	// tnt
-	// bookshelf
+	// tnt (flammable)
+	// bookshelf (flammable)
 	blocks[48] = &block_mossstone;
 	blocks[49] = &block_obsidian;
 	blocks[50] = &block_torch;
-	// TODO: blocks[51] = &block_fire;
+	blocks[51] = &block_fire;
 	blocks[52] = &block_spawner;
 	blocks[53] = &block_stairs;
 	blocks[54] = &block_chest;
@@ -93,7 +93,7 @@ void blocks_init() {
 	blocks[82] = &block_clay;
 	blocks[83] = &block_reed;
 	// jukebox
-	// fence
+	// fence (flammable)
 	blocks[86] = &block_pumpkin;
 	// netherrack
 	// soul sand

@@ -63,6 +63,7 @@ struct block block_furnaceoff = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_furnaceon = {
@@ -79,4 +80,5 @@ struct block block_furnaceon = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };

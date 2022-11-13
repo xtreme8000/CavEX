@@ -58,4 +58,5 @@ struct block block_slab = {
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = true,
+	.flammable = false,
 };

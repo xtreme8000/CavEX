@@ -50,4 +50,5 @@ struct block block_farmland = {
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = true,
+	.flammable = false,
 };

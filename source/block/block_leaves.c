@@ -59,4 +59,5 @@ struct block block_leaves = {
 	.double_sided = true,
 	.can_see_through = true,
 	.ignore_lighting = false,
+	.flammable = true,
 };

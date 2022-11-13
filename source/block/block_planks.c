@@ -41,4 +41,5 @@ struct block block_planks = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = true,
 };

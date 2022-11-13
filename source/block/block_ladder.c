@@ -58,4 +58,5 @@ struct block block_ladder = {
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = false,
+	.flammable = false,
 };

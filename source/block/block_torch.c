@@ -58,6 +58,7 @@ struct block block_torch = {
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_redstone_torch = {
@@ -74,6 +75,7 @@ struct block block_redstone_torch = {
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_redstone_torch_lit = {
@@ -90,4 +92,5 @@ struct block block_redstone_torch_lit = {
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = false,
+	.flammable = false,
 };

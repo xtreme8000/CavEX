@@ -53,6 +53,7 @@ struct block block_iron = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_gold = {
@@ -69,6 +70,7 @@ struct block block_gold = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_diamond = {
@@ -85,6 +87,7 @@ struct block block_diamond = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_lapis = {
@@ -101,4 +104,5 @@ struct block block_lapis = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };

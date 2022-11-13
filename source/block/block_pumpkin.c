@@ -63,6 +63,7 @@ struct block block_pumpkin = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_pumpkin_lit = {
@@ -79,4 +80,5 @@ struct block block_pumpkin_lit = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };

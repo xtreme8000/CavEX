@@ -41,4 +41,5 @@ struct block block_crops = {
 	.double_sided = true,
 	.can_see_through = true,
 	.ignore_lighting = false,
+	.flammable = false,
 };

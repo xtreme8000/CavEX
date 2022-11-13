@@ -44,6 +44,7 @@ struct block block_cobblestone = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_mossstone = {
@@ -60,4 +61,5 @@ struct block block_mossstone = {
 	.double_sided = false,
 	.can_see_through = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };

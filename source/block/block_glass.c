@@ -42,4 +42,5 @@ struct block block_glass = {
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = false,
+	.flammable = false,
 };

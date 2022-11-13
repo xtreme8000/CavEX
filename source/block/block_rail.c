@@ -57,6 +57,7 @@ struct block block_rail = {
 	.can_see_through = true,
 	.render_block_data.rail_curved_possible = true,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_powered_rail = {
@@ -74,6 +75,7 @@ struct block block_powered_rail = {
 	.can_see_through = true,
 	.render_block_data.rail_curved_possible = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
 
 struct block block_detector_rail = {
@@ -91,4 +93,5 @@ struct block block_detector_rail = {
 	.can_see_through = true,
 	.render_block_data.rail_curved_possible = false,
 	.ignore_lighting = false,
+	.flammable = false,
 };
