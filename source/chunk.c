@@ -7,6 +7,7 @@
 
 #include "block/blocks.h"
 #include "chunk.h"
+#include "platform/graphics/gfx.h"
 #include "stack.h"
 
 #define CHUNK_INDEX(x, y, z) ((x) + ((z) + (y)*CHUNK_SIZE) * CHUNK_SIZE)
@@ -535,17 +536,15 @@ void chunk_check_built(struct chunk* c) {
 	}
 }
 
-void chunk_pre_render(struct chunk* c, Mtx view) {
+void chunk_pre_render(struct chunk* c, mat4 view) {
 	assert(c && view);
 
-	Mtx model;
-	guMtxTrans(model, c->x, c->y, c->z);
-	guMtxConcat(view, model, c->model_view);
+	glm_translate_to(view, (vec3) {c->x, c->y, c->z}, c->model_view);
 }
 
 static void check_matrix_set(struct chunk* c, bool* needs_matrix) {
 	if(*needs_matrix) {
-		GX_LoadPosMtxImm(c->model_view, GX_PNMTX0);
+		gfx_matrix_modelview(c->model_view);
 		*needs_matrix = false;
 	}
 }
@@ -590,8 +589,8 @@ void chunk_render(struct chunk* c, bool pass, float x, float y, float z) {
 
 	if(!pass && c->has_displist[12]) {
 		check_matrix_set(c, &needs_matrix);
-		GX_SetCullMode(GX_CULL_NONE);
+		gfx_culling(false);
 		displaylist_render(c->mesh + 12);
-		GX_SetCullMode(GX_CULL_BACK);
+		gfx_culling(true);
 	}
 }

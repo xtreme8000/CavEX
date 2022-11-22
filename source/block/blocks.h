@@ -4,8 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "../displaylist.h"
-#include "../world.h"
+#include "../platform/graphics/displaylist.h"
 
 #define TEXTURE_INDEX(x, y) (((y)*14) + (x))
 #define TEXTURE_X(idx) ((idx) % 14)
@@ -68,6 +67,7 @@ enum block_type {
 	BLOCK_PORTAL = 90,
 };
 
+#include "../world.h"
 #include "aabb.h"
 
 struct block {
@@ -160,7 +160,7 @@ extern struct block block_bricks;
 
 extern struct block* blocks[256];
 
-#include "../render_block.h"
+#include "../platform/graphics/render_block.h"
 
 void blocks_init(void);
 enum side blocks_side_opposite(enum side s);

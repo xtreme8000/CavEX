@@ -1,10 +1,11 @@
 #include <gccore.h>
 #include <stdint.h>
 
-#include "block/blocks.h"
-#include "chunk.h"
+#include "../../block/blocks.h"
+#include "../../chunk.h"
+#include "../../util.h"
+#include "gfx.h"
 #include "render_block.h"
-#include "util.h"
 
 #define BLK_LEN 256
 
@@ -768,6 +769,25 @@ size_t render_block_bed(struct displaylist* d, struct block_info* this,
 	return 1;
 }
 
+size_t render_block_fire(struct displaylist* d, struct block_info* this,
+						 enum side side, struct block_info* it,
+						 uint8_t* vertex_light, bool count_only) {
+	if(side == SIDE_TOP || side == SIDE_BOTTOM)
+		return 0;
+
+	int16_t x = W2C_COORD(this->x);
+	int16_t y = W2C_COORD(this->y);
+	int16_t z = W2C_COORD(this->z);
+
+	if(!count_only)
+		render_block_side(
+			d, W2C_COORD(this->x), W2C_COORD(this->y), W2C_COORD(this->z), 0,
+			360, blocks[this->block->type]->getTextureIndex(this, side),
+			blocks[this->block->type]->luminance, false, 0, false, 0, side,
+			vertex_light);
+	return 1;
+}
+
 size_t render_block_slab(struct displaylist* d, struct block_info* this,
 						 enum side side, struct block_info* it,
 						 uint8_t* vertex_light, bool count_only) {
@@ -790,4 +810,140 @@ size_t render_block_full(struct displaylist* d, struct block_info* this,
 			blocks[this->block->type]->luminance, true, 0, false, 0, side,
 			vertex_light);
 	return 1;
+}
+
+// TODO: find better solution for this
+void render_block_selection(mat4 view_matrix, struct block_info* this) {
+	assert(this);
+
+	int pad = 1;
+	struct AABB box;
+
+	if(!blocks[this->block->type]
+	   || !blocks[this->block->type]->getBoundingBox(this, false, &box))
+		return;
+
+	gfx_lighting(false);
+	gfx_blending(MODE_BLEND);
+	gfx_texture(false);
+
+	mat4 model_view;
+	glm_translate_to(view_matrix, (vec3) {this->x, this->y, this->z},
+					 model_view);
+	gfx_matrix_modelview(model_view);
+
+	GX_Begin(GX_LINES, GX_VTXFMT3, 24);
+
+	// bottom
+	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
+					box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
+					box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
+					box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
+					box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	// top
+	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
+					box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
+					box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	// vertical
+	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad,
+					-pad + box.z1 * 256);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
+					box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
+					box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
+					box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad);
+	GX_Color4u8(0, 0, 0, 153);
+	GX_TexCoord2u8(0, 0);
+
+	GX_End();
+
+	gfx_texture(true);
+	gfx_lighting(true);
 }

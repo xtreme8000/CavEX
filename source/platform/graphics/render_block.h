@@ -1,12 +1,17 @@
 #ifndef RENDER_BLOCK_H
 #define RENDER_BLOCK_H
 
+#include <gccore.h>
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "block/blocks.h"
+#include "../../cglm/cglm.h"
+
+#include "../../block/blocks.h"
+#include "../../world.h"
 #include "displaylist.h"
-#include "world.h"
+
+void render_block_selection(mat4 view_matrix, struct block_info* this);
 
 size_t render_block_cross(struct displaylist* d, struct block_info* this,
 						  enum side side, struct block_info* it,
@@ -27,6 +32,10 @@ size_t render_block_slab(struct displaylist* d, struct block_info* this,
 size_t render_block_bed(struct displaylist* d, struct block_info* this,
 						enum side side, struct block_info* it,
 						uint8_t* vertex_light, bool count_only);
+
+size_t render_block_fire(struct displaylist* d, struct block_info* this,
+						 enum side side, struct block_info* it,
+						 uint8_t* vertex_light, bool count_only);
 
 size_t render_block_farmland(struct displaylist* d, struct block_info* this,
 							 enum side side, struct block_info* it,

@@ -1,8 +1,11 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include <m-lib/m-dict.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#include "cglm/cglm.h"
 
 #define WORLD_HEIGHT 128
 
@@ -21,17 +24,35 @@ struct block_info {
 	w_coord_t x, y, z;
 };
 
+#include "block/aabb.h"
+#include "chunk.h"
+#include "game/camera.h"
+#include "util.h"
+
+DICT_DEF2(dict_chunks, uint64_t, M_BASIC_OPLIST, struct chunk*, M_PTR_OPLIST)
+
 struct world {
-	int test;
+	dict_chunks_t chunks;
+	struct chunk* world_chunk_cache;
+	ilist_chunks_t render;
+	ptime_t anim_timer;
 };
 
-void world_init(struct world* w, size_t chunks);
+void world_create(struct world* w);
 void world_destroy(struct world* w);
+struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
+										 enum side s);
 struct chunk* world_find_chunk(struct world* w, w_coord_t x, w_coord_t y,
 							   w_coord_t z);
 struct block_data world_get_block(struct world* w, w_coord_t x, w_coord_t y,
 								  w_coord_t z);
 void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
 					 struct block_data blk);
+void world_preload(struct world* w,
+				   void (*progress)(struct world* w, float percent));
+bool world_block_intersection(struct world* w, struct ray* r, w_coord_t x,
+							  w_coord_t y, w_coord_t z, enum side* s);
+void world_pre_render(struct world* w, struct camera* c, mat4 view);
+size_t world_render(struct world* w, struct camera* c, bool pass);
 
 #endif
