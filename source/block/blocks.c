@@ -43,7 +43,7 @@ void blocks_init() {
 	blocks[32] = &block_deadbush;
 	// piston
 	// piston head
-	// wool (flammable)
+	blocks[35] = &block_wool;
 	// moving piston head
 	blocks[37] = &block_flower;
 	blocks[38] = &block_rose;
