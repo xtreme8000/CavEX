@@ -21,7 +21,7 @@ static enum block_render_type getRenderType(struct block_info* this) {
 }
 
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
-	return TEXTURE_INDEX(3, 4);
+	return TEXTURE_INDEX(4, 0);
 }
 
 static uint32_t getBaseColor(struct block_info* this, enum side side) {
