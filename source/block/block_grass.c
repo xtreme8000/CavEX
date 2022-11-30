@@ -21,15 +21,15 @@ static enum block_render_type getRenderType(struct block_info* this) {
 
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	switch(side) {
-		case SIDE_TOP: return TEXTURE_INDEX(5, 9);
+		case SIDE_TOP:
+			return (this->neighbours[SIDE_TOP].type == BLOCK_SNOW) ?
+				TEXTURE_INDEX(2, 4) :
+				TEXTURE_INDEX(5, 9);
 		case SIDE_BOTTOM: return TEXTURE_INDEX(2, 0);
 		default:
-			if(world_get_block(this->world, this->x, this->y + 1, this->z).type
-			   == BLOCK_SNOW) {
-				return TEXTURE_INDEX(4, 4);
-			} else {
-				return TEXTURE_INDEX(5, 10);
-			}
+			return (this->neighbours[SIDE_TOP].type == BLOCK_SNOW) ?
+				TEXTURE_INDEX(4, 4) :
+				TEXTURE_INDEX(5, 10);
 	}
 }
 

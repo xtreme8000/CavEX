@@ -20,16 +20,12 @@ static enum block_render_type getRenderType(struct block_info* this) {
 }
 
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
-	struct block_data right
-		= world_get_block(this->world, this->x + 1, this->y, this->z);
-	struct block_data left
-		= world_get_block(this->world, this->x - 1, this->y, this->z);
-	struct block_data back
-		= world_get_block(this->world, this->x, this->y, this->z + 1);
-	struct block_data front
-		= world_get_block(this->world, this->x, this->y, this->z - 1);
+	struct block_data* right = this->neighbours + SIDE_RIGHT;
+	struct block_data* left = this->neighbours + SIDE_LEFT;
+	struct block_data* back = this->neighbours + SIDE_BACK;
+	struct block_data* front = this->neighbours + SIDE_FRONT;
 
-	if(right.type == this->block->type) {
+	if(right->type == this->block->type) {
 		switch(side) {
 			case SIDE_TOP:
 			case SIDE_BOTTOM: return TEXTURE_INDEX(9, 1);
@@ -39,7 +35,7 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 		}
 	}
 
-	if(left.type == this->block->type) {
+	if(left->type == this->block->type) {
 		switch(side) {
 			case SIDE_TOP:
 			case SIDE_BOTTOM: return TEXTURE_INDEX(9, 1);
@@ -49,7 +45,7 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 		}
 	}
 
-	if(back.type == this->block->type) {
+	if(back->type == this->block->type) {
 		switch(side) {
 			case SIDE_TOP:
 			case SIDE_BOTTOM: return TEXTURE_INDEX(9, 1);
@@ -59,7 +55,7 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 		}
 	}
 
-	if(front.type == this->block->type) {
+	if(front->type == this->block->type) {
 		switch(side) {
 			case SIDE_TOP:
 			case SIDE_BOTTOM: return TEXTURE_INDEX(9, 1);
@@ -75,13 +71,13 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 		[SIDE_LEFT] = TEXTURE_INDEX(10, 1), [SIDE_RIGHT] = TEXTURE_INDEX(10, 1),
 	};
 
-	if(left.type && !right.type)
+	if(left->type && !right->type)
 		tex[SIDE_RIGHT] = TEXTURE_INDEX(11, 1);
-	else if(right.type && !left.type)
+	else if(right->type && !left->type)
 		tex[SIDE_LEFT] = TEXTURE_INDEX(11, 1);
-	else if(front.type && !back.type)
+	else if(front->type && !back->type)
 		tex[SIDE_BACK] = TEXTURE_INDEX(11, 1);
-	else if(back.type && !front.type)
+	else if(back->type && !front->type)
 		tex[SIDE_FRONT] = TEXTURE_INDEX(11, 1);
 	else
 		tex[SIDE_BACK] = TEXTURE_INDEX(11, 1);

@@ -20,7 +20,7 @@ struct block_data {
 
 struct block_info {
 	struct block_data* block;
-	struct world* world;
+	struct block_data* neighbours;
 	w_coord_t x, y, z;
 };
 
@@ -35,11 +35,16 @@ struct world {
 	dict_chunks_t chunks;
 	struct chunk* world_chunk_cache;
 	ilist_chunks_t render;
+	ilist_chunks2_t gpu_busy_chunks;
 	ptime_t anim_timer;
 };
 
 void world_create(struct world* w);
 void world_destroy(struct world* w);
+void world_load_chunk(struct world* w, struct chunk* c);
+void world_unload_chunk(struct world* w, struct chunk* c);
+void world_build_chunks(struct world* w, size_t tokens);
+void world_render_completed(struct world* w, bool new_render);
 struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
 										 enum side s);
 struct chunk* world_find_chunk(struct world* w, w_coord_t x, w_coord_t y,

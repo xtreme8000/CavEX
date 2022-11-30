@@ -3,96 +3,47 @@
 #include "platform/graphics/gfx.h"
 #include "world.h"
 
-char* chunk_files[] = {
-	"x0 z-10.vc",	"x-1 z-2.vc",  "x-3 z-5.vc",  "x-5 z-8.vc",	 "x-8 z-11.vc",
-	"x0 z-11.vc",	"x-1 z-3.vc",  "x-3 z-6.vc",  "x-5 z-9.vc",	 "x-8 z-1.vc",
-	"x0 z-1.vc",	"x-1 z-4.vc",  "x-3 z-7.vc",  "x-6 z-10.vc", "x-8 z-2.vc",
-	"x0 z-2.vc",	"x-1 z-5.vc",  "x-3 z-8.vc",  "x-6 z-11.vc", "x-8 z-3.vc",
-	"x0 z-3.vc",	"x-1 z-6.vc",  "x-3 z-9.vc",  "x-6 z-1.vc",	 "x-8 z-4.vc",
-	"x0 z-4.vc",	"x-1 z-7.vc",  "x-4 z-10.vc", "x-6 z-2.vc",	 "x-8 z-5.vc",
-	"x0 z-5.vc",	"x-1 z-8.vc",  "x-4 z-11.vc", "x-6 z-3.vc",	 "x-8 z-6.vc",
-	"x0 z-6.vc",	"x-1 z-9.vc",  "x-4 z-1.vc",  "x-6 z-4.vc",	 "x-8 z-7.vc",
-	"x0 z-7.vc",	"x-2 z-10.vc", "x-4 z-2.vc",  "x-6 z-5.vc",	 "x-8 z-8.vc",
-	"x0 z-8.vc",	"x-2 z-11.vc", "x-4 z-3.vc",  "x-6 z-6.vc",	 "x-8 z-9.vc",
-	"x0 z-9.vc",	"x-2 z-1.vc",  "x-4 z-4.vc",  "x-6 z-7.vc",	 "x-9 z-10.vc",
-	"x-10 z-10.vc", "x-2 z-2.vc",  "x-4 z-5.vc",  "x-6 z-8.vc",	 "x-9 z-11.vc",
-	"x-10 z-11.vc", "x-2 z-3.vc",  "x-4 z-6.vc",  "x-6 z-9.vc",	 "x-9 z-1.vc",
-	"x-10 z-1.vc",	"x-2 z-4.vc",  "x-4 z-7.vc",  "x-7 z-10.vc", "x-9 z-2.vc",
-	"x-10 z-2.vc",	"x-2 z-5.vc",  "x-4 z-8.vc",  "x-7 z-11.vc", "x-9 z-3.vc",
-	"x-10 z-3.vc",	"x-2 z-6.vc",  "x-4 z-9.vc",  "x-7 z-1.vc",	 "x-9 z-4.vc",
-	"x-10 z-4.vc",	"x-2 z-7.vc",  "x-5 z-10.vc", "x-7 z-2.vc",	 "x-9 z-5.vc",
-	"x-10 z-5.vc",	"x-2 z-8.vc",  "x-5 z-11.vc", "x-7 z-3.vc",	 "x-9 z-6.vc",
-	"x-10 z-6.vc",	"x-2 z-9.vc",  "x-5 z-1.vc",  "x-7 z-4.vc",	 "x-9 z-7.vc",
-	"x-10 z-7.vc",	"x-3 z-10.vc", "x-5 z-2.vc",  "x-7 z-5.vc",	 "x-9 z-8.vc",
-	"x-10 z-8.vc",	"x-3 z-11.vc", "x-5 z-3.vc",  "x-7 z-6.vc",	 "x-9 z-9.vc",
-	"x-10 z-9.vc",	"x-3 z-1.vc",  "x-5 z-4.vc",  "x-7 z-7.vc",	 "x-1 z-10.vc",
-	"x-3 z-2.vc",	"x-5 z-5.vc",  "x-7 z-8.vc",  "x-1 z-11.vc", "x-3 z-3.vc",
-	"x-5 z-6.vc",	"x-7 z-9.vc",  "x-1 z-1.vc",  "x-3 z-4.vc",	 "x-5 z-7.vc",
-	"x-8 z-10.vc",
-};
+void world_load_chunk(struct world* w, struct chunk* c) {
+	assert(w && c);
+	assert(!dict_chunks_get(
+		w->chunks,
+		CHUNK_TO_ID(c->x / CHUNK_SIZE, c->y / CHUNK_SIZE, c->z / CHUNK_SIZE)));
 
-static struct chunk chunks_base[sizeof(chunk_files) / sizeof(*chunk_files) * 8];
-static struct chunk* chunks_end = chunks_base;
+	chunk_ref(c);
+	dict_chunks_set_at(
+		w->chunks,
+		CHUNK_TO_ID(c->x / CHUNK_SIZE, c->y / CHUNK_SIZE, c->z / CHUNK_SIZE),
+		c);
+}
 
-static void load_chunk(struct world* w, struct chunk** c, char* file) {
-	uint8_t* chunk_data = malloc(16 * 16 * 128 * 3);
+void world_unload_chunk(struct world* w, struct chunk* c) {
+	assert(w && c);
+	assert(dict_chunks_get(
+		w->chunks,
+		CHUNK_TO_ID(c->x / CHUNK_SIZE, c->y / CHUNK_SIZE, c->z / CHUNK_SIZE)));
 
-	int32_t chunk_x, chunk_z;
+	dict_chunks_erase(
+		w->chunks,
+		CHUNK_TO_ID(c->x / CHUNK_SIZE, c->y / CHUNK_SIZE, c->z / CHUNK_SIZE));
 
-	FILE* f = fopen(file, "rb");
-	assert(f);
-	fread((uint8_t*)&chunk_x + 3, sizeof(uint8_t), 1, f);
-	fread((uint8_t*)&chunk_x + 2, sizeof(uint8_t), 1, f);
-	fread((uint8_t*)&chunk_x + 1, sizeof(uint8_t), 1, f);
-	fread((uint8_t*)&chunk_x + 0, sizeof(uint8_t), 1, f);
-	fread((uint8_t*)&chunk_z + 3, sizeof(uint8_t), 1, f);
-	fread((uint8_t*)&chunk_z + 2, sizeof(uint8_t), 1, f);
-	fread((uint8_t*)&chunk_z + 1, sizeof(uint8_t), 1, f);
-	fread((uint8_t*)&chunk_z + 0, sizeof(uint8_t), 1, f);
-	fread(chunk_data, 1, 16 * 16 * 128 * 3, f);
-	fclose(f);
+	if(w->world_chunk_cache == c)
+		w->world_chunk_cache = NULL;
 
-	for(int k = 0; k < 8; k++) {
-		chunk_init(*c, w, chunk_x * 16, k * 16, chunk_z * 16);
-		dict_chunks_set_at(w->chunks, CHUNK_TO_ID(chunk_x, k, chunk_z), *c);
-
-		for(int y = 0; y < CHUNK_SIZE; y++) {
-			for(int z = 0; z < CHUNK_SIZE; z++) {
-				for(int x = 0; x < CHUNK_SIZE; x++) {
-					uint8_t blockid
-						= chunk_data[(x + ((y + k * 16) * 16 + z) * 16) * 3
-									 + 0];
-					uint8_t metadata
-						= chunk_data[(x + ((y + k * 16) * 16 + z) * 16) * 3
-									 + 1];
-					uint8_t light
-						= chunk_data[(x + ((y + k * 16) * 16 + z) * 16) * 3
-									 + 2];
-
-					chunk_set_block(*c, x, y, z,
-									(struct block_data) {
-										.type = blockid,
-										.metadata = metadata,
-										.sky_light = light & 0xF,
-										.torch_light = light >> 4,
-									});
-				}
-			}
-		}
-
-		(*c)++;
-	}
-
-	free(chunk_data);
+	chunk_unref(c);
 }
 
 static void world_bfs(struct world* w, ilist_chunks_t render, float x, float y,
 					  float z, vec4* planes) {
 	assert(w && render && planes);
 
-	for(struct chunk* c = chunks_base; c != chunks_end; c++) {
+	dict_chunks_it_t it;
+	dict_chunks_it(it, w->chunks);
+
+	while(!dict_chunks_end_p(it)) {
+		struct chunk* c = dict_chunks_ref(it)->value;
 		c->tmp_data.visited = false;
 		c->tmp_data.steps = 0;
+		dict_chunks_next(it);
 	}
 
 	enum side sides[6]
@@ -115,6 +66,7 @@ static void world_bfs(struct world* w, ilist_chunks_t render, float x, float y,
 	while(!ilist_chunks_empty_p(queue)) {
 		struct chunk* current = ilist_chunks_pop_front(queue);
 		ilist_chunks_push_back(render, current);
+		chunk_ref(current);
 
 		for(int s = 0; s < 6; s++) {
 			struct chunk* neigh
@@ -147,11 +99,8 @@ void world_create(struct world* w) {
 	assert(w);
 
 	dict_chunks_init(w->chunks);
+	ilist_chunks2_init(w->gpu_busy_chunks);
 	w->world_chunk_cache = NULL;
-
-	for(size_t k = 0; k < sizeof(chunk_files) / sizeof(*chunk_files); k++)
-		load_chunk(w, &chunks_end, chunk_files[k]);
-
 	w->anim_timer = time_get();
 }
 
@@ -164,19 +113,40 @@ struct block_data world_get_block(struct world* w, w_coord_t x, w_coord_t y,
 	assert(w);
 	struct chunk* c = world_find_chunk(w, x, y, z);
 
-	return c ? chunk_get_block(c, x & CHUNK_SIZE_BITS, y & CHUNK_SIZE_BITS,
-							   z & CHUNK_SIZE_BITS) :
-			   (struct block_data) {.type = (y < WORLD_HEIGHT) ? 1 : 0};
+	return c ? chunk_get_block(c, W2C_COORD(x), W2C_COORD(y), W2C_COORD(z)) :
+			   (struct block_data) {
+				   .type = (y < WORLD_HEIGHT) ? 1 : 0,
+				   .metadata = 0,
+				   .sky_light = (y < WORLD_HEIGHT) ? 0 : 15,
+				   .torch_light = 0,
+			   };
 }
 
 void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
 					 struct block_data blk) {
 	assert(w);
+
+	if(y < 0 || y >= WORLD_HEIGHT)
+		return;
+
 	struct chunk* c = world_find_chunk(w, x, y, z);
 
+	if(!c) {
+		c = malloc(sizeof(struct chunk));
+		assert(c);
+
+		int cx = WCOORD_CHUNK_OFFSET(x);
+		int cy = y / CHUNK_SIZE;
+		int cz = WCOORD_CHUNK_OFFSET(z);
+		chunk_init(c, w, cx * CHUNK_SIZE, cy * CHUNK_SIZE, cz * CHUNK_SIZE);
+		chunk_ref(c);
+
+		dict_chunks_set_at(w->chunks, CHUNK_TO_ID(cx, cy, cz), c);
+		w->world_chunk_cache = c;
+	}
+
 	if(c)
-		chunk_set_block(c, x & CHUNK_SIZE_BITS, y & CHUNK_SIZE_BITS,
-						z & CHUNK_SIZE_BITS, blk);
+		chunk_set_block(c, W2C_COORD(x), W2C_COORD(y), W2C_COORD(z), blk);
 }
 
 struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
@@ -209,11 +179,9 @@ struct chunk* world_find_chunk(struct world* w, w_coord_t x, w_coord_t y,
 	int cy = y / CHUNK_SIZE;
 	int cz = WCOORD_CHUNK_OFFSET(z);
 
-	if(w->world_chunk_cache
-	   && CHUNK_TO_ID(cx, cy, cz)
-		   == CHUNK_TO_ID(w->world_chunk_cache->x / CHUNK_SIZE,
-						  w->world_chunk_cache->y / CHUNK_SIZE,
-						  w->world_chunk_cache->z / CHUNK_SIZE))
+	if(w->world_chunk_cache && cx == w->world_chunk_cache->x / CHUNK_SIZE
+	   && cy == w->world_chunk_cache->y / CHUNK_SIZE
+	   && cz == w->world_chunk_cache->z / CHUNK_SIZE)
 		return w->world_chunk_cache;
 
 	struct chunk** res = dict_chunks_get(w->chunks, CHUNK_TO_ID(cx, cy, cz));
@@ -254,8 +222,7 @@ bool world_block_intersection(struct world* w, struct ray* r, w_coord_t x,
 		struct AABB bbox;
 
 		if(blocks[blk.type]->getBoundingBox(
-			   &(struct block_info) {
-				   .block = &blk, .world = w, .x = x, .y = y, .z = z},
+			   &(struct block_info) {.block = &blk, .x = x, .y = y, .z = z},
 			   false, &bbox)) {
 			aabb_translate(&bbox, x, y, z);
 			return aabb_intersection_ray(&bbox, r, s);
@@ -279,6 +246,51 @@ void world_pre_render(struct world* w, struct camera* c, mat4 view) {
 	while(!ilist_chunks_end_p(it)) {
 		chunk_pre_render(ilist_chunks_ref(it), view);
 		ilist_chunks_next(it);
+	}
+}
+
+void world_build_chunks(struct world* w, size_t tokens) {
+	ilist_chunks_it_t it;
+	ilist_chunks_it(it, w->render);
+
+	while(tokens > 0 && !ilist_chunks_end_p(it)) {
+		if(chunk_check_built(ilist_chunks_ref(it)))
+			tokens--;
+		ilist_chunks_next(it);
+	}
+
+	dict_chunks_it_t it2;
+	dict_chunks_it(it2, w->chunks);
+
+	while(tokens > 0 && !dict_chunks_end_p(it2)) {
+		if(chunk_check_built(dict_chunks_ref(it2)->value))
+			tokens--;
+		dict_chunks_next(it2);
+	}
+}
+
+void world_render_completed(struct world* w, bool new_render) {
+	assert(w);
+
+	ilist_chunks2_it_t it;
+	ilist_chunks2_it(it, w->gpu_busy_chunks);
+
+	while(!ilist_chunks2_end_p(it)) {
+		chunk_unref(ilist_chunks2_ref(it));
+		ilist_chunks2_next(it);
+	}
+
+	ilist_chunks2_reset(w->gpu_busy_chunks);
+
+	if(new_render) {
+		ilist_chunks_it_t it2;
+		ilist_chunks_it(it2, w->render);
+
+		while(!ilist_chunks_end_p(it2)) {
+			// move imaginary reference token from "render" to "gpu_busy_chunks"
+			ilist_chunks2_push_back(w->gpu_busy_chunks, ilist_chunks_ref(it2));
+			ilist_chunks_next(it2);
+		}
 	}
 }
 

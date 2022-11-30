@@ -24,12 +24,7 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 				face_occlusion_full() :
 				face_occlusion_empty();
 		case SIDE_BOTTOM: return face_occlusion_full();
-		default:
-			return (world_get_block(this->world, this->x, this->y + 1, this->z)
-						.type
-					== this->block->type) ?
-				face_occlusion_full() :
-				face_occlusion_rect(block_height);
+		default: return face_occlusion_rect(block_height);
 	}
 }
 

@@ -3,9 +3,29 @@
 
 #include "../world.h"
 
-void clin_chunk(w_coord_t x, w_coord_t y, w_coord_t z, c_coord_t sx,
-				c_coord_t sy, c_coord_t sz, void* data);
+enum client_rpc_type {
+	CRPC_CHUNK,
+	CRPC_UNLOAD_CHUNK,
+};
 
-void clin_unload_chunk(w_coord_t x, w_coord_t z);
+struct client_rpc {
+	enum client_rpc_type type;
+	union {
+		struct {
+			w_coord_t x, y, z;
+			w_coord_t sx, sy, sz;
+			uint8_t* ids;
+			uint8_t* metadata;
+			uint8_t* lighting;
+		} chunk;
+		struct {
+			w_coord_t x, z;
+		} unload_chunk;
+	} payload;
+};
+
+void clin_init(void);
+void clin_update(void);
+void clin_rpc_send(struct client_rpc* call);
 
 #endif

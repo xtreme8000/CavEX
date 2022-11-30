@@ -4,6 +4,19 @@
 #include "gfx.h"
 #include "gui_util.h"
 
+int gutil_control_icon(int x, enum gutil_control_icon icon, char* str) {
+	gfx_bind_texture(TEXTURE_GUI);
+	int scale = 32;
+	int text_scale = 10;
+
+	gutil_texquad(x, gfx_height() - scale * 8 / 5, (448 + (icon % 2) * 32) / 2,
+				  (icon / 2) * 32, 32 / 2, 32, scale, scale);
+	gutil_text(x + scale + text_scale / 2,
+			   gfx_height() - scale * 8 / 5 + (scale - text_scale) / 2, str,
+			   text_scale);
+	return scale + text_scale + gutil_font_width(str, text_scale);
+}
+
 void gutil_texquad_col(int x, int y, int tx, int ty, int sx, int sy, int width,
 					   int height, uint8_t r, uint8_t g, uint8_t b) {
 	GX_Begin(GX_QUADS, GX_VTXFMT2, 4);

@@ -6,6 +6,8 @@
 #include "../../platform/input.h"
 #include "../game_state.h"
 
+#include <malloc.h>
+
 static void screen_ingame_render3D(struct screen* s, mat4 view) {
 	if(gstate.world_loaded && gstate.camera_hit.hit) {
 		struct block_data blk
@@ -14,7 +16,6 @@ static void screen_ingame_render3D(struct screen* s, mat4 view) {
 		render_block_selection(view,
 							   &(struct block_info) {
 								   .block = &blk,
-								   .world = &gstate.world,
 								   .x = gstate.camera_hit.x,
 								   .y = gstate.camera_hit.y,
 								   .z = gstate.camera_hit.z,
@@ -52,7 +53,7 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	char str[64];
 	sprintf(str, GAME_NAME " Alpha %i.%i.%i (impl. MC B1.7.3)", VERSION_MAJOR,
 			VERSION_MINOR, VERSION_PATCH);
-	gutil_text(4, 4 + 16 * 0, str, 16);
+	gutil_text(4, 4 + 17 * 0, str, 16);
 
 	sprintf(str, "%0.1f fps, wait: gpu %0.1fms, vsync %0.1fms",
 			gstate.stats.fps, gstate.stats.dt_gpu * 1000.0F,
@@ -69,20 +70,25 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	// sprintf(str, "daytime: %0.2f", daytime);
 	// gutil_text(4, 4 + 17 * 4, str, 16);
 
-	sprintf(str, "side: %s, (%i, %i, %i)",
-			block_side_name(gstate.camera_hit.side), gstate.camera_hit.x,
-			gstate.camera_hit.y, gstate.camera_hit.z);
-	gutil_text(4, 4 + 17 * 5, str, 16);
+	if(gstate.camera_hit.hit) {
+		sprintf(str, "side: %s, (%i, %i, %i)",
+				block_side_name(gstate.camera_hit.side), gstate.camera_hit.x,
+				gstate.camera_hit.y, gstate.camera_hit.z);
+		gutil_text(4, 4 + 17 * 5, str, 16);
+	}
 
-	gutil_text(32 + 32 + 6, 429 + 16 - 5, "Movement", 10);
-	gutil_text(32 + 32 + 6 + gutil_font_width("Movement", 10) + 6 + 32 + 6,
-			   429 + 16 - 5, "Inventory", 10);
+	sprintf(str, "mem used %iKiB", mallinfo().uordblks / 1024);
+	gutil_text(4, 4 + 17 * 6, str, 16);
+
+	int icon_offset = 32;
+	icon_offset += gutil_control_icon(icon_offset, CONTROL_A, "Inventory");
+	icon_offset += gutil_control_icon(icon_offset, CONTROL_B, "Jump");
+	if(gstate.camera_hit.hit) {
+		icon_offset += gutil_control_icon(icon_offset, CONTROL_C, "Place");
+		icon_offset += gutil_control_icon(icon_offset, CONTROL_Z, "Mine");
+	}
 
 	gfx_bind_texture(TEXTURE_GUI);
-	gutil_texquad(32, 429, 448 / 2, 64, 32 / 2, 32, 32, 32);
-	gutil_texquad(32 + 32 + 6 + gutil_font_width("Movement", 10) + 6, 429,
-				  448 / 2, 0, 32 / 2, 32, 32, 32);
-	// gutil_texquad(32 + 96, 429, 480 / 2, 0, 32 / 2, 32, 32, 32);
 
 	// draw inventory
 	/*gutil_texquad((782 - 176 * 2) / 2, (480 - 167 * 2) / 2, 176 / 2, 135,

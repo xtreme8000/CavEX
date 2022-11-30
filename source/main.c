@@ -8,8 +8,10 @@
 #include <fat.h>
 #endif
 
+#include "chunk_mesher.h"
 #include "game/game_state.h"
 #include "game/gui/screen.h"
+#include "network/client_interface.h"
 #include "network/server_local.h"
 #include "platform/graphics/gfx.h"
 #include "platform/graphics/gui_util.h"
@@ -66,11 +68,19 @@ int main(void) {
 	gstate.config.render_distance = 192.0F;
 
 	world_create(&gstate.world);
-	world_preload(&gstate.world, loading_progress);
+
+	// world_preload(&gstate.world, loading_progress);
 	gstate.world_loaded = true;
 
 	ptime_t last_frame = time_get();
 	float daytime = 1.0F;
+
+	clin_init();
+	svin_init();
+	chunk_mesher_init();
+
+	struct server_local server;
+	server_local_create(&server);
 
 	while(1) {
 		ptime_t this_frame = time_get();
@@ -80,6 +90,8 @@ int main(void) {
 
 		input_poll();
 
+		clin_update();
+
 		bool render_world
 			= gstate.current_screen->render_world && gstate.world_loaded;
 
@@ -87,6 +99,7 @@ int main(void) {
 			camera_update(&gstate.camera, gstate.stats.dt);
 
 			world_pre_render(&gstate.world, &gstate.camera, gstate.camera.view);
+			world_build_chunks(&gstate.world, CHUNK_MESHER_QLENGTH);
 
 			struct camera* c = &gstate.camera;
 			camera_ray_pick(&gstate.world, c->x, c->y, c->z,
@@ -103,6 +116,10 @@ int main(void) {
 										  gstate.stats.dt);
 
 		gfx_flip_buffers(&gstate.stats.dt_gpu, &gstate.stats.dt_vsync);
+
+		// must not modify displaylists while still rendering!
+		chunk_mesher_receive();
+		world_render_completed(&gstate.world, render_world);
 
 		gfx_clear_buffers(0x79 * daytime, 0xA6 * daytime, 0xFF * daytime);
 
