@@ -9,7 +9,7 @@ struct displaylist {
 	void* data;
 	size_t length;
 	size_t index;
-	bool dirty;
+	bool finished;
 };
 
 void displaylist_init(struct displaylist* l, size_t vertices,

@@ -20,6 +20,7 @@ void displaylist_init(struct displaylist* l, size_t vertices,
 	l->length = DISPLAYLIST_CACHE_LINES(vertices, vertex_size);
 	l->data = memalign(DISPLAYLIST_CLL, l->length);
 	l->index = 0;
+	l->finished = false;
 }
 
 void displaylist_destroy(struct displaylist* l) {
@@ -30,7 +31,7 @@ void displaylist_destroy(struct displaylist* l) {
 
 void displaylist_begin(struct displaylist* l, uint8_t primitve, uint8_t vtxfmt,
 					   uint16_t vtxcnt) {
-	assert(l);
+	assert(l && !l->finished);
 	uint8_t reg = primitve | (vtxfmt & 7);
 	MEM_U8(l->data, l->index++) = reg;
 	MEM_U16(l->data, l->index) = vtxcnt;
@@ -38,14 +39,15 @@ void displaylist_begin(struct displaylist* l, uint8_t primitve, uint8_t vtxfmt,
 }
 
 void displaylist_end(struct displaylist* l) {
-	assert(l);
+	assert(l && !l->finished);
 
 	memset((uint8_t*)l->data + l->index, 0, l->length - l->index);
 	DCStoreRange(l->data, l->length);
+	l->finished = true;
 }
 
 void displaylist_pos(struct displaylist* l, int16_t x, int16_t y, int16_t z) {
-	assert(l);
+	assert(l && !l->finished);
 	MEM_U16(l->data, l->index) = x;
 	l->index += 2;
 	MEM_U16(l->data, l->index) = y;
@@ -55,12 +57,13 @@ void displaylist_pos(struct displaylist* l, int16_t x, int16_t y, int16_t z) {
 }
 
 void displaylist_color(struct displaylist* l, uint8_t index) {
-	assert(l);
+	assert(l && !l->finished);
 	MEM_U8(l->data, l->index++) = index;
 }
 
 void displaylist_texcoord(struct displaylist* l, uint8_t s, uint8_t t) {
-	assert(l);
+	assert(l && !l->finished);
+	assert(!l->finished);
 	MEM_U8(l->data, l->index++) = s;
 	MEM_U8(l->data, l->index++) = t;
 }
@@ -68,5 +71,6 @@ void displaylist_texcoord(struct displaylist* l, uint8_t s, uint8_t t) {
 void displaylist_render(struct displaylist* l) {
 	assert(l);
 
-	GX_CallDispList(l->data, l->length);
+	if(l->finished)
+		GX_CallDispList(l->data, l->length);
 }
