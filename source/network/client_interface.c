@@ -20,20 +20,25 @@ void clin_chunk(w_coord_t x, w_coord_t y, w_coord_t z, w_coord_t sx,
 	uint8_t* ids_t = ids;
 	uint8_t* metadata_t = metadata;
 	uint8_t* lighting_t = lighting;
+	bool flip = true;
 
-	for(w_coord_t oy = y; oy < y + sy; oy++) {
+	for(w_coord_t ox = x; ox < x + sx; ox++) {
 		for(w_coord_t oz = z; oz < z + sz; oz++) {
-			for(w_coord_t ox = x; ox < x + sx; ox++) {
+			for(w_coord_t oy = y; oy < y + sy; oy++) {
+				uint8_t md = flip ? (*metadata_t) & 0xF : (*metadata_t) >> 4;
 				world_set_block(&gstate.world, ox, oy, oz,
 								(struct block_data) {
 									.type = *ids_t,
-									.metadata = *metadata_t,
+									.metadata = md,
 									.sky_light = (*lighting_t) & 0xF,
 									.torch_light = (*lighting_t) >> 4,
 								});
 				ids_t++;
-				metadata_t++;
 				lighting_t++;
+
+				flip = !flip;
+				if(flip)
+					metadata_t++;
 			}
 		}
 	}
