@@ -15,9 +15,8 @@ struct displaylist {
 void displaylist_init(struct displaylist* l, size_t vertices,
 					  size_t vertex_size);
 void displaylist_destroy(struct displaylist* l);
-void displaylist_begin(struct displaylist* l, uint8_t primitve, uint8_t vtxfmt,
-					   uint16_t vtxcnt);
-void displaylist_end(struct displaylist* l);
+void displaylist_finalize(struct displaylist* l, uint8_t primitve,
+						  uint8_t vtxfmt, uint16_t vtxcnt);
 void displaylist_render(struct displaylist* l);
 
 void displaylist_pos(struct displaylist* l, int16_t x, int16_t y, int16_t z);

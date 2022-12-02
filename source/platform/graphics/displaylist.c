@@ -5,6 +5,7 @@
 
 #include "displaylist.h"
 
+#define GX_NOP 0
 #define DISPLAYLIST_CLL 32
 #define DISPLAYLIST_CACHE_LINES(v, s)                                          \
 	(((v) * (s) + 3 + DISPLAYLIST_CLL - 1) / DISPLAYLIST_CLL * DISPLAYLIST_CLL)
@@ -18,36 +19,48 @@ void displaylist_init(struct displaylist* l, size_t vertices,
 	assert(l && vertices > 0 && vertex_size > 0);
 
 	l->length = DISPLAYLIST_CACHE_LINES(vertices, vertex_size);
-	l->data = memalign(DISPLAYLIST_CLL, l->length);
-	l->index = 0;
+	l->data = NULL;
+	/* has 32 byte padding of GX_NOP in front for possible misalignment caused
+	 * by realloc */
+	l->index = DISPLAYLIST_CLL + 3;
 	l->finished = false;
 }
 
 void displaylist_destroy(struct displaylist* l) {
 	assert(l);
 
-	free(l->data);
+	if(l->data)
+		free(l->data);
 }
 
-void displaylist_begin(struct displaylist* l, uint8_t primitve, uint8_t vtxfmt,
-					   uint16_t vtxcnt) {
-	assert(l && !l->finished);
-	uint8_t reg = primitve | (vtxfmt & 7);
-	MEM_U8(l->data, l->index++) = reg;
-	MEM_U16(l->data, l->index) = vtxcnt;
-	l->index += 2;
-}
+void displaylist_finalize(struct displaylist* l, uint8_t primitve,
+						  uint8_t vtxfmt, uint16_t vtxcnt) {
+	assert(l && !l->finished && l->data);
 
-void displaylist_end(struct displaylist* l) {
-	assert(l && !l->finished);
+	MEM_U8(l->data, DISPLAYLIST_CLL) = primitve | (vtxfmt & 7);
+	MEM_U16(l->data, DISPLAYLIST_CLL + 1) = vtxcnt;
 
-	memset((uint8_t*)l->data + l->index, 0, l->length - l->index);
-	DCStoreRange(l->data, l->length);
+	memset(l->data, GX_NOP, DISPLAYLIST_CLL);
+	memset((uint8_t*)l->data + l->index, GX_NOP,
+		   l->length + DISPLAYLIST_CLL - l->index);
+	DCStoreRange(l->data, l->length + DISPLAYLIST_CLL);
 	l->finished = true;
 }
 
 void displaylist_pos(struct displaylist* l, int16_t x, int16_t y, int16_t z) {
 	assert(l && !l->finished);
+
+	if(!l->data) {
+		l->data = malloc(l->length + DISPLAYLIST_CLL);
+		assert(l->data);
+	}
+
+	if(l->index + 9 > l->length) {
+		l->length *= 2;
+		l->data = realloc(l->data, l->length + DISPLAYLIST_CLL);
+		assert(l->data);
+	}
+
 	MEM_U16(l->data, l->index) = x;
 	l->index += 2;
 	MEM_U16(l->data, l->index) = y;
@@ -57,13 +70,12 @@ void displaylist_pos(struct displaylist* l, int16_t x, int16_t y, int16_t z) {
 }
 
 void displaylist_color(struct displaylist* l, uint8_t index) {
-	assert(l && !l->finished);
+	assert(l && !l->finished && l->data);
 	MEM_U8(l->data, l->index++) = index;
 }
 
 void displaylist_texcoord(struct displaylist* l, uint8_t s, uint8_t t) {
-	assert(l && !l->finished);
-	assert(!l->finished);
+	assert(l && !l->finished && l->data);
 	MEM_U8(l->data, l->index++) = s;
 	MEM_U8(l->data, l->index++) = t;
 }
@@ -72,5 +84,9 @@ void displaylist_render(struct displaylist* l) {
 	assert(l);
 
 	if(l->finished)
-		GX_CallDispList(l->data, l->length);
+		GX_CallDispList(
+			(uint8_t*)l->data
+				+ (DISPLAYLIST_CLL - (uintptr_t)l->data % DISPLAYLIST_CLL),
+			(l->index + (uintptr_t)l->data % DISPLAYLIST_CLL - 1)
+				/ DISPLAYLIST_CLL * DISPLAYLIST_CLL);
 }

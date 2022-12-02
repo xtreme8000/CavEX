@@ -236,9 +236,11 @@ static void chunk_mesher_vertex_light(struct block_data* bd,
 
 static void chunk_mesher_rebuild(struct block_data* bd, w_coord_t cx,
 								 w_coord_t cy, w_coord_t cz,
-								 struct displaylist* d, uint8_t* light_data,
-								 bool count_only, size_t* vertices) {
+								 struct displaylist* d, bool count_only,
+								 size_t* vertices) {
 	assert(bd && d && vertices);
+
+	uint8_t* light_data = NULL;
 
 	for(int k = 0; k < 13; k++)
 		vertices[k] = 0;
@@ -309,6 +311,14 @@ static void chunk_mesher_rebuild(struct block_data* bd, w_coord_t cx,
 							dp_index = 12;
 
 						if(face_visible) {
+							if(!light_data) {
+								light_data
+									= malloc((CHUNK_SIZE + 2) * (CHUNK_SIZE + 2)
+											 * (CHUNK_SIZE + 2) * 3);
+								assert(light_data);
+								chunk_mesher_vertex_light(bd, light_data);
+							}
+
 							if(!light_loaded) {
 								light_loaded = true;
 								vertex_light[0]
@@ -423,43 +433,29 @@ static void chunk_mesher_rebuild(struct block_data* bd, w_coord_t cx,
 			}
 		}
 	}
+
+	if(light_data)
+		free(light_data);
 }
 
 static void chunk_mesher_build(struct chunk_mesher_rpc* req) {
-	for(int k = 0; k < 13; k++)
+	for(int k = 0; k < 13; k++) {
 		req->result.has_displist[k] = false;
+		displaylist_init(req->result.mesh + k, 256, 3 * 2 + 2 * 1 + 1);
+	}
 
 	size_t vertices[13];
 	chunk_mesher_rebuild(req->request.blocks, req->chunk->x, req->chunk->y,
-						 req->chunk->z, req->result.mesh, NULL, true, vertices);
-
-	bool has_any_vertices = false;
+						 req->chunk->z, req->result.mesh, false, vertices);
 
 	for(int k = 0; k < 13; k++) {
 		if(vertices[k] > 0 && vertices[k] <= 0xFFFF * 4) {
-			displaylist_init(req->result.mesh + k, vertices[k],
-							 3 * 2 + 2 * 1 + 1);
-			displaylist_begin(req->result.mesh + k, GX_QUADS, GX_VTXFMT0,
-							  vertices[k]);
+			displaylist_finalize(req->result.mesh + k, GX_QUADS, GX_VTXFMT0,
+								 vertices[k]);
 			req->result.has_displist[k] = true;
-			has_any_vertices = true;
+		} else {
+			displaylist_destroy(req->result.mesh + k);
 		}
-	}
-
-	if(has_any_vertices) {
-		uint8_t* light_data = malloc((CHUNK_SIZE + 2) * (CHUNK_SIZE + 2)
-									 * (CHUNK_SIZE + 2) * 3);
-		assert(light_data);
-		chunk_mesher_vertex_light(req->request.blocks, light_data);
-		chunk_mesher_rebuild(req->request.blocks, req->chunk->x, req->chunk->y,
-							 req->chunk->z, req->result.mesh, light_data, false,
-							 vertices);
-		free(light_data);
-	}
-
-	for(int k = 0; k < 13; k++) {
-		if(req->result.has_displist[k])
-			displaylist_end(req->result.mesh + k);
 	}
 
 	chunk_test_init(req->request.blocks, req->result.reachable);
