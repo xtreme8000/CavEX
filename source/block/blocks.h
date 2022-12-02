@@ -158,6 +158,8 @@ extern struct block block_bed;
 extern struct block block_sapling;
 extern struct block block_bricks;
 extern struct block block_wool;
+extern struct block block_netherrack;
+extern struct block block_soulsand;
 
 extern struct block* blocks[256];
 

@@ -95,8 +95,8 @@ void blocks_init() {
 	// jukebox
 	// fence (flammable)
 	blocks[86] = &block_pumpkin;
-	// netherrack
-	// soul sand
+	blocks[87] = &block_netherrack;
+	blocks[88] = &block_soulsand;
 	blocks[89] = &block_glowstone;
 	blocks[90] = &block_portal;
 	blocks[91] = &block_pumpkin_lit;
