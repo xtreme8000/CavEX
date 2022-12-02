@@ -788,6 +788,82 @@ size_t render_block_fire(struct displaylist* d, struct block_info* this,
 	return 1;
 }
 
+size_t render_block_pressure_plate(struct displaylist* d,
+								   struct block_info* this, enum side side,
+								   struct block_info* it, uint8_t* vertex_light,
+								   bool count_only) {
+	if(!count_only) {
+		uint8_t tex = blocks[this->block->type]->getTextureIndex(this, side);
+		uint8_t luminance = blocks[this->block->type]->luminance;
+		uint8_t height = this->block->metadata ? 8 : 16;
+
+		switch(side) {
+			case SIDE_TOP:
+				render_block_side_adv(
+					d, W2C_COORD(this->x) * BLK_LEN + 16,
+					W2C_COORD(this->y) * BLK_LEN + height,
+					W2C_COORD(this->z) * BLK_LEN + 16, BLK_LEN - 32,
+					BLK_LEN - 32, TEX_OFFSET(TEXTURE_X(tex)) + 1,
+					TEX_OFFSET(TEXTURE_Y(tex)) + 1, false, false, true,
+					SIDE_TOP, vertex_light, luminance);
+				break;
+			case SIDE_BOTTOM:
+				render_block_side_adv(
+					d, W2C_COORD(this->x) * BLK_LEN + 16,
+					W2C_COORD(this->y) * BLK_LEN,
+					W2C_COORD(this->z) * BLK_LEN + 16, BLK_LEN - 32,
+					BLK_LEN - 32, TEX_OFFSET(TEXTURE_X(tex)) + 1,
+					TEX_OFFSET(TEXTURE_Y(tex)) + 1, false, false, true,
+					SIDE_BOTTOM, vertex_light, luminance);
+				break;
+			case SIDE_FRONT:
+			case SIDE_LEFT:
+				render_block_side_adv(
+					d, W2C_COORD(this->x) * BLK_LEN + 16,
+					W2C_COORD(this->y) * BLK_LEN,
+					W2C_COORD(this->z) * BLK_LEN + 16, BLK_LEN - 32, height,
+					TEX_OFFSET(TEXTURE_X(tex)) + 1,
+					TEX_OFFSET(TEXTURE_Y(tex)) + 1, false, false, true, side,
+					vertex_light, luminance);
+				break;
+			case SIDE_RIGHT:
+				render_block_side_adv(
+					d, W2C_COORD(this->x) * BLK_LEN + BLK_LEN - 16,
+					W2C_COORD(this->y) * BLK_LEN,
+					W2C_COORD(this->z) * BLK_LEN + 16, BLK_LEN - 32, height,
+					TEX_OFFSET(TEXTURE_X(tex)) + 1,
+					TEX_OFFSET(TEXTURE_Y(tex)) + 1, false, false, true,
+					SIDE_RIGHT, vertex_light, luminance);
+				break;
+			case SIDE_BACK:
+				render_block_side_adv(
+					d, W2C_COORD(this->x) * BLK_LEN + 16,
+					W2C_COORD(this->y) * BLK_LEN,
+					W2C_COORD(this->z) * BLK_LEN + BLK_LEN - 16, BLK_LEN - 32,
+					height, TEX_OFFSET(TEXTURE_X(tex)) + 1,
+					TEX_OFFSET(TEXTURE_Y(tex)) + 1, false, false, true,
+					SIDE_BACK, vertex_light, luminance);
+				break;
+			default: break;
+		}
+	}
+
+	return 1;
+}
+
+size_t render_block_layer(struct displaylist* d, struct block_info* this,
+						  enum side side, struct block_info* it,
+						  uint8_t* vertex_light, bool count_only) {
+	if(!count_only)
+		render_block_side(
+			d, W2C_COORD(this->x), W2C_COORD(this->y), W2C_COORD(this->z), 0,
+			(this->block->metadata + 1) * 32,
+			blocks[this->block->type]->getTextureIndex(this, side),
+			blocks[this->block->type]->luminance, true, 0, false, 0, side,
+			vertex_light);
+	return 1;
+}
+
 size_t render_block_slab(struct displaylist* d, struct block_info* this,
 						 enum side side, struct block_info* it,
 						 uint8_t* vertex_light, bool count_only) {

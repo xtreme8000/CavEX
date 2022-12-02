@@ -107,6 +107,7 @@ extern struct block block_sandstone;
 extern struct block block_gravel;
 extern struct block block_ice;
 extern struct block block_snow;
+extern struct block block_snow_block;
 extern struct block block_tallgrass;
 extern struct block block_deadbush;
 extern struct block block_flower;
@@ -160,6 +161,13 @@ extern struct block block_bricks;
 extern struct block block_wool;
 extern struct block block_netherrack;
 extern struct block block_soulsand;
+extern struct block block_bookshelf;
+extern struct block block_stone_pressure_plate;
+extern struct block block_wooden_pressure_plate;
+extern struct block block_jukebox;
+extern struct block block_noteblock;
+extern struct block block_sponge;
+extern struct block block_dispenser;
 
 extern struct block* blocks[256];
 

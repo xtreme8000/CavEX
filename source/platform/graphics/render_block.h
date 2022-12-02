@@ -13,6 +13,15 @@
 
 void render_block_selection(mat4 view_matrix, struct block_info* this);
 
+size_t render_block_pressure_plate(struct displaylist* d,
+								   struct block_info* this, enum side side,
+								   struct block_info* it, uint8_t* vertex_light,
+								   bool count_only);
+
+size_t render_block_layer(struct displaylist* d, struct block_info* this,
+						  enum side side, struct block_info* it,
+						  uint8_t* vertex_light, bool count_only);
+
 size_t render_block_cross(struct displaylist* d, struct block_info* this,
 						  enum side side, struct block_info* it,
 						  uint8_t* vertex_light, bool count_only);

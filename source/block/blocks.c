@@ -27,13 +27,13 @@ void blocks_init() {
 	blocks[16] = &block_coalore;
 	blocks[17] = &block_log;
 	blocks[18] = &block_leaves;
-	// sponge
+	blocks[19] = &block_sponge;
 	blocks[20] = &block_glass;
 	blocks[21] = &block_lapisore;
 	blocks[22] = &block_lapis;
-	// dispenser
+	blocks[23] = &block_dispenser;
 	blocks[24] = &block_sandstone;
-	// note block
+	blocks[25] = &block_noteblock;
 	blocks[26] = &block_bed;
 	blocks[27] = &block_powered_rail;
 	blocks[28] = &block_detector_rail;
@@ -55,7 +55,7 @@ void blocks_init() {
 	blocks[44] = &block_slab;
 	blocks[45] = &block_bricks;
 	// tnt (flammable)
-	// bookshelf (flammable)
+	blocks[47] = &block_bookshelf;
 	blocks[48] = &block_mossstone;
 	blocks[49] = &block_obsidian;
 	blocks[50] = &block_torch;
@@ -78,9 +78,9 @@ void blocks_init() {
 	// cobblestone stairs
 	// sign wall mounted
 	// lever
-	// stone pressure plate
+	blocks[70] = &block_stone_pressure_plate;
 	// iron door
-	// wooden pressure plate
+	blocks[72] = &block_wooden_pressure_plate;
 	blocks[73] = &block_redstoneore;
 	blocks[74] = &block_redstoneore;
 	blocks[75] = &block_redstone_torch;
@@ -88,11 +88,11 @@ void blocks_init() {
 	// button
 	blocks[78] = &block_snow;
 	blocks[79] = &block_ice;
-	// snow block
+	blocks[80] = &block_snow_block;
 	blocks[81] = &block_cactus;
 	blocks[82] = &block_clay;
 	blocks[83] = &block_reed;
-	// jukebox
+	blocks[84] = &block_jukebox;
 	// fence (flammable)
 	blocks[86] = &block_pumpkin;
 	blocks[87] = &block_netherrack;

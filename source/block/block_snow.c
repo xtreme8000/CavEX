@@ -4,19 +4,30 @@ static enum block_material getMaterial(struct block_info* this) {
 	return MATERIAL_WOOL;
 }
 
-static bool getBoundingBox(struct block_info* this, bool entity,
-						   struct AABB* x) {
+static bool getBoundingBox1(struct block_info* this, bool entity,
+							struct AABB* x) {
 	aabb_setsize(x, 1.0F, 0.125F * (this->block->metadata + 1), 1.0F);
 	return true;
 }
 
+static bool getBoundingBox2(struct block_info* this, bool entity,
+							struct AABB* x) {
+	aabb_setsize(x, 1.0F, 1.0F, 1.0F);
+	return true;
+}
+
 static struct face_occlusion*
-getSideMask(struct block_info* this, enum side side, struct block_info* it) {
+getSideMask1(struct block_info* this, enum side side, struct block_info* it) {
 	switch(side) {
 		case SIDE_TOP: return face_occlusion_empty();
 		case SIDE_BOTTOM: return face_occlusion_full();
 		default: return face_occlusion_rect((this->block->metadata + 1) * 2);
 	}
+}
+
+static struct face_occlusion*
+getSideMask2(struct block_info* this, enum side side, struct block_info* it) {
+	return face_occlusion_full();
 }
 
 static enum block_render_type getRenderType(struct block_info* this) {
@@ -34,8 +45,25 @@ static uint32_t getBaseColor(struct block_info* this, enum side side) {
 struct block block_snow = {
 	.name = "Snow",
 	.getRenderType = getRenderType,
-	.getSideMask = getSideMask,
-	.getBoundingBox = getBoundingBox,
+	.getSideMask = getSideMask1,
+	.getBoundingBox = getBoundingBox1,
+	.getMaterial = getMaterial,
+	.getTextureIndex = getTextureIndex,
+	.transparent = false,
+	.getBaseColor = getBaseColor,
+	.renderBlock = render_block_layer,
+	.luminance = 0,
+	.double_sided = false,
+	.can_see_through = true,
+	.ignore_lighting = false,
+	.flammable = false,
+};
+
+struct block block_snow_block = {
+	.name = "Snow Block",
+	.getRenderType = getRenderType,
+	.getSideMask = getSideMask2,
+	.getBoundingBox = getBoundingBox2,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
@@ -43,7 +71,7 @@ struct block block_snow = {
 	.renderBlock = render_block_full,
 	.luminance = 0,
 	.double_sided = false,
-	.can_see_through = true,
+	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
 };
