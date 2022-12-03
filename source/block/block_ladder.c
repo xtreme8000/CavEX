@@ -54,6 +54,7 @@ struct block block_ladder = {
 	.transparent = false,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_ladder,
+	.renderBlockAlways = NULL,
 	.luminance = 0,
 	.double_sided = false,
 	.can_see_through = true,

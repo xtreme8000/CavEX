@@ -1,6 +1,10 @@
 #include "blocks.h"
 
-static enum block_material getMaterial(struct block_info* this) {
+static enum block_material getMaterial1(struct block_info* this) {
+	return MATERIAL_WOOD;
+}
+
+static enum block_material getMaterial2(struct block_info* this) {
 	return MATERIAL_STONE;
 }
 
@@ -10,51 +14,118 @@ static bool getBoundingBox(struct block_info* this, bool entity,
 	return true;
 }
 
+static struct face_occlusion side_mask = {
+	.mask = {0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFFFFFFFF,
+			 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF},
+};
+
+static struct face_occlusion side_mask_mirrored = {
+	.mask = {0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0xFF00FF00, 0xFFFFFFFF,
+			 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF},
+};
+
+static struct face_occlusion side_top_mask_1 = {
+	.mask = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000,
+			 0x00000000, 0x00000000, 0x00000000},
+};
+
+static struct face_occlusion side_top_mask_2 = {
+	.mask = {0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF,
+			 0x00FF00FF, 0x00FF00FF, 0x00FF00FF},
+};
+
+static struct face_occlusion side_top_mask_3 = {
+	.mask = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF,
+			 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF},
+};
+
+static struct face_occlusion side_top_mask_4 = {
+	.mask = {0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00,
+			 0xFF00FF00, 0xFF00FF00, 0xFF00FF00},
+};
+
 static struct face_occlusion*
 getSideMask(struct block_info* this, enum side side, struct block_info* it) {
-	return face_occlusion_empty();
-}
+	enum side facing = (enum side[4]) {SIDE_RIGHT, SIDE_LEFT, SIDE_BACK,
+									   SIDE_FRONT}[this->block->metadata & 3];
 
-/*static struct rectangle getSideMask(struct block_info* this, enum side side,
-struct block_info* it) { switch(side) { case SIDE_TOP: return
-rectangle_from(0,0,16,8); case SIDE_BOTTOM: return rectangle_full(); case
-SIDE_LEFT: return rectangle_from(0,8,16,8); case SIDE_RIGHT: return
-rectangle_full(); case SIDE_FRONT: case SIDE_BACK:
-		{
-			struct rectangle rect;
-			rect.length = 2;
-			rectangle_from2(&rect,0,0,8,16,8);
-			rectangle_from2(&rect,1,8,0,8,8);
-			return rect;
+	if(side == facing || side == SIDE_BOTTOM) {
+		return face_occlusion_full();
+	} else if(side == blocks_side_opposite(facing)) {
+		return face_occlusion_rect(8);
+	}
+
+	if(side == SIDE_TOP) {
+		switch(facing) {
+			case SIDE_FRONT: return &side_top_mask_1;
+			case SIDE_BACK: return &side_top_mask_3;
+			case SIDE_RIGHT: return &side_top_mask_2;
+			case SIDE_LEFT: return &side_top_mask_4;
+			default:
+				return face_occlusion_empty();
+				// case never reached, just for -pedantic
+		}
+	} else {
+		switch(facing) {
+			case SIDE_FRONT: return &side_mask;
+			case SIDE_BACK: return &side_mask_mirrored;
+			case SIDE_RIGHT: return &side_mask;
+			case SIDE_LEFT: return &side_mask_mirrored;
+			default:
+				return face_occlusion_empty();
+				// case never reached, just for -pedantic
 		}
 	}
-}*/
+}
 
 static enum block_render_type getRenderType(struct block_info* this) {
 	return RENDERTYPE_STAIRS;
 }
 
-static uint8_t getTextureIndex(struct block_info* this, enum side side) {
+static uint8_t getTextureIndex1(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(4, 0);
+}
+
+static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
+	return TEXTURE_INDEX(0, 1);
 }
 
 static uint32_t getBaseColor(struct block_info* this, enum side side) {
 	return 0xFFFFFF;
 }
 
-struct block block_stairs = {
+struct block block_wooden_stairs = {
 	.name = "Stairs",
 	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
-	.getMaterial = getMaterial,
-	.getTextureIndex = getTextureIndex,
+	.getMaterial = getMaterial1,
+	.getTextureIndex = getTextureIndex1,
 	.transparent = false,
 	.getBaseColor = getBaseColor,
-	.renderBlock = render_block_full,
+	.renderBlock = render_block_stairs,
+	.renderBlockAlways = render_block_stairs_always,
 	.luminance = 0,
 	.double_sided = false,
 	.can_see_through = true,
 	.ignore_lighting = true,
 	.flammable = true,
+};
+
+struct block block_stone_stairs = {
+	.name = "Stairs",
+	.getRenderType = getRenderType,
+	.getSideMask = getSideMask,
+	.getBoundingBox = getBoundingBox,
+	.getMaterial = getMaterial2,
+	.getTextureIndex = getTextureIndex2,
+	.transparent = false,
+	.getBaseColor = getBaseColor,
+	.renderBlock = render_block_stairs,
+	.renderBlockAlways = render_block_stairs_always,
+	.luminance = 0,
+	.double_sided = false,
+	.can_see_through = true,
+	.ignore_lighting = true,
+	.flammable = false,
 };

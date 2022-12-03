@@ -310,7 +310,8 @@ static void chunk_mesher_rebuild(struct block_data* bd, w_coord_t cx,
 						if(blocks[local.type]->double_sided)
 							dp_index = 12;
 
-						if(face_visible) {
+						if(face_visible
+						   || blocks[local.type]->renderBlockAlways) {
 							if(!light_data) {
 								light_data
 									= malloc((CHUNK_SIZE + 2) * (CHUNK_SIZE + 2)
@@ -420,14 +421,23 @@ static void chunk_mesher_rebuild(struct block_data* bd, w_coord_t cx,
 													 * 3
 												 + 2];
 							}
+						}
 
+						if(face_visible)
 							vertices[dp_index]
 								+= blocks[local.type]->renderBlock(
 									   d + dp_index, &local_info, s,
 									   neighbours_info + k, vertex_light,
 									   count_only)
 								* 4;
-						}
+
+						if(blocks[local.type]->renderBlockAlways)
+							vertices[dp_index]
+								+= blocks[local.type]->renderBlockAlways(
+									   d + dp_index, &local_info, s,
+									   neighbours_info + k, vertex_light,
+									   count_only)
+								* 4;
 					}
 				}
 			}

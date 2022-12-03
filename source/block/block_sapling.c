@@ -41,6 +41,7 @@ struct block block_sapling = {
 	.transparent = false,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_cross,
+	.renderBlockAlways = NULL,
 	.luminance = 0,
 	.double_sided = true,
 	.can_see_through = true,

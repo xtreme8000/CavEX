@@ -11,7 +11,7 @@ static bool getBoundingBox(struct block_info* this, bool entity,
 }
 
 // TODO: add missing bed legs to mask? (difficult, many states)
-struct face_occlusion side_mask = {
+static struct face_occlusion side_mask = {
 	.mask = {0x00000000, 0x00000000, 0x00000000, 0x0000FFFF, 0xFFFFFFFF,
 			 0xFFFFFFFF, 0xFFFF0000, 0x00000000},
 };
@@ -73,6 +73,7 @@ struct block block_bed = {
 	.transparent = false,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_bed,
+	.renderBlockAlways = NULL,
 	.luminance = 0,
 	.double_sided = false,
 	.can_see_through = true,

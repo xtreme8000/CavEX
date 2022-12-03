@@ -50,6 +50,7 @@ struct block block_water = {
 	.transparent = true,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_fluid,
+	.renderBlockAlways = NULL,
 	.luminance = 0,
 	.double_sided = false,
 	.can_see_through = true,

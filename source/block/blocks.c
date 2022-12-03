@@ -54,14 +54,14 @@ void blocks_init() {
 	blocks[43] = &block_double_slab;
 	blocks[44] = &block_slab;
 	blocks[45] = &block_bricks;
-	// tnt (flammable)
+	blocks[46] = &block_tnt;
 	blocks[47] = &block_bookshelf;
 	blocks[48] = &block_mossstone;
 	blocks[49] = &block_obsidian;
 	blocks[50] = &block_torch;
 	blocks[51] = &block_fire;
 	blocks[52] = &block_spawner;
-	blocks[53] = &block_stairs;
+	blocks[53] = &block_wooden_stairs;
 	blocks[54] = &block_chest;
 	// redstone wire
 	blocks[56] = &block_diamondore;
@@ -75,7 +75,7 @@ void blocks_init() {
 	// wooden door
 	blocks[65] = &block_ladder;
 	blocks[66] = &block_rail;
-	// cobblestone stairs
+	blocks[67] = &block_stone_stairs;
 	// sign wall mounted
 	// lever
 	blocks[70] = &block_stone_pressure_plate;

@@ -749,6 +749,108 @@ size_t render_block_farmland(struct displaylist* d, struct block_info* this,
 	return 1;
 }
 
+size_t render_block_stairs_always(struct displaylist* d,
+								  struct block_info* this, enum side side,
+								  struct block_info* it, uint8_t* vertex_light,
+								  bool count_only) {
+	enum side facing = (enum side[4]) {SIDE_RIGHT, SIDE_LEFT, SIDE_BACK,
+									   SIDE_FRONT}[this->block->metadata & 3];
+
+	if(side != SIDE_TOP && side != blocks_side_opposite(facing))
+		return 0;
+
+	if(!count_only) {
+		uint8_t tex = blocks[this->block->type]->getTextureIndex(this, side);
+		uint8_t luminance = blocks[this->block->type]->luminance;
+
+		if(side == SIDE_TOP) {
+			render_block_side(d, W2C_COORD(this->x), W2C_COORD(this->y),
+							  W2C_COORD(this->z), 0, BLK_LEN / 2, tex,
+							  luminance, true, 0, false, 0, side, vertex_light);
+		} else if(side == blocks_side_opposite(facing)) {
+			render_block_side(d, W2C_COORD(this->x), W2C_COORD(this->y),
+							  W2C_COORD(this->z), 0, BLK_LEN, tex, luminance,
+							  true, BLK_LEN / 2, false, 0, side, vertex_light);
+		}
+	}
+
+	return 1;
+}
+
+size_t render_block_stairs(struct displaylist* d, struct block_info* this,
+						   enum side side, struct block_info* it,
+						   uint8_t* vertex_light, bool count_only) {
+	size_t k = 0;
+	enum side facing = (enum side[4]) {SIDE_RIGHT, SIDE_LEFT, SIDE_BACK,
+									   SIDE_FRONT}[this->block->metadata & 3];
+	uint8_t tex = blocks[this->block->type]->getTextureIndex(this, side);
+	uint8_t luminance = blocks[this->block->type]->luminance;
+
+	// render "slab"
+	if(side == facing) {
+		if(!count_only)
+			render_block_side(d, W2C_COORD(this->x), W2C_COORD(this->y),
+							  W2C_COORD(this->z), 0, BLK_LEN, tex, luminance,
+							  true, 0, false, 0, side, vertex_light);
+		k++;
+	} else if(side != SIDE_TOP) {
+		if(!count_only)
+			render_block_side(d, W2C_COORD(this->x), W2C_COORD(this->y),
+							  W2C_COORD(this->z), 0, BLK_LEN / 2, tex,
+							  luminance, true, 0, false, 0, side, vertex_light);
+		k++;
+	}
+
+	// render top part
+	if(side == SIDE_TOP) {
+		int tx = (facing == SIDE_RIGHT) ? BLK_LEN / 2 : 0;
+		int ty = (facing == SIDE_BACK) ? BLK_LEN / 2 : 0;
+		int sx = (facing == SIDE_LEFT || facing == SIDE_RIGHT) ? BLK_LEN / 2 :
+																 BLK_LEN;
+		int sy = (facing == SIDE_FRONT || facing == SIDE_BACK) ? BLK_LEN / 2 :
+																 BLK_LEN;
+		if(!count_only)
+			render_block_side_adv(d, W2C_COORD(this->x) * BLK_LEN + tx,
+								  W2C_COORD(this->y) * BLK_LEN + BLK_LEN,
+								  W2C_COORD(this->z) * BLK_LEN + ty, sx, sy,
+								  TEX_OFFSET(TEXTURE_X(tex)) + tx / 16,
+								  TEX_OFFSET(TEXTURE_Y(tex)) + ty / 16, false,
+								  false, true, SIDE_TOP, vertex_light,
+								  luminance);
+		k++;
+	} else if(side != facing && side != blocks_side_opposite(facing)
+			  && side != SIDE_BOTTOM) {
+		int off[][2] = {
+			[SIDE_LEFT] = {0, 0},
+			[SIDE_RIGHT] = {BLK_LEN, 0},
+			[SIDE_FRONT] = {0, 0},
+			[SIDE_BACK] = {0, BLK_LEN},
+		};
+
+		if(facing == SIDE_BACK) {
+			off[SIDE_LEFT][1] = BLK_LEN / 2;
+			off[SIDE_RIGHT][1] = BLK_LEN / 2;
+		} else if(facing == SIDE_RIGHT) {
+			off[SIDE_FRONT][0] = BLK_LEN / 2;
+			off[SIDE_BACK][0] = BLK_LEN / 2;
+		}
+
+		// TODO: fix texture offset
+
+		if(!count_only)
+			render_block_side_adv(
+				d, W2C_COORD(this->x) * BLK_LEN + off[side][0],
+				W2C_COORD(this->y) * BLK_LEN + BLK_LEN / 2,
+				W2C_COORD(this->z) * BLK_LEN + off[side][1], BLK_LEN / 2,
+				BLK_LEN / 2, TEX_OFFSET(TEXTURE_X(tex)),
+				TEX_OFFSET(TEXTURE_Y(tex)), false, false, true, side,
+				vertex_light, luminance);
+		k++;
+	}
+
+	return k;
+}
+
 size_t render_block_bed(struct displaylist* d, struct block_info* this,
 						enum side side, struct block_info* it,
 						uint8_t* vertex_light, bool count_only) {

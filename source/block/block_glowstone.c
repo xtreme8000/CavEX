@@ -37,6 +37,7 @@ struct block block_glowstone = {
 	.transparent = false,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
+	.renderBlockAlways = NULL,
 	.luminance = 15,
 	.double_sided = false,
 	.can_see_through = false,

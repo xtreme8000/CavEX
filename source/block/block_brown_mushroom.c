@@ -37,6 +37,7 @@ struct block block_brown_mushroom = {
 	.transparent = false,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_cross,
+	.renderBlockAlways = NULL,
 	.luminance = 1,
 	.double_sided = true,
 	.can_see_through = true,

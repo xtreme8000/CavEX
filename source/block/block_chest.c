@@ -25,6 +25,8 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	struct block_data* back = this->neighbours + SIDE_BACK;
 	struct block_data* front = this->neighbours + SIDE_FRONT;
 
+	// TODO: double chest wrong orientation
+
 	if(right->type == this->block->type) {
 		switch(side) {
 			case SIDE_TOP:
@@ -99,6 +101,7 @@ struct block block_chest = {
 	.transparent = false,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
+	.renderBlockAlways = NULL,
 	.luminance = 0,
 	.double_sided = false,
 	.can_see_through = false,
@@ -116,6 +119,7 @@ struct block block_locked_chest = {
 	.transparent = false,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
+	.renderBlockAlways = NULL,
 	.luminance = 15,
 	.double_sided = false,
 	.can_see_through = false,

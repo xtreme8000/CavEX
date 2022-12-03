@@ -81,6 +81,8 @@ struct block {
 	uint32_t (*getBaseColor)(struct block_info*, enum side);
 	size_t (*renderBlock)(struct displaylist*, struct block_info*, enum side,
 						  struct block_info*, uint8_t*, bool);
+	size_t (*renderBlockAlways)(struct displaylist*, struct block_info*,
+								enum side, struct block_info*, uint8_t*, bool);
 	bool transparent;
 	int luminance;
 	bool double_sided;
@@ -123,7 +125,8 @@ extern struct block block_goldore;
 extern struct block block_diamondore;
 extern struct block block_redstoneore;
 extern struct block block_lapisore;
-extern struct block block_stairs;
+extern struct block block_wooden_stairs;
+extern struct block block_stone_stairs;
 extern struct block block_obsidian;
 extern struct block block_spawner;
 extern struct block block_cobblestone;
@@ -168,6 +171,7 @@ extern struct block block_jukebox;
 extern struct block block_noteblock;
 extern struct block block_sponge;
 extern struct block block_dispenser;
+extern struct block block_tnt;
 
 extern struct block* blocks[256];
 

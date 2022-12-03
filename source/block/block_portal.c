@@ -36,6 +36,7 @@ struct block block_portal = {
 	.transparent = true,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_portal,
+	.renderBlockAlways = NULL,
 	.luminance = 11,
 	.double_sided = false,
 	.can_see_through = true,
