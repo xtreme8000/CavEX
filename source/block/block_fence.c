@@ -6,7 +6,7 @@ static enum block_material getMaterial(struct block_info* this) {
 
 static bool getBoundingBox(struct block_info* this, bool entity,
 						   struct AABB* x) {
-	aabb_setsize(x, 1.0F, 1.0F, 1.0F);
+	aabb_setsize(x, 1.0F, entity ? 1.5F : 1.0F, 1.0F);
 	return true;
 }
 
