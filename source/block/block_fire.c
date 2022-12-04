@@ -6,8 +6,7 @@ static enum block_material getMaterial(struct block_info* this) {
 
 static bool getBoundingBox(struct block_info* this, bool entity,
 						   struct AABB* x) {
-	aabb_setsize(x, 1.0F, 1.0F, 1.0F);
-	return !entity;
+	return false;
 }
 
 static struct face_occlusion*
@@ -34,7 +33,7 @@ struct block block_fire = {
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
-	.transparent = true,
+	.transparent = false,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_fire,
 	.renderBlockAlways = NULL,

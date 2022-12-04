@@ -11,7 +11,11 @@
 
 #define TEX_OFFSET(x) ((x)*18 + 3)
 
-static inline uint8_t MAX_LIGHT(uint8_t a, uint8_t b) {
+static inline uint8_t MIN_U8(uint8_t a, uint8_t b) {
+	return a < b ? a : b;
+}
+
+static inline uint8_t MAX_U8(uint8_t a, uint8_t b) {
 	return a > b ? a : b;
 }
 
@@ -30,56 +34,54 @@ static uint8_t level_table_2[16] = {
 static inline uint8_t DIM_LIGHT(uint8_t l, uint8_t* table, bool shade_sides,
 								uint8_t luminance) {
 	return shade_sides ?
-		(table[MAX_LIGHT(l >> 4, luminance)] << 4) | table[l & 0x0F] :
-		(MAX_LIGHT(l >> 4, luminance) << 4) | (l & 0x0F);
+		(table[MAX_U8(l >> 4, luminance)] << 4) | table[l & 0x0F] :
+		(MAX_U8(l >> 4, luminance) << 4) | (l & 0x0F);
 }
 
-static inline void render_block_side_adv(struct displaylist* d, int16_t x,
-										 int16_t y, int16_t z, uint16_t width,
-										 uint16_t height, uint8_t tex_x,
-										 uint8_t tex_y, bool tex_flip_h,
-										 int tex_rotate, bool shade_sides,
-										 enum side side, uint8_t* vertex_light,
-										 uint8_t luminance) {
-	uint8_t tex_coords[2][4][2] = {
+static inline void render_block_side_adv_v2(
+	struct displaylist* d, int16_t x, int16_t y, int16_t z, uint16_t width,
+	uint16_t height, int16_t inset_bottom, int16_t inset_top, uint8_t tex_x,
+	uint8_t tex_y, bool tex_flip_h, int tex_rotate, bool shade_sides,
+	enum side side, const uint8_t* vertex_light, uint8_t luminance) {
+	const uint8_t tex_coords[2][4][2] = {
 		{
 			{tex_x, tex_y},
-			{tex_x + width / 16, tex_y},
-			{tex_x + width / 16, tex_y + height / 16},
-			{tex_x, tex_y + height / 16},
+			{tex_x + MIN_U8(16, width / 16), tex_y},
+			{tex_x + MIN_U8(16, width / 16), tex_y + MIN_U8(16, height / 16)},
+			{tex_x, tex_y + MIN_U8(16, height / 16)},
 		},
 		{
-			{tex_x + width / 16, tex_y},
+			{tex_x + MIN_U8(16, width / 16), tex_y},
 			{tex_x, tex_y},
-			{tex_x, tex_y + height / 16},
-			{tex_x + width / 16, tex_y + height / 16},
+			{tex_x, tex_y + MIN_U8(16, height / 16)},
+			{tex_x + MIN_U8(16, width / 16), tex_y + MIN_U8(16, height / 16)},
 		},
 	};
 
 	switch(side) {
 		case SIDE_LEFT: { // x minus
-			displaylist_pos(d, x, y, z);
+			displaylist_pos(d, x + inset_bottom, y, z);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[8], level_table_1,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
-			displaylist_pos(d, x, y + height, z);
+			displaylist_pos(d, x + inset_top, y + height, z);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[9], level_table_1,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			displaylist_pos(d, x, y + height, z + width);
+			displaylist_pos(d, x + inset_top, y + height, z + width);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[10], level_table_1,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
-			displaylist_pos(d, x, y, z + width);
+			displaylist_pos(d, x + inset_bottom, y, z + width);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[11], level_table_1,
 										shade_sides, luminance));
@@ -88,28 +90,28 @@ static inline void render_block_side_adv(struct displaylist* d, int16_t x,
 				tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
 		} break;
 		case SIDE_RIGHT: { // x positive
-			displaylist_pos(d, x, y, z);
+			displaylist_pos(d, x - inset_bottom, y, z);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[12], level_table_1,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
-			displaylist_pos(d, x, y, z + width);
+			displaylist_pos(d, x - inset_bottom, y, z + width);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[15], level_table_1,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
-			displaylist_pos(d, x, y + height, z + width);
+			displaylist_pos(d, x - inset_top, y + height, z + width);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[14], level_table_1,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			displaylist_pos(d, x, y + height, z);
+			displaylist_pos(d, x - inset_top, y + height, z);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[13], level_table_1,
 										shade_sides, luminance));
@@ -144,28 +146,28 @@ static inline void render_block_side_adv(struct displaylist* d, int16_t x,
 				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
 		} break;
 		case SIDE_BOTTOM: { // y negative
-			displaylist_pos(d, x, y, z);
+			displaylist_pos(d, x, y + inset_bottom, z);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[0], level_table_0,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
-			displaylist_pos(d, x, y, z + height);
+			displaylist_pos(d, x, y + inset_top, z + height);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[3], level_table_0,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			displaylist_pos(d, x + width, y, z + height);
+			displaylist_pos(d, x + width, y + inset_top, z + height);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[2], level_table_0,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
-			displaylist_pos(d, x + width, y, z);
+			displaylist_pos(d, x + width, y + inset_bottom, z);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[1], level_table_0,
 										shade_sides, luminance));
@@ -174,28 +176,28 @@ static inline void render_block_side_adv(struct displaylist* d, int16_t x,
 				tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
 		} break;
 		case SIDE_FRONT: { // z minus
-			displaylist_pos(d, x, y, z);
+			displaylist_pos(d, x, y, z + inset_bottom);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[16], level_table_2,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 2) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 2) % 4][1]);
-			displaylist_pos(d, x + width, y, z);
+			displaylist_pos(d, x + width, y, z + inset_bottom);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[17], level_table_2,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
-			displaylist_pos(d, x + width, y + height, z);
+			displaylist_pos(d, x + width, y + height, z + inset_top);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[18], level_table_2,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			displaylist_pos(d, x, y + height, z);
+			displaylist_pos(d, x, y + height, z + inset_top);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[19], level_table_2,
 										shade_sides, luminance));
@@ -204,28 +206,28 @@ static inline void render_block_side_adv(struct displaylist* d, int16_t x,
 				tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
 		} break;
 		case SIDE_BACK: { // z positive
-			displaylist_pos(d, x, y, z);
+			displaylist_pos(d, x, y, z - inset_bottom);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[20], level_table_2,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 3) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 3) % 4][1]);
-			displaylist_pos(d, x, y + height, z);
+			displaylist_pos(d, x, y + height, z - inset_top);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[23], level_table_2,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 0) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 0) % 4][1]);
-			displaylist_pos(d, x + width, y + height, z);
+			displaylist_pos(d, x + width, y + height, z - inset_top);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[22], level_table_2,
 										shade_sides, luminance));
 			displaylist_texcoord(
 				d, tex_coords[tex_flip_h][(tex_rotate + 1) % 4][0],
 				tex_coords[tex_flip_h][(tex_rotate + 1) % 4][1]);
-			displaylist_pos(d, x + width, y, z);
+			displaylist_pos(d, x + width, y, z - inset_bottom);
 			displaylist_color(d,
 							  DIM_LIGHT(vertex_light[21], level_table_2,
 										shade_sides, luminance));
@@ -237,13 +239,24 @@ static inline void render_block_side_adv(struct displaylist* d, int16_t x,
 	}
 }
 
+static inline void
+render_block_side_adv(struct displaylist* d, int16_t x, int16_t y, int16_t z,
+					  uint16_t width, uint16_t height, uint8_t tex_x,
+					  uint8_t tex_y, bool tex_flip_h, int tex_rotate,
+					  bool shade_sides, enum side side,
+					  const uint8_t* vertex_light, uint8_t luminance) {
+	render_block_side_adv_v2(d, x, y, z, width, height, 0, 0, tex_x, tex_y,
+							 tex_flip_h, tex_rotate, shade_sides, side,
+							 vertex_light, luminance);
+}
+
 static inline void render_block_side(struct displaylist* d, int16_t x,
 									 int16_t y, int16_t z, int16_t yoffset,
 									 uint16_t height, uint8_t tex,
 									 uint8_t luminance, bool shade_sides,
 									 uint16_t inset, bool tex_flip_h,
 									 int tex_rotate, enum side side,
-									 uint8_t* vertex_light) {
+									 const uint8_t* vertex_light) {
 	uint8_t tex_x = TEX_OFFSET(TEXTURE_X(tex));
 	uint8_t tex_y = TEX_OFFSET(TEXTURE_Y(tex));
 
@@ -313,8 +326,8 @@ size_t render_block_cross(struct displaylist* d, struct block_info* this,
 			= blocks[this->block->type]->getTextureIndex(this, SIDE_TOP);
 		uint8_t tex_x = TEX_OFFSET(TEXTURE_X(tex));
 		uint8_t tex_y = TEX_OFFSET(TEXTURE_Y(tex));
-		uint8_t light = (MAX_LIGHT(this->block->torch_light,
-								   blocks[this->block->type]->luminance)
+		uint8_t light = (MAX_U8(this->block->torch_light,
+								blocks[this->block->type]->luminance)
 						 << 4)
 			| this->block->sky_light;
 
@@ -361,8 +374,8 @@ size_t render_block_torch(struct displaylist* d, struct block_info* this,
 		uint8_t tex = blocks[this->block->type]->getTextureIndex(this, side);
 		uint8_t tex_x = TEX_OFFSET(TEXTURE_X(tex));
 		uint8_t tex_y = TEX_OFFSET(TEXTURE_Y(tex));
-		uint8_t light = (MAX_LIGHT(this->block->torch_light,
-								   blocks[this->block->type]->luminance)
+		uint8_t light = (MAX_U8(this->block->torch_light,
+								blocks[this->block->type]->luminance)
 						 << 4)
 			| this->block->sky_light;
 
@@ -874,20 +887,154 @@ size_t render_block_bed(struct displaylist* d, struct block_info* this,
 size_t render_block_fire(struct displaylist* d, struct block_info* this,
 						 enum side side, struct block_info* it,
 						 uint8_t* vertex_light, bool count_only) {
-	if(side == SIDE_TOP || side == SIDE_BOTTOM)
+	if(side == SIDE_TOP)
 		return 0;
+
+	size_t k = 0;
+	bool is_floating = !blocks[this->neighbours[SIDE_BOTTOM].type]
+		|| (blocks[this->neighbours[SIDE_BOTTOM].type]->can_see_through
+			&& !blocks[this->neighbours[SIDE_BOTTOM].type]->flammable);
 
 	int16_t x = W2C_COORD(this->x);
 	int16_t y = W2C_COORD(this->y);
 	int16_t z = W2C_COORD(this->z);
+	uint8_t tex = blocks[this->block->type]->getTextureIndex(this, side);
+	uint8_t luminance = blocks[this->block->type]->luminance;
+	uint8_t tex_x = TEX_OFFSET(TEXTURE_X(tex));
+	uint8_t tex_y = TEX_OFFSET(TEXTURE_Y(tex));
+	uint16_t height = 360;
 
-	if(!count_only)
-		render_block_side(
-			d, W2C_COORD(this->x), W2C_COORD(this->y), W2C_COORD(this->z), 0,
-			360, blocks[this->block->type]->getTextureIndex(this, side),
-			blocks[this->block->type]->luminance, false, 0, false, 0, side,
-			vertex_light);
-	return 1;
+	if(is_floating) {
+		switch(side) {
+			case SIDE_BOTTOM:
+				if(blocks[this->neighbours[SIDE_TOP].type]
+				   && blocks[this->neighbours[SIDE_TOP].type]->flammable) {
+					if(!count_only) {
+						render_block_side_adv_v2(
+							d, x * BLK_LEN, y * BLK_LEN + BLK_LEN, z * BLK_LEN,
+							BLK_LEN, BLK_LEN, 0, -3 * 16, tex_x, tex_y, false,
+							0, false, SIDE_BOTTOM, vertex_light, luminance);
+						render_block_side_adv_v2(
+							d, x * BLK_LEN, y * BLK_LEN + BLK_LEN, z * BLK_LEN,
+							BLK_LEN, BLK_LEN, -3 * 16, 0, tex_x, tex_y, false,
+							2, false, SIDE_BOTTOM, vertex_light, luminance);
+					}
+					k += 2;
+				}
+				break;
+			case SIDE_LEFT:
+				if(blocks[this->neighbours[SIDE_RIGHT].type]
+				   && blocks[this->neighbours[SIDE_RIGHT].type]->flammable) {
+					if(!count_only)
+						render_block_side_adv_v2(
+							d, x * BLK_LEN + BLK_LEN, y * BLK_LEN + 16,
+							z * BLK_LEN, BLK_LEN, height, 0, -48, tex_x, tex_y,
+							false, false, false, SIDE_LEFT, vertex_light,
+							luminance);
+					k++;
+				}
+				break;
+			case SIDE_RIGHT:
+				if(blocks[this->neighbours[SIDE_LEFT].type]
+				   && blocks[this->neighbours[SIDE_LEFT].type]->flammable) {
+					if(!count_only)
+						render_block_side_adv_v2(
+							d, x * BLK_LEN, y * BLK_LEN + 16, z * BLK_LEN,
+							BLK_LEN, height, 0, -48, tex_x, tex_y, false, false,
+							false, SIDE_RIGHT, vertex_light, luminance);
+					k++;
+				}
+				break;
+			case SIDE_FRONT:
+				if(blocks[this->neighbours[SIDE_BACK].type]
+				   && blocks[this->neighbours[SIDE_BACK].type]->flammable) {
+					if(!count_only)
+						render_block_side_adv_v2(
+							d, x * BLK_LEN, y * BLK_LEN + 16,
+							z * BLK_LEN + BLK_LEN, BLK_LEN, height, 0, -48,
+							tex_x, tex_y, false, false, false, SIDE_FRONT,
+							vertex_light, luminance);
+					k++;
+				}
+				break;
+			case SIDE_BACK:
+				if(blocks[this->neighbours[SIDE_FRONT].type]
+				   && blocks[this->neighbours[SIDE_FRONT].type]->flammable) {
+					if(!count_only)
+						render_block_side_adv_v2(
+							d, x * BLK_LEN, y * BLK_LEN + 16, z * BLK_LEN,
+							BLK_LEN, height, 0, -48, tex_x, tex_y, false, false,
+							false, SIDE_BACK, vertex_light, luminance);
+					k++;
+				}
+				break;
+			default: break;
+		}
+	} else {
+		switch(side) {
+			case SIDE_LEFT:
+				if(!count_only) {
+					render_block_side_adv_v2(
+						d, x * BLK_LEN, y * BLK_LEN, z * BLK_LEN, BLK_LEN,
+						height, 0, 24, tex_x, tex_y, false, false, false,
+						SIDE_LEFT, vertex_light, luminance);
+
+					render_block_side_adv_v2(
+						d, x * BLK_LEN + 5 * 16, y * BLK_LEN, z * BLK_LEN,
+						BLK_LEN, height, 0, BLK_LEN / 2, tex_x, tex_y, false,
+						false, false, SIDE_LEFT, vertex_light, luminance);
+				}
+				k += 2;
+				break;
+			case SIDE_RIGHT:
+				if(!count_only) {
+					render_block_side_adv_v2(
+						d, x * BLK_LEN + BLK_LEN, y * BLK_LEN, z * BLK_LEN,
+						BLK_LEN, height, 0, 24, tex_x, tex_y, false, false,
+						false, SIDE_RIGHT, vertex_light, luminance);
+
+					render_block_side_adv_v2(
+						d, x * BLK_LEN + BLK_LEN - 5 * 16, y * BLK_LEN,
+						z * BLK_LEN, BLK_LEN, height, 0, BLK_LEN / 2, tex_x,
+						tex_y, false, false, false, SIDE_RIGHT, vertex_light,
+						luminance);
+				}
+				k += 2;
+				break;
+			case SIDE_FRONT:
+				if(!count_only) {
+					render_block_side_adv_v2(
+						d, x * BLK_LEN, y * BLK_LEN, z * BLK_LEN, BLK_LEN,
+						height, 0, 24, tex_x, tex_y, false, false, false,
+						SIDE_FRONT, vertex_light, luminance);
+
+					render_block_side_adv_v2(
+						d, x * BLK_LEN, y * BLK_LEN, z * BLK_LEN + 5 * 16,
+						BLK_LEN, height, 0, BLK_LEN / 2, tex_x, tex_y, false,
+						false, false, SIDE_FRONT, vertex_light, luminance);
+				}
+				k += 2;
+				break;
+			case SIDE_BACK:
+				if(!count_only) {
+					render_block_side_adv_v2(
+						d, x * BLK_LEN, y * BLK_LEN, z * BLK_LEN + BLK_LEN,
+						BLK_LEN, height, 0, 24, tex_x, tex_y, false, false,
+						false, SIDE_BACK, vertex_light, luminance);
+
+					render_block_side_adv_v2(
+						d, x * BLK_LEN, y * BLK_LEN,
+						z * BLK_LEN + BLK_LEN - 5 * 16, BLK_LEN, height, 0,
+						BLK_LEN / 2, tex_x, tex_y, false, false, false,
+						SIDE_BACK, vertex_light, luminance);
+				}
+				k += 2;
+				break;
+			default: break;
+		}
+	}
+
+	return k;
 }
 
 size_t render_block_pressure_plate(struct displaylist* d,
