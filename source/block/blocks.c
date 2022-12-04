@@ -93,7 +93,7 @@ void blocks_init() {
 	blocks[82] = &block_clay;
 	blocks[83] = &block_reed;
 	blocks[84] = &block_jukebox;
-	// fence (flammable)
+	blocks[85] = &block_fence;
 	blocks[86] = &block_pumpkin;
 	blocks[87] = &block_netherrack;
 	blocks[88] = &block_soulsand;

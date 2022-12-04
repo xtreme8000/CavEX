@@ -1100,6 +1100,233 @@ size_t render_block_pressure_plate(struct displaylist* d,
 	return 1;
 }
 
+size_t render_block_fence_always(struct displaylist* d, struct block_info* this,
+								 enum side side, struct block_info* it,
+								 uint8_t* vertex_light, bool count_only) {
+	size_t k = 0;
+	int16_t x = W2C_COORD(this->x);
+	int16_t y = W2C_COORD(this->y);
+	int16_t z = W2C_COORD(this->z);
+	uint8_t tex = blocks[this->block->type]->getTextureIndex(this, side);
+	uint8_t tex_x = TEX_OFFSET(TEXTURE_X(tex));
+	uint8_t tex_y = TEX_OFFSET(TEXTURE_Y(tex));
+	uint8_t luminance = blocks[this->block->type]->luminance;
+	bool connect_pos_x = this->neighbours[SIDE_RIGHT].type == this->block->type;
+	bool connect_pos_z = this->neighbours[SIDE_BACK].type == this->block->type;
+
+	// TODO: textures are not perfect but I'll take it
+
+	switch(side) {
+		case SIDE_LEFT:
+			if(connect_pos_z && !count_only) {
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 7 / 16,
+									  y * BLK_LEN + BLK_LEN * 12 / 16,
+									  z * BLK_LEN + BLK_LEN * 10 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN * 3 / 16,
+									  tex_x + 2, tex_y + 9, false, 0, true,
+									  SIDE_LEFT, vertex_light, luminance);
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 7 / 16,
+									  y * BLK_LEN + BLK_LEN * 6 / 16,
+									  z * BLK_LEN + BLK_LEN * 10 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN * 3 / 16,
+									  tex_x + 2, tex_y + 11, false, 0, true,
+									  SIDE_LEFT, vertex_light, luminance);
+			}
+
+			k += connect_pos_z ? 2 : 0;
+			break;
+		case SIDE_RIGHT:
+			if(connect_pos_z && !count_only) {
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 9 / 16,
+									  y * BLK_LEN + BLK_LEN * 12 / 16,
+									  z * BLK_LEN + BLK_LEN * 10 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN * 3 / 16,
+									  tex_x + 2, tex_y + 9, false, 0, true,
+									  SIDE_RIGHT, vertex_light, luminance);
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 9 / 16,
+									  y * BLK_LEN + BLK_LEN * 6 / 16,
+									  z * BLK_LEN + BLK_LEN * 10 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN * 3 / 16,
+									  tex_x + 2, tex_y + 11, false, 0, true,
+									  SIDE_RIGHT, vertex_light, luminance);
+			}
+
+			k += connect_pos_z ? 2 : 0;
+			break;
+		case SIDE_BOTTOM:
+			if(connect_pos_x && !count_only) {
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 10 / 16,
+									  y * BLK_LEN + BLK_LEN * 12 / 16,
+									  z * BLK_LEN + BLK_LEN * 7 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN / 8, tex_x,
+									  tex_y, false, 0, true, SIDE_BOTTOM,
+									  vertex_light, luminance);
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 10 / 16,
+									  y * BLK_LEN + BLK_LEN * 6 / 16,
+									  z * BLK_LEN + BLK_LEN * 7 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN / 8, tex_x,
+									  tex_y, false, 0, true, SIDE_BOTTOM,
+									  vertex_light, luminance);
+			}
+
+			if(connect_pos_z && !count_only) {
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 7 / 16,
+									  y * BLK_LEN + BLK_LEN * 12 / 16,
+									  z * BLK_LEN + BLK_LEN * 10 / 16,
+									  BLK_LEN / 8, BLK_LEN * 3 / 4, tex_x,
+									  tex_y, false, 0, true, SIDE_BOTTOM,
+									  vertex_light, luminance);
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 7 / 16,
+									  y * BLK_LEN + BLK_LEN * 6 / 16,
+									  z * BLK_LEN + BLK_LEN * 10 / 16,
+									  BLK_LEN / 8, BLK_LEN * 3 / 4, tex_x,
+									  tex_y, false, 0, true, SIDE_BOTTOM,
+									  vertex_light, luminance);
+			}
+
+			k += connect_pos_x ? 2 : 0;
+			k += connect_pos_z ? 2 : 0;
+			break;
+		case SIDE_TOP:
+			if(connect_pos_x && !count_only) {
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 10 / 16,
+									  y * BLK_LEN + BLK_LEN * 15 / 16,
+									  z * BLK_LEN + BLK_LEN * 7 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN / 8, tex_x,
+									  tex_y, false, 0, true, SIDE_TOP,
+									  vertex_light, luminance);
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 10 / 16,
+									  y * BLK_LEN + BLK_LEN * 9 / 16,
+									  z * BLK_LEN + BLK_LEN * 7 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN / 8, tex_x,
+									  tex_y, false, 0, true, SIDE_TOP,
+									  vertex_light, luminance);
+			}
+
+			if(connect_pos_z && !count_only) {
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 7 / 16,
+									  y * BLK_LEN + BLK_LEN * 15 / 16,
+									  z * BLK_LEN + BLK_LEN * 10 / 16,
+									  BLK_LEN / 8, BLK_LEN * 3 / 4, tex_x,
+									  tex_y, false, 0, true, SIDE_TOP,
+									  vertex_light, luminance);
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 7 / 16,
+									  y * BLK_LEN + BLK_LEN * 9 / 16,
+									  z * BLK_LEN + BLK_LEN * 10 / 16,
+									  BLK_LEN / 8, BLK_LEN * 3 / 4, tex_x,
+									  tex_y, false, 0, true, SIDE_TOP,
+									  vertex_light, luminance);
+			}
+
+			k += connect_pos_x ? 2 : 0;
+			k += connect_pos_z ? 2 : 0;
+			break;
+		case SIDE_FRONT:
+			if(connect_pos_x && !count_only) {
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 10 / 16,
+									  y * BLK_LEN + BLK_LEN * 12 / 16,
+									  z * BLK_LEN + BLK_LEN * 7 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN * 3 / 16,
+									  tex_x + 2, tex_y + 9, false, 0, true,
+									  SIDE_FRONT, vertex_light, luminance);
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 10 / 16,
+									  y * BLK_LEN + BLK_LEN * 6 / 16,
+									  z * BLK_LEN + BLK_LEN * 7 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN * 3 / 16,
+									  tex_x + 2, tex_y + 11, false, 0, true,
+									  SIDE_FRONT, vertex_light, luminance);
+			}
+
+			k += connect_pos_x ? 2 : 0;
+			break;
+		case SIDE_BACK:
+			if(connect_pos_x && !count_only) {
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 10 / 16,
+									  y * BLK_LEN + BLK_LEN * 12 / 16,
+									  z * BLK_LEN + BLK_LEN * 9 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN * 3 / 16,
+									  tex_x + 2, tex_y + 9, false, 0, true,
+									  SIDE_BACK, vertex_light, luminance);
+				render_block_side_adv(d, x * BLK_LEN + BLK_LEN * 10 / 16,
+									  y * BLK_LEN + BLK_LEN * 6 / 16,
+									  z * BLK_LEN + BLK_LEN * 9 / 16,
+									  BLK_LEN * 3 / 4, BLK_LEN * 3 / 16,
+									  tex_x + 2, tex_y + 11, false, 0, true,
+									  SIDE_BACK, vertex_light, luminance);
+			}
+
+			k += connect_pos_x ? 2 : 0;
+			break;
+		default: break;
+	}
+
+	return k;
+}
+
+size_t render_block_fence(struct displaylist* d, struct block_info* this,
+						  enum side side, struct block_info* it,
+						  uint8_t* vertex_light, bool count_only) {
+	if(!count_only) {
+		int16_t x = W2C_COORD(this->x);
+		int16_t y = W2C_COORD(this->y);
+		int16_t z = W2C_COORD(this->z);
+		uint8_t tex = blocks[this->block->type]->getTextureIndex(this, side);
+		uint8_t tex_x = TEX_OFFSET(TEXTURE_X(tex));
+		uint8_t tex_y = TEX_OFFSET(TEXTURE_Y(tex));
+		uint8_t luminance = blocks[this->block->type]->luminance;
+
+		// TODO: textures are not perfect but I'll take it
+
+		switch(side) {
+			case SIDE_LEFT:
+				render_block_side_adv(
+					d, x * BLK_LEN + BLK_LEN * 3 / 8, y * BLK_LEN,
+					z * BLK_LEN + BLK_LEN * 3 / 8, BLK_LEN / 4, BLK_LEN,
+					tex_x + 6, tex_y, false, 0, true, SIDE_LEFT, vertex_light,
+					luminance);
+				break;
+			case SIDE_RIGHT:
+				render_block_side_adv(
+					d, x * BLK_LEN + BLK_LEN - BLK_LEN * 3 / 8, y * BLK_LEN,
+					z * BLK_LEN + BLK_LEN * 3 / 8, BLK_LEN / 4, BLK_LEN,
+					tex_x + 6, tex_y, false, 0, true, SIDE_RIGHT, vertex_light,
+					luminance);
+				break;
+			case SIDE_BOTTOM:
+				render_block_side_adv(
+					d, x * BLK_LEN + BLK_LEN * 3 / 8, y * BLK_LEN,
+					z * BLK_LEN + BLK_LEN * 3 / 8, BLK_LEN / 4, BLK_LEN / 4,
+					tex_x, tex_y, false, 0, true, SIDE_BOTTOM, vertex_light,
+					luminance);
+				break;
+			case SIDE_TOP:
+				render_block_side_adv(
+					d, x * BLK_LEN + BLK_LEN * 3 / 8, y * BLK_LEN + BLK_LEN,
+					z * BLK_LEN + BLK_LEN * 3 / 8, BLK_LEN / 4, BLK_LEN / 4,
+					tex_x, tex_y, false, 0, true, SIDE_TOP, vertex_light,
+					luminance);
+				break;
+			case SIDE_FRONT:
+				render_block_side_adv(
+					d, x * BLK_LEN + BLK_LEN * 3 / 8, y * BLK_LEN,
+					z * BLK_LEN + BLK_LEN * 3 / 8, BLK_LEN / 4, BLK_LEN,
+					tex_x + 6, tex_y, false, 0, true, SIDE_FRONT, vertex_light,
+					luminance);
+				break;
+			case SIDE_BACK:
+				render_block_side_adv(
+					d, x * BLK_LEN + BLK_LEN * 3 / 8, y * BLK_LEN,
+					z * BLK_LEN + BLK_LEN - BLK_LEN * 3 / 8, BLK_LEN / 4,
+					BLK_LEN, tex_x + 6, tex_y, false, 0, true, SIDE_BACK,
+					vertex_light, luminance);
+				break;
+			default: break;
+		}
+	}
+
+	return 1;
+}
+
 size_t render_block_layer(struct displaylist* d, struct block_info* this,
 						  enum side side, struct block_info* it,
 						  uint8_t* vertex_light, bool count_only) {
