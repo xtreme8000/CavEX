@@ -38,7 +38,7 @@ void blocks_init() {
 	blocks[27] = &block_powered_rail;
 	blocks[28] = &block_detector_rail;
 	// sticky piston
-	// cobweb
+	blocks[30] = &block_cobweb;
 	blocks[31] = &block_tallgrass;
 	blocks[32] = &block_deadbush;
 	// piston
