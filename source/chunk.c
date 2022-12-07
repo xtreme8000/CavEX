@@ -32,6 +32,9 @@ void chunk_init(struct chunk* c, struct world* world, w_coord_t x, w_coord_t y,
 	c->rebuild_displist = false;
 	c->world = world;
 	c->reference_count = 0;
+
+	ilist_chunks_init_field(c);
+	ilist_chunks2_init_field(c);
 }
 
 static void chunk_destroy(struct chunk* c) {

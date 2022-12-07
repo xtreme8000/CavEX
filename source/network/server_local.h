@@ -22,6 +22,7 @@ struct server_local {
 	} loaded_chunks[MAX_CHUNKS];
 	size_t loaded_chunks_length;
 	struct region_archive loaded_regions[MAX_REGIONS];
+	ilist_regions_t loaded_regions_lru;
 	size_t loaded_regions_length;
 	ptime_t last_chunk_load;
 };

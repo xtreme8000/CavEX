@@ -34,21 +34,25 @@ bool region_archive_create(struct region_archive* ra, char* world_name,
 
 	fclose(f);
 
+	ilist_regions_init_field(ra);
+
 	return true;
 }
 
 void region_archive_destroy(struct region_archive* ra) {
-	assert(ra);
+	assert(ra && ra->offsets);
 
 	free(ra->offsets);
 }
 
 bool region_archive_contains(struct region_archive* ra, w_coord_t x,
-							 w_coord_t z) {
-	assert(ra);
+							 w_coord_t z, bool* chunk_exists) {
+	assert(ra && chunk_exists);
 
-	if(CHUNK_REGION_COORD(x) != ra->x || CHUNK_REGION_COORD(z) != ra->z)
+	if(CHUNK_REGION_COORD(x) != ra->x || CHUNK_REGION_COORD(z) != ra->z) {
+		*chunk_exists = false;
 		return false;
+	}
 
 	int rx = x & (REGION_SIZE - 1);
 	int rz = z & (REGION_SIZE - 1);
@@ -56,14 +60,16 @@ bool region_archive_contains(struct region_archive* ra, w_coord_t x,
 	uint32_t offset = ra->offsets[rx + rz * REGION_SIZE] >> 8;
 	uint32_t sectors = ra->offsets[rx + rz * REGION_SIZE] & 0xFF;
 
-	return offset >= 2 && sectors >= 1;
+	*chunk_exists = offset >= 2 && sectors >= 1;
+	return true;
 }
 
 bool region_archive_get_blocks(struct region_archive* ra, w_coord_t x,
 							   w_coord_t z, uint8_t** ids, uint8_t** metadata,
 							   uint8_t** lighting) {
 	assert(ra && ids && metadata && lighting);
-	assert(region_archive_contains(ra, x, z));
+	bool chunk_exists;
+	assert(region_archive_contains(ra, x, z, &chunk_exists) && chunk_exists);
 
 	int rx = x & (REGION_SIZE - 1);
 	int rz = z & (REGION_SIZE - 1);

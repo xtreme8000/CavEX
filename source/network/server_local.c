@@ -2,6 +2,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "../cglm/cglm.h"
+
 #include "client_interface.h"
 #include "server_interface.h"
 #include "server_local.h"
@@ -13,30 +15,53 @@ static bool has_chunk(struct server_local* s, w_coord_t x, w_coord_t z) {
 	assert(s);
 
 	for(size_t k = 0; k < s->loaded_regions_length; k++) {
-		if(region_archive_contains(s->loaded_regions + k, x, z))
-			return true;
-	}
-
-	if(s->loaded_regions_length < MAX_REGIONS) {
-		if(region_archive_create(s->loaded_regions + s->loaded_regions_length,
-								 "world", CHUNK_REGION_COORD(x),
-								 CHUNK_REGION_COORD(z))) {
-			s->loaded_regions_length++;
-			return true;
+		bool chunk_exists;
+		if(region_archive_contains(s->loaded_regions + k, x, z,
+								   &chunk_exists)) {
+			ilist_regions_unlink(s->loaded_regions + k);
+			ilist_regions_push_back(s->loaded_regions_lru,
+									s->loaded_regions + k);
+			return chunk_exists;
 		}
 	}
 
-	return false;
+	struct region_archive ra;
+	if(!region_archive_create(&ra, "world", CHUNK_REGION_COORD(x),
+							  CHUNK_REGION_COORD(z)))
+		return false;
+
+	struct region_archive* lru;
+	if(ilist_regions_size(s->loaded_regions_lru) < MAX_REGIONS) {
+		assert(s->loaded_regions_length < MAX_REGIONS);
+		lru = s->loaded_regions + (s->loaded_regions_length++);
+	} else {
+		lru = ilist_regions_pop_front(s->loaded_regions_lru);
+		region_archive_destroy(lru);
+	}
+
+	*lru = ra;
+	ilist_regions_push_back(s->loaded_regions_lru, lru);
+
+	return true;
 }
 
 static bool load_chunk(struct server_local* s, w_coord_t x, w_coord_t z,
 					   uint8_t** ids, uint8_t** metadata, uint8_t** lighting) {
 	assert(s && ids && metadata && lighting);
 
-	for(size_t k = 0; k < s->loaded_regions_length; k++) {
-		if(region_archive_contains(s->loaded_regions + k, x, z))
-			return region_archive_get_blocks(s->loaded_regions + k, x, z, ids,
-											 metadata, lighting);
+	ilist_regions_it_t it;
+	ilist_regions_it(it, s->loaded_regions_lru);
+
+	while(!ilist_regions_end_p(it)) {
+		struct region_archive* ra = ilist_regions_ref(it);
+
+		bool chunk_exists;
+		if(region_archive_contains(ra, x, z, &chunk_exists))
+			return chunk_exists ?
+				region_archive_get_blocks(ra, x, z, ids, metadata, lighting) :
+				false;
+
+		ilist_regions_next(it);
 	}
 
 	return false;
@@ -149,7 +174,7 @@ static void server_local_update(struct server_local* s) {
 static void* server_local_thread(void* user) {
 	while(1) {
 		server_local_update(user);
-		usleep(20 * 1000);
+		usleep(50 * 1000);
 	}
 
 	return NULL;
@@ -161,6 +186,8 @@ void server_local_create(struct server_local* s) {
 	s->loaded_regions_length = 0;
 	s->last_chunk_load = time_get();
 	s->player.has_pos = false;
+
+	ilist_regions_init(s->loaded_regions_lru);
 
 	lwp_t thread;
 	LWP_CreateThread(&thread, server_local_thread, s, NULL, 0, 8);

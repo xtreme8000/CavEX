@@ -1,6 +1,7 @@
 #ifndef REGION_ARCHIVE_H
 #define REGION_ARCHIVE_H
 
+#include <m-lib/m-i-list.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -10,7 +11,10 @@ struct region_archive {
 	w_coord_t x, z;
 	uint32_t* offsets;
 	char file_name[64];
+	ILIST_INTERFACE(ilist_regions, struct region_archive);
 };
+
+ILIST_DEF(ilist_regions, struct region_archive, M_POD_OPLIST)
 
 #define REGION_SIZE 32
 #define REGION_SIZE_BITS 5
@@ -22,7 +26,7 @@ bool region_archive_create(struct region_archive* ra, char* world_name,
 						   w_coord_t x, w_coord_t z);
 void region_archive_destroy(struct region_archive* ra);
 bool region_archive_contains(struct region_archive* ra, w_coord_t x,
-							 w_coord_t z);
+							 w_coord_t z, bool* chunk_exists);
 bool region_archive_get_blocks(struct region_archive* ra, w_coord_t x,
 							   w_coord_t z, uint8_t** ids, uint8_t** metadata,
 							   uint8_t** lighting);
