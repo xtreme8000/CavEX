@@ -319,10 +319,10 @@ size_t world_render(struct world* w, struct camera* c, bool pass) {
 		gfx_write_buffers(false, true);
 
 		mat4 matrix_anim;
-		int anim = (time_diff_ms(w->anim_timer, time_get()) * 3 / 400) % 24;
+		int anim = (time_diff_ms(w->anim_timer, time_get()) * 7 / 800) % 28;
 		glm_translate_make(
 			matrix_anim,
-			(vec3) {(anim / 14) * 0.3515625F, (anim % 14) * 0.0703125F, 0.0F});
+			(vec3) {(anim / 14) * 0.4921875F, (anim % 14) * 0.0703125F, 0.0F});
 
 		gfx_matrix_texture(true, matrix_anim);
 		gfx_bind_texture(TEXTURE_ANIM);
