@@ -2,6 +2,7 @@
 
 #include "../../block/blocks.h"
 #include "../../platform/graphics/gfx.h"
+#include "../../platform/graphics/gfx_util.h"
 #include "../../platform/graphics/gui_util.h"
 #include "../../platform/input.h"
 #include "../game_state.h"
