@@ -14,13 +14,13 @@ static void screen_ingame_render3D(struct screen* s, mat4 view) {
 		struct block_data blk
 			= world_get_block(&gstate.world, gstate.camera_hit.x,
 							  gstate.camera_hit.y, gstate.camera_hit.z);
-		render_block_selection(view,
-							   &(struct block_info) {
-								   .block = &blk,
-								   .x = gstate.camera_hit.x,
-								   .y = gstate.camera_hit.y,
-								   .z = gstate.camera_hit.z,
-							   });
+		gutil_block_selection(view,
+							  &(struct block_info) {
+								  .block = &blk,
+								  .x = gstate.camera_hit.x,
+								  .y = gstate.camera_hit.y,
+								  .z = gstate.camera_hit.z,
+							  });
 	}
 }
 
@@ -64,17 +64,22 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	sprintf(str, "%i chunks", gstate.stats.chunks_rendered);
 	gutil_text(4, 4 + 17 * 2, str, 16);
 
-	sprintf(str, "(%0.1f, %0.1f, %0.1f)", gstate.camera.x, gstate.camera.y,
-			gstate.camera.z);
+	sprintf(str, "(%0.1f, %0.1f, %0.1f) (%0.1f, %0.1f)", gstate.camera.x,
+			gstate.camera.y, gstate.camera.z, glm_deg(gstate.camera.rx),
+			glm_deg(gstate.camera.ry));
 	gutil_text(4, 4 + 17 * 3, str, 16);
 
 	// sprintf(str, "daytime: %0.2f", daytime);
 	// gutil_text(4, 4 + 17 * 4, str, 16);
 
 	if(gstate.camera_hit.hit) {
-		sprintf(str, "side: %s, (%i, %i, %i)",
+		struct block* b
+			= blocks[world_get_block(&gstate.world, gstate.camera_hit.x,
+									 gstate.camera_hit.y, gstate.camera_hit.z)
+						 .type];
+		sprintf(str, "side: %s, (%i, %i, %i), %s",
 				block_side_name(gstate.camera_hit.side), gstate.camera_hit.x,
-				gstate.camera_hit.y, gstate.camera_hit.z);
+				gstate.camera_hit.y, gstate.camera_hit.z, b ? b->name : NULL);
 		gutil_text(4, 4 + 17 * 5, str, 16);
 	}
 

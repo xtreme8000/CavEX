@@ -35,6 +35,7 @@ struct chunk {
 	struct world* world;
 	uint8_t reachable[6];
 	size_t reference_count;
+	bool has_fog;
 	struct chunk_step {
 		bool visited;
 		enum side from;
@@ -60,6 +61,6 @@ void chunk_set_block(struct chunk* c, c_coord_t x, c_coord_t y, c_coord_t z,
 					 struct block_data blk);
 bool chunk_check_built(struct chunk* c);
 void chunk_render(struct chunk* c, bool pass, float x, float y, float z);
-void chunk_pre_render(struct chunk* c, mat4 view);
+void chunk_pre_render(struct chunk* c, mat4 view, bool has_fog);
 
 #endif

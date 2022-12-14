@@ -21,6 +21,9 @@ static mqbox_t frame_empty;
 static void* fifoBuffer = NULL;
 static uint8_t colors[256 * 3] ATTRIBUTE_ALIGN(32);
 
+static bool gfx_matrix_texture_prev = false;
+static bool gfx_fog_prev = false;
+
 static const float light_lookup[16] = {
 	0.05F,	0.067F, 0.085F, 0.106F, 0.129F, 0.156F, 0.186F, 0.221F,
 	0.261F, 0.309F, 0.367F, 0.437F, 0.525F, 0.638F, 0.789F, 1.0F,
@@ -64,33 +67,41 @@ static void copy_buffers(u32 cnt) {
 }
 
 static void gfx_load_textures() {
-	GXTexObj terrain, font, anim, gui, gui2;
+	GXTexObj terrain, font, anim, gui, gui2, fog;
 	TPLFile spriteTPL;
 	TPL_OpenTPLFromMemory(&spriteTPL, (void*)textures_tpl, textures_tpl_size);
 	TPL_GetTexture(&spriteTPL, texture_terrain, &terrain);
-	GX_InitTexObjLOD(&terrain, GX_NEAR, GX_NEAR, 0, 0, 0, GX_DISABLE,
-					 GX_DISABLE, GX_ANISO_1);
+	GX_InitTexObjFilterMode(&terrain, GX_NEAR, GX_NEAR);
+	GX_InitTexObjMaxAniso(&terrain, GX_ANISO_1);
 	GX_LoadTexObj(&terrain, GX_TEXMAP0);
 
 	TPL_GetTexture(&spriteTPL, texture_font, &font);
-	GX_InitTexObjLOD(&font, GX_LINEAR, GX_NEAR, 0, 0, 0, GX_DISABLE, GX_DISABLE,
-					 GX_ANISO_1);
+	GX_InitTexObjFilterMode(&font, GX_NEAR, GX_NEAR);
+	GX_InitTexObjMaxAniso(&font, GX_ANISO_1);
 	GX_LoadTexObj(&font, GX_TEXMAP1);
 
 	TPL_GetTexture(&spriteTPL, texture_anim, &anim);
-	GX_InitTexObjLOD(&anim, GX_NEAR, GX_NEAR, 0, 0, 0, GX_DISABLE, GX_DISABLE,
-					 GX_ANISO_1);
+	GX_InitTexObjFilterMode(&anim, GX_NEAR, GX_NEAR);
+	GX_InitTexObjMaxAniso(&anim, GX_ANISO_1);
 	GX_LoadTexObj(&anim, GX_TEXMAP2);
 
 	TPL_GetTexture(&spriteTPL, texture_gui, &gui);
-	GX_InitTexObjLOD(&gui, GX_NEAR, GX_NEAR, 0, 0, 0, GX_DISABLE, GX_DISABLE,
-					 GX_ANISO_1);
+	GX_InitTexObjFilterMode(&gui, GX_NEAR, GX_NEAR);
+	GX_InitTexObjMaxAniso(&gui, GX_ANISO_1);
 	GX_LoadTexObj(&gui, GX_TEXMAP3);
 
 	TPL_GetTexture(&spriteTPL, texture_gui2, &gui2);
-	GX_InitTexObjLOD(&gui2, GX_NEAR, GX_NEAR, 0, 0, 0, GX_DISABLE, GX_DISABLE,
-					 GX_ANISO_1);
+	GX_InitTexObjFilterMode(&gui2, GX_NEAR, GX_NEAR);
+	GX_InitTexObjMaxAniso(&gui2, GX_ANISO_1);
 	GX_LoadTexObj(&gui2, GX_TEXMAP4);
+
+	TPL_GetTexture(&spriteTPL, texture_fog, &fog);
+	GX_InitTexObjFilterMode(&fog, GX_LINEAR, GX_LINEAR);
+	GX_InitTexObjMaxAniso(&fog, GX_ANISO_1);
+	GX_InitTexObjWrapMode(&fog, GX_CLAMP, GX_CLAMP);
+	GX_LoadTexObj(&fog, GX_TEXMAP7);
+
+	TPL_CloseTPLFile(&spriteTPL);
 }
 
 int gfx_width() {
@@ -192,11 +203,15 @@ void gfx_setup() {
 	GX_SetArray(GX_VA_CLR0, colors, 3 * sizeof(uint8_t));
 	GX_SetNumChans(1);
 	GX_SetNumTexGens(1);
+	GX_SetNumTevStages(1);
 	gfx_bind_texture(TEXTURE_TERRAIN);
 	gfx_texture(true);
 	gfx_alpha_test(true);
 
 	gfx_load_textures();
+
+	GX_SetTexCoordGen(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_POS, GX_TEXMTX1);
+
 	GX_DrawDone();
 }
 
@@ -276,6 +291,8 @@ void gfx_bind_texture(enum gfx_texture tex) {
 void gfx_mode_world() { }
 
 void gfx_mode_gui() {
+	gfx_fog(false);
+
 	Mtx44 projection;
 	Mtx44 identity;
 	guMtxIdentity(identity);
@@ -318,10 +335,45 @@ void gfx_matrix_texture(bool enable, mat4 tex) {
 		mat4 convert;
 		glm_mat4_transpose_to(tex, convert);
 		GX_LoadTexMtxImm(convert, GX_TEXMTX0, GX_MTX2x4);
-		GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX0);
-	} else {
-		GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
 	}
+
+	if(enable != gfx_matrix_texture_prev)
+		GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0,
+						  enable ? GX_TEXMTX0 : GX_IDENTITY);
+	gfx_matrix_texture_prev = enable;
+}
+
+void gfx_fog_color(uint8_t r, uint8_t g, uint8_t b) {
+	GX_SetTevColor(GX_TEVREG0, (GXColor) {r, g, b, 255});
+}
+
+void gfx_fog_pos(float dx, float dz, float distance) {
+	assert(distance > 0);
+
+	if(gfx_fog_prev) {
+		float dist = 1.0F / (distance * 2.0F);
+		GX_LoadTexMtxImm((mat4) {{dist, 0, 0, dx * dist + 0.5F},
+								 {0, 0, dist, dz * dist + 0.5F},
+								 {0, 0, 0, 0},
+								 {0, 0, 0, 1}},
+						 GX_TEXMTX1, GX_MTX2x4);
+	}
+}
+
+void gfx_fog(bool enable) {
+	if(enable != gfx_fog_prev) {
+		GX_SetNumTexGens(enable ? 2 : 1);
+		GX_SetNumTevStages(enable ? 2 : 1);
+
+		if(enable) {
+			GX_SetTevOp(GX_TEVSTAGE1, GX_DECAL);
+			GX_SetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP7, GX_COLOR0A0);
+			GX_SetTevColorIn(GX_TEVSTAGE1, GX_CC_CPREV, GX_CC_C0, GX_CC_TEXA,
+							 GX_CC_ZERO);
+		}
+	}
+
+	gfx_fog_prev = enable;
 }
 
 void gfx_blending(enum gfx_blend mode) {
@@ -329,6 +381,9 @@ void gfx_blending(enum gfx_blend mode) {
 		case MODE_BLEND:
 			GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA,
 							GX_LO_NOOP);
+			break;
+		case MODE_BLEND2:
+			GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
 			break;
 		case MODE_INVERT:
 			GX_SetBlendMode(GX_BM_LOGIC, GX_BL_ZERO, GX_BL_ZERO, GX_LO_INV);
@@ -349,9 +404,10 @@ void gfx_alpha_test(bool enable) {
 	}
 }
 
-void gfx_write_buffers(bool color, bool depth) {
+void gfx_write_buffers(bool color, bool depth, bool depth_test) {
 	GX_SetColorUpdate(color ? GX_TRUE : GX_FALSE);
-	GX_SetZMode(GX_TRUE, GX_LEQUAL, depth ? GX_TRUE : GX_FALSE);
+	GX_SetZMode(depth_test ? GX_TRUE : GX_FALSE, GX_LEQUAL,
+				depth ? GX_TRUE : GX_FALSE);
 }
 
 void gfx_texture(bool enable) {

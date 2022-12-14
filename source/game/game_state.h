@@ -22,6 +22,7 @@ struct game_state {
 	struct {
 		float fov;
 		float render_distance;
+		float fog_distance;
 	} config;
 	struct screen* current_screen;
 	struct camera camera;

@@ -1,7 +1,18 @@
 #include <assert.h>
 
+#include "game/game_state.h"
 #include "platform/graphics/gfx.h"
 #include "world.h"
+
+// params depend on fog texture
+#define FOG_DIST_NO_RENDER 1.13F
+#define FOG_DIST_NO_EFFECT 0.72F
+
+#define FOG_DIST_LESS(c, dist)                                                 \
+	(glm_vec2_distance2(                                                       \
+		 (vec2) {(c)->x + CHUNK_SIZE / 2, (c)->z + CHUNK_SIZE / 2},            \
+		 (vec2) {gstate.camera.x, gstate.camera.z})                            \
+	 <= glm_pow2((dist)*gstate.config.fog_distance))
 
 void world_load_chunk(struct world* w, struct chunk* c) {
 	assert(w && c);
@@ -77,6 +88,7 @@ static void world_bfs(struct world* w, ilist_chunks_t render, float x, float y,
 			   && (current->tmp_data.from == SIDE_MAX
 				   || current->reachable[current->tmp_data.from]
 					   & (1 << sides[s]))
+			   && FOG_DIST_LESS(neigh, FOG_DIST_NO_RENDER)
 			   && glm_aabb_frustum(
 				   (vec3[2]) {{neigh->x, neigh->y, neigh->z},
 							  {neigh->x + CHUNK_SIZE, neigh->y + CHUNK_SIZE,
@@ -244,8 +256,17 @@ void world_pre_render(struct world* w, struct camera* c, mat4 view) {
 	ilist_chunks_it(it, w->render);
 
 	while(!ilist_chunks_end_p(it)) {
-		chunk_pre_render(ilist_chunks_ref(it), view);
-		ilist_chunks_next(it);
+		struct chunk* c = ilist_chunks_ref(it);
+		bool has_fog = !FOG_DIST_LESS(c, FOG_DIST_NO_EFFECT);
+
+		chunk_pre_render(c, view, has_fog);
+
+		if(has_fog) {
+			ilist_chunks_remove(w->render, it);
+			ilist_chunks_push_front(w->render, c);
+		} else {
+			ilist_chunks_next(it);
+		}
 	}
 }
 
@@ -316,7 +337,7 @@ size_t world_render(struct world* w, struct camera* c, bool pass) {
 	} else {
 		gfx_alpha_test(false);
 		gfx_blending(MODE_BLEND);
-		gfx_write_buffers(false, true);
+		gfx_write_buffers(false, true, true);
 
 		mat4 matrix_anim;
 		int anim = (time_diff_ms(w->anim_timer, time_get()) * 7 / 800) % 28;
@@ -329,7 +350,7 @@ size_t world_render(struct world* w, struct camera* c, bool pass) {
 
 		for(int t_pass = 0; t_pass < 2; t_pass++) {
 			if(t_pass == 1)
-				gfx_write_buffers(true, false);
+				gfx_write_buffers(true, false, true);
 
 			ilist_chunks_it(it, w->render);
 			while(!ilist_chunks_end_p(it)) {
@@ -339,7 +360,7 @@ size_t world_render(struct world* w, struct camera* c, bool pass) {
 		}
 
 		gfx_matrix_texture(false, NULL);
-		gfx_write_buffers(true, true);
+		gfx_write_buffers(true, true, true);
 	}
 
 	return in_view;

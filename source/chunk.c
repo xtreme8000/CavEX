@@ -7,6 +7,7 @@
 
 #include "block/blocks.h"
 #include "chunk.h"
+#include "game/game_state.h"
 #include "platform/graphics/gfx.h"
 #include "stack.h"
 
@@ -139,10 +140,11 @@ bool chunk_check_built(struct chunk* c) {
 	return false;
 }
 
-void chunk_pre_render(struct chunk* c, mat4 view) {
+void chunk_pre_render(struct chunk* c, mat4 view, bool has_fog) {
 	assert(c && view);
 
 	glm_translate_to(view, (vec3) {c->x, c->y, c->z}, c->model_view);
+	c->has_fog = has_fog;
 }
 
 static void check_matrix_set(struct chunk* c, bool* needs_matrix) {
@@ -150,6 +152,9 @@ static void check_matrix_set(struct chunk* c, bool* needs_matrix) {
 
 	if(*needs_matrix) {
 		gfx_matrix_modelview(c->model_view);
+		gfx_fog(c->has_fog);
+		gfx_fog_pos(c->x - gstate.camera.x, c->z - gstate.camera.z,
+					gstate.config.fog_distance);
 		*needs_matrix = false;
 	}
 }

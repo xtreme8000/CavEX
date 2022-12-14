@@ -8,6 +8,7 @@
 
 enum gfx_blend {
 	MODE_BLEND,
+	MODE_BLEND2,
 	MODE_INVERT,
 	MODE_OFF,
 };
@@ -35,9 +36,12 @@ void gfx_matrix_texture(bool enable, mat4 tex);
 
 void gfx_mode_world(void);
 void gfx_mode_gui(void);
+void gfx_fog_color(uint8_t r, uint8_t g, uint8_t b);
+void gfx_fog_pos(float dx, float dz, float distance);
+void gfx_fog(bool enable);
 void gfx_blending(enum gfx_blend mode);
 void gfx_alpha_test(bool enable);
-void gfx_write_buffers(bool color, bool depth);
+void gfx_write_buffers(bool color, bool depth, bool depth_test);
 void gfx_texture(bool enable);
 void gfx_lighting(bool enable);
 void gfx_culling(bool enable);

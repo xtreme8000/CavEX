@@ -9,14 +9,16 @@
 #endif
 
 #include "chunk_mesher.h"
+#include "daytime.h"
 #include "game/game_state.h"
 #include "game/gui/screen.h"
 #include "network/client_interface.h"
+#include "network/server_interface.h"
 #include "network/server_local.h"
 #include "platform/graphics/gfx.h"
+#include "platform/graphics/gfx_util.h"
 #include "platform/graphics/gui_util.h"
 #include "platform/input.h"
-#include "util.h"
 #include "world.h"
 
 #include "cNBT/nbt.h"
@@ -57,15 +59,16 @@ int main(void) {
 #endif
 
 	gstate.camera = (struct camera) {
-		.x = -66.5F,
-		.y = 72.5F,
-		.z = -83.5F,
-		.rx = glm_rad(-26),
-		.ry = glm_rad(91),
+		.x = -344.7F,
+		.y = 78.7F,
+		.z = -378.9F,
+		.rx = glm_rad(275.0F),
+		.ry = glm_rad(92.7F),
 		.controller = {0, 0, 0},
 	};
 	gstate.config.fov = 75.0F;
 	gstate.config.render_distance = 192.0F;
+	gstate.config.fog_distance = 5 * 16.0F;
 
 	world_create(&gstate.world);
 
@@ -121,13 +124,23 @@ int main(void) {
 		chunk_mesher_receive();
 		world_render_completed(&gstate.world, render_world);
 
-		gfx_clear_buffers(0x79 * daytime, 0xA6 * daytime, 0xFF * daytime);
+		vec3 top_plane_color, bottom_plane_color, atmosphere_color;
+		daytime_sky_colors(daytime, top_plane_color, bottom_plane_color,
+						   atmosphere_color);
+
+		gfx_clear_buffers(atmosphere_color[0], atmosphere_color[1],
+						  atmosphere_color[2]);
+		gfx_fog_color(atmosphere_color[0], atmosphere_color[1],
+					  atmosphere_color[2]);
 
 		if(render_world) {
 			gfx_mode_world();
-			gfx_update_light(daytime);
+			gfx_update_light(daytime_brightness(daytime));
 
 			gfx_matrix_projection(gstate.camera.projection, true);
+
+			gutil_sky_box(gstate.camera.view, daytime_celestial_angle(daytime),
+						  top_plane_color, bottom_plane_color);
 
 			gstate.stats.chunks_rendered
 				= world_render(&gstate.world, &gstate.camera, false);
@@ -147,6 +160,16 @@ int main(void) {
 		if(gstate.current_screen->render2D)
 			gstate.current_screen->render2D(gstate.current_screen, gfx_width(),
 											gfx_height());
+
+		if(input_held(IB_SCROLL_LEFT)) {
+			daytime += 0.1F * gstate.stats.dt;
+		}
+
+		if(input_held(IB_SCROLL_RIGHT)) {
+			daytime -= 0.1F * gstate.stats.dt;
+		}
+
+		daytime = fmaxf(fminf(daytime, 1), 0);
 
 		gfx_finish(true);
 

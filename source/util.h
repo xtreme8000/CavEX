@@ -12,4 +12,6 @@ float time_diff_s(ptime_t f, ptime_t s);
 
 uint32_t hash_u32(uint32_t x);
 
+void hsv2rgb(float* h, float* s, float* v);
+
 #endif

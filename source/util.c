@@ -1,3 +1,5 @@
+#include <assert.h>
+#include <math.h>
 #include <ogc/lwp_watchdog.h>
 
 #include "util.h"
@@ -23,4 +25,28 @@ uint32_t hash_u32(uint32_t x) {
 	x = ((x >> 16) ^ x) * 0x45D9F3B;
 	x = (x >> 16) ^ x;
 	return x;
+}
+
+void hsv2rgb(float* h, float* s, float* v) {
+	assert(h && s && v);
+
+	int i = floor((*h) * 6.0F);
+	float f = (*h) * 6.0F - i;
+	float p = (*v) * (1.0F - *s);
+	float q = (*v) * (1.0F - f * (*s));
+	float t = (*v) * (1.0F - (1.0F - f) * (*s));
+
+	float r, g, b;
+	switch(i % 6) {
+		case 0: r = *v, g = t, b = p; break;
+		case 1: r = q, g = *v, b = p; break;
+		case 2: r = p, g = *v, b = t; break;
+		case 3: r = p, g = q, b = *v; break;
+		case 4: r = t, g = p, b = *v; break;
+		case 5: r = *v, g = p, b = q; break;
+	}
+
+	*h = r;
+	*s = g;
+	*v = b;
 }
