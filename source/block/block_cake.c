@@ -6,7 +6,6 @@ static enum block_material getMaterial(struct block_info* this) {
 
 static bool getBoundingBox(struct block_info* this, bool entity,
 						   struct AABB* x) {
-	// TODO: AABB hitbox for all states
 	aabb_setsize(x, 0.875F - 0.125F * this->block->metadata, 0.5F, 0.875F);
 	aabb_translate(x, 0.0625F * this->block->metadata, 0, 0);
 	return true;
