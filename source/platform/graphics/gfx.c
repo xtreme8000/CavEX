@@ -212,6 +212,8 @@ void gfx_setup() {
 
 	GX_SetTexCoordGen(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_POS, GX_TEXMTX1);
 
+	gfx_update_light(1.0F);
+
 	GX_DrawDone();
 }
 
@@ -288,23 +290,23 @@ void gfx_bind_texture(enum gfx_texture tex) {
 	}
 }
 
-void gfx_mode_world() { }
+void gfx_mode_world() {
+	gfx_write_buffers(true, true, true);
+}
 
 void gfx_mode_gui() {
 	gfx_fog(false);
 
 	Mtx44 projection;
-	Mtx44 identity;
-	guMtxIdentity(identity);
 
-	guOrtho(projection, 0, gfx_height(), 0, gfx_width(), 0, 10);
+	guOrtho(projection, 0, gfx_height(), 0, gfx_width(), 0, 256);
 	GX_LoadProjectionMtx(projection, GX_ORTHOGRAPHIC);
-	GX_LoadPosMtxImm(identity, GX_PNMTX0);
+	gfx_matrix_modelview(GLM_MAT4_IDENTITY);
 
-	GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-
+	gfx_lighting(false);
 	gfx_blending(MODE_BLEND);
 	gfx_alpha_test(true);
+	gfx_write_buffers(true, false, false);
 }
 
 void gfx_matrix_projection(mat4 proj, bool is_perspective) {

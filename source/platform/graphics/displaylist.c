@@ -90,3 +90,19 @@ void displaylist_render(struct displaylist* l) {
 			(l->index + (uintptr_t)l->data % DISPLAYLIST_CLL - 1)
 				/ DISPLAYLIST_CLL * DISPLAYLIST_CLL);
 }
+
+void displaylist_render_immediate(struct displaylist* l, uint8_t primitve,
+								  uint8_t vtxfmt, uint16_t vtxcnt) {
+	assert(l && l->data);
+
+	uint8_t* base = (uint8_t*)l->data + DISPLAYLIST_CLL + 3;
+
+	GX_Begin(primitve, vtxfmt, vtxcnt);
+	for(uint16_t k = 0; k < vtxcnt; k++) {
+		GX_Position3s16(MEM_U16(base, 0), MEM_U16(base, 2), MEM_U16(base, 4));
+		GX_Color1x8(MEM_U8(base, 6));
+		GX_TexCoord2u8(MEM_U8(base, 7), MEM_U8(base, 8));
+		base += 9;
+	}
+	GX_End();
+}
