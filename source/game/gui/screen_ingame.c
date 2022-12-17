@@ -41,12 +41,26 @@ static void screen_ingame_update(struct screen* s, float dt) {
 			world_set_block(&gstate.world, gstate.camera_hit.x + x,
 							gstate.camera_hit.y + y, gstate.camera_hit.z + z,
 							(struct block_data) {
-								.type = BLOCK_DIRT,
+								.type = 51,
 								.metadata = 0,
-								.sky_light = 0,
-								.torch_light = 0,
+								.sky_light = 15,
+								.torch_light = blocks[51]->luminance,
 							});
 		}
+	}
+
+	size_t slot = inventory_get_hotbar(&gstate.inventory);
+
+	if(input_pressed(IB_SCROLL_LEFT)) {
+		inventory_set_hotbar(&gstate.inventory,
+							 (slot == 0) ? INVENTORY_SIZE_HOTBAR - 1 :
+										   slot - 1);
+	}
+
+	if(input_pressed(IB_SCROLL_RIGHT)) {
+		inventory_set_hotbar(&gstate.inventory,
+							 (slot == INVENTORY_SIZE_HOTBAR - 1) ? 0 :
+																   slot + 1);
 	}
 }
 
@@ -69,9 +83,6 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 			glm_deg(gstate.camera.ry));
 	gutil_text(4, 4 + 17 * 3, str, 16);
 
-	// sprintf(str, "daytime: %0.2f", daytime);
-	// gutil_text(4, 4 + 17 * 4, str, 16);
-
 	if(gstate.camera_hit.hit) {
 		struct block* b
 			= blocks[world_get_block(&gstate.world, gstate.camera_hit.x,
@@ -90,24 +101,31 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	icon_offset += gutil_control_icon(icon_offset, CONTROL_A, "Inventory");
 	icon_offset += gutil_control_icon(icon_offset, CONTROL_B, "Jump");
 	if(gstate.camera_hit.hit) {
-		icon_offset += gutil_control_icon(icon_offset, CONTROL_C, "Place");
+		struct item_data item;
+		if(inventory_get_slot(&gstate.inventory,
+							  inventory_get_hotbar(&gstate.inventory), &item)) {
+			icon_offset += gutil_control_icon(
+				icon_offset, CONTROL_C, item_is_block(&item) ? "Place" : "Use");
+		}
 		icon_offset += gutil_control_icon(icon_offset, CONTROL_Z, "Mine");
 	}
 
 	gfx_bind_texture(TEXTURE_GUI);
 
 	// draw inventory
-	/*gutil_texquad((782 - 176 * 2) / 2, (480 - 167 * 2) / 2, 176 / 2, 135,
+	/*gutil_texquad((width - 176 * 2) / 2, (height - 167 * 2) / 2, 176 / 2, 135,
 				  176 / 2, 79, 176 * 2, 79 * 2);
-	gutil_texquad_rt((782 - 176 * 2) / 2, (480 - 167 * 2) / 2 + 79 * 2,
+	gutil_texquad_rt((width - 176 * 2) / 2, (height - 167 * 2) / 2 + 79 * 2,
 					 352 / 2, 0, 88 / 2, 176, 176 * 2, 88 * 2);*/
 
 	gfx_bind_texture(TEXTURE_GUI2);
+
 	// draw hotbar
-	/*gutil_texquad((782 - 182 * 2) / 2, 480 - 22 * 2, 0, 0, 182, 22,
-					   182 * 2, 22 * 2);
-	gutil_texquad((782 - 182 * 2) / 2 - 2, 480 - 23 * 2, 208, 0, 24,
-					   24, 24 * 2, 24 * 2);*/
+	gutil_texquad((width - 182 * 2) / 2, height - 32 * 8 / 5 - 22 * 2, 0, 0,
+				  182, 22, 182 * 2, 22 * 2);
+	gutil_texquad((width - 182 * 2) / 2 - 2
+					  + 20 * 2 * inventory_get_hotbar(&gstate.inventory),
+				  height - 32 * 8 / 5 - 23 * 2, 208, 0, 24, 24, 24 * 2, 24 * 2);
 
 	gfx_blending(MODE_INVERT);
 	gutil_texquad((width - 16 * 2) / 2, (height - 16 * 2) / 2, 0, 229, 16, 16,

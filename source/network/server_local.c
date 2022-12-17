@@ -4,6 +4,7 @@
 
 #include "../cglm/cglm.h"
 
+#include "../item/inventory.h"
 #include "client_interface.h"
 #include "server_interface.h"
 #include "server_local.h"
@@ -74,10 +75,12 @@ static void server_local_process(struct server_rpc* call, void* user) {
 
 	switch(call->type) {
 		case SRPC_PLAYER_POS:
-			s->player.x = call->payload.player_pos.x;
-			s->player.y = call->payload.player_pos.y;
-			s->player.z = call->payload.player_pos.z;
-			s->player.has_pos = true;
+			if(s->player.finished_loading) {
+				s->player.x = call->payload.player_pos.x;
+				s->player.y = call->payload.player_pos.y;
+				s->player.z = call->payload.player_pos.z;
+				s->player.has_pos = true;
+			}
 			break;
 	}
 }
@@ -168,6 +171,27 @@ static void server_local_update(struct server_local* s) {
 			.payload.chunk.metadata = metadata,
 			.payload.chunk.lighting = lighting,
 		});
+	} else if(!s->player.finished_loading) {
+		struct client_rpc pos;
+		pos.type = CRPC_PLAYER_POS;
+		if(level_archive_read_player(&s->level, pos.payload.player_pos.position,
+									 pos.payload.player_pos.rotation, NULL))
+			clin_rpc_send(&pos);
+
+		struct item_data inventory[INVENTORY_SIZE];
+		if(level_archive_read_inventory(&s->level, inventory, INVENTORY_SIZE)) {
+			for(size_t k = 0; k < INVENTORY_SIZE; k++) {
+				if(inventory[k].id > 0) {
+					clin_rpc_send(&(struct client_rpc) {
+						.type = CRPC_INVENTORY_SLOT,
+						.payload.inventory_slot.slot = k,
+						.payload.inventory_slot.item = inventory[k],
+					});
+				}
+			}
+		}
+
+		s->player.finished_loading = true;
 	}
 }
 
@@ -186,6 +210,17 @@ void server_local_create(struct server_local* s) {
 	s->loaded_regions_length = 0;
 	s->last_chunk_load = time_get();
 	s->player.has_pos = false;
+	s->player.finished_loading = false;
+
+	level_archive_create(&s->level, "world/level.dat");
+
+	vec3 pos;
+	if(level_archive_read_player(&s->level, pos, NULL, NULL)) {
+		s->player.x = pos[0];
+		s->player.y = pos[1];
+		s->player.z = pos[2];
+		s->player.has_pos = true;
+	}
 
 	ilist_regions_init(s->loaded_regions_lru);
 

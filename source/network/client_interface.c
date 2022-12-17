@@ -15,8 +15,6 @@ void clin_chunk(w_coord_t x, w_coord_t y, w_coord_t z, w_coord_t sx,
 	assert(sx > 0 && sz > 0 && y >= 0 && y + sy <= WORLD_HEIGHT);
 	assert(ids && metadata && lighting);
 
-	// TODO: metadata
-
 	uint8_t* ids_t = ids;
 	uint8_t* metadata_t = metadata;
 	uint8_t* lighting_t = lighting;
@@ -73,6 +71,20 @@ void clin_process(struct client_rpc* call) {
 			clin_unload_chunk(call->payload.unload_chunk.x,
 							  call->payload.unload_chunk.z);
 			break;
+		case CRPC_PLAYER_POS:
+			gstate.camera.x = call->payload.player_pos.position[0];
+			gstate.camera.y = call->payload.player_pos.position[1];
+			gstate.camera.z = call->payload.player_pos.position[2];
+			gstate.camera.rx = glm_rad(call->payload.player_pos.rotation[0]);
+			gstate.camera.ry
+				= glm_rad(call->payload.player_pos.rotation[1] + 90.0F);
+			gstate.world_loaded = true;
+			break;
+		case CRPC_INVENTORY_SLOT:
+			inventory_set_slot(&gstate.inventory,
+							   call->payload.inventory_slot.slot,
+							   call->payload.inventory_slot.item);
+			break;
 	}
 }
 
@@ -91,12 +103,14 @@ void clin_update() {
 		MQ_Send(clin_empty_msg, call, MQ_MSG_BLOCK);
 	}
 
-	svin_rpc_send(&(struct server_rpc) {
-		.type = SRPC_PLAYER_POS,
-		.payload.player_pos.x = gstate.camera.x,
-		.payload.player_pos.y = gstate.camera.y,
-		.payload.player_pos.z = gstate.camera.z,
-	});
+	if(gstate.world_loaded) {
+		svin_rpc_send(&(struct server_rpc) {
+			.type = SRPC_PLAYER_POS,
+			.payload.player_pos.x = gstate.camera.x,
+			.payload.player_pos.y = gstate.camera.y,
+			.payload.player_pos.z = gstate.camera.z,
+		});
+	}
 }
 
 void clin_rpc_send(struct client_rpc* call) {

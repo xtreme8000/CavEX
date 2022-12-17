@@ -66,17 +66,19 @@ int main(void) {
 		.ry = glm_rad(92.7F),
 		.controller = {0, 0, 0},
 	};
-	gstate.config.fov = 75.0F;
+	gstate.config.fov = 70.0F;
 	gstate.config.render_distance = 192.0F;
 	gstate.config.fog_distance = 5 * 16.0F;
 
 	world_create(&gstate.world);
 
 	// world_preload(&gstate.world, loading_progress);
-	gstate.world_loaded = true;
+	gstate.world_loaded = false;
 
 	ptime_t last_frame = time_get();
 	float daytime = 1.0F;
+
+	inventory_clear(&gstate.inventory);
 
 	clin_init();
 	svin_init();
@@ -102,7 +104,6 @@ int main(void) {
 			camera_update(&gstate.camera, gstate.stats.dt);
 
 			world_pre_render(&gstate.world, &gstate.camera, gstate.camera.view);
-			world_build_chunks(&gstate.world, CHUNK_MESHER_QLENGTH);
 
 			struct camera* c = &gstate.camera;
 			camera_ray_pick(&gstate.world, c->x, c->y, c->z,
@@ -113,6 +114,8 @@ int main(void) {
 		} else {
 			gstate.camera_hit.hit = false;
 		}
+
+		world_build_chunks(&gstate.world, CHUNK_MESHER_QLENGTH);
 
 		if(gstate.current_screen->update)
 			gstate.current_screen->update(gstate.current_screen,

@@ -111,6 +111,7 @@ void world_create(struct world* w) {
 	assert(w);
 
 	dict_chunks_init(w->chunks);
+	ilist_chunks_init(w->render);
 	ilist_chunks2_init(w->gpu_busy_chunks);
 	w->world_chunk_cache = NULL;
 	w->anim_timer = time_get();

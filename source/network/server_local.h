@@ -5,6 +5,7 @@
 #include <stddef.h>
 
 #include "../world.h"
+#include "level_archive.h"
 #include "region_archive.h"
 
 #define MAX_REGIONS 4
@@ -15,6 +16,7 @@ struct server_local {
 	struct {
 		double x, y, z;
 		bool has_pos;
+		bool finished_loading;
 	} player;
 	struct loaded_chunk {
 		w_coord_t x, z; // not!!! stored in multiples of CHUNK_SIZE
@@ -25,6 +27,7 @@ struct server_local {
 	ilist_regions_t loaded_regions_lru;
 	size_t loaded_regions_length;
 	ptime_t last_chunk_load;
+	struct level_archive level;
 };
 
 void server_local_create(struct server_local* s);

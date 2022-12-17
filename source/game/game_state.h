@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "../item/inventory.h"
 #include "../world.h"
 #include "camera.h"
 #include "gui/screen.h"
@@ -28,6 +29,7 @@ struct game_state {
 	struct camera camera;
 	struct camera_ray_result camera_hit;
 	struct world world;
+	struct inventory inventory;
 	bool world_loaded;
 };
 
