@@ -102,6 +102,10 @@ void clin_process(struct client_rpc* call) {
 							   call->payload.inventory_slot.slot,
 							   call->payload.inventory_slot.item);
 			break;
+		case CRPC_TIME_SET:
+			gstate.world_time = call->payload.time_set;
+			gstate.world_time_start = time_get();
+			break;
 	}
 }
 

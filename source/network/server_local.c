@@ -112,8 +112,6 @@ static void server_local_update(struct server_local* s) {
 	if(!s->player.has_pos)
 		return;
 
-	s->last_chunk_load = time_get();
-
 	w_coord_t px = WCOORD_CHUNK_OFFSET(floor(s->player.x));
 	w_coord_t pz = WCOORD_CHUNK_OFFSET(floor(s->player.z));
 
@@ -197,6 +195,13 @@ static void server_local_update(struct server_local* s) {
 									 pos.payload.player_pos.rotation, NULL))
 			clin_rpc_send(&pos);
 
+		s->world_time_start = time_get();
+
+		clin_rpc_send(&(struct client_rpc) {
+			.type = CRPC_TIME_SET,
+			.payload.time_set = s->world_time,
+		});
+
 		struct item_data inventory[INVENTORY_SIZE];
 		if(level_archive_read_inventory(&s->level, inventory, INVENTORY_SIZE)) {
 			for(size_t k = 0; k < INVENTORY_SIZE; k++) {
@@ -227,7 +232,8 @@ void server_local_create(struct server_local* s) {
 	assert(s);
 	s->loaded_chunks_length = 0;
 	s->loaded_regions_length = 0;
-	s->last_chunk_load = time_get();
+	s->world_time = 0;
+	s->world_time_start = time_get();
 	s->player.has_pos = false;
 	s->player.finished_loading = false;
 
@@ -240,6 +246,9 @@ void server_local_create(struct server_local* s) {
 		s->player.z = pos[2];
 		s->player.has_pos = true;
 	}
+
+	if(level_archive_read(&s->level, LEVEL_TIME, &s->world_time, 0))
+		s->world_time_start = time_get();
 
 	ilist_regions_init(s->loaded_regions_lru);
 

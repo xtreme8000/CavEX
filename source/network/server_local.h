@@ -45,7 +45,8 @@ struct server_local {
 	struct region_archive loaded_regions[MAX_REGIONS];
 	ilist_regions_t loaded_regions_lru;
 	size_t loaded_regions_length;
-	ptime_t last_chunk_load;
+	uint64_t world_time;
+	ptime_t world_time_start;
 	struct level_archive level;
 };
 

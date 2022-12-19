@@ -48,6 +48,8 @@ struct game_state {
 	struct camera camera;
 	struct camera_ray_result camera_hit;
 	struct world world;
+	uint64_t world_time;
+	ptime_t world_time_start;
 	struct inventory inventory;
 	bool world_loaded;
 };

@@ -30,6 +30,7 @@ enum client_rpc_type {
 	CRPC_UNLOAD_CHUNK,
 	CRPC_INVENTORY_SLOT,
 	CRPC_PLAYER_POS,
+	CRPC_TIME_SET,
 };
 
 struct client_rpc {
@@ -53,6 +54,7 @@ struct client_rpc {
 			vec3 position;
 			vec2 rotation;
 		} player_pos;
+		uint64_t time_set;
 	} payload;
 };
 

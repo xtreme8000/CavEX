@@ -95,7 +95,6 @@ int main(void) {
 	gstate.world_loaded = false;
 
 	ptime_t last_frame = time_get();
-	float daytime = 1.0F;
 
 	inventory_clear(&gstate.inventory);
 
@@ -111,6 +110,12 @@ int main(void) {
 		gstate.stats.dt = time_diff_s(last_frame, this_frame);
 		gstate.stats.fps = 1.0F / gstate.stats.dt;
 		last_frame = this_frame;
+
+		float daytime
+			= (float)((gstate.world_time
+					   + time_diff_ms(gstate.world_time_start, this_frame) / 50)
+					  % 24000)
+			/ 24000.0F;
 
 		input_poll();
 
