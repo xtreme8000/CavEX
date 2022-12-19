@@ -23,32 +23,52 @@
 #include "../cglm/cglm.h"
 #include "input.h"
 
+static bool input_has_wpad;
+static bool input_has_pad;
 static bool input_has_joystick;
 static float input_dx, input_dy;
 
 void input_init() {
-	WPAD_Init();
-	WPAD_SetDataFormat(0, WPAD_FMT_BTNS_ACC_IR);
+	input_has_wpad = WPAD_Init() == WPAD_ERR_NONE;
+	input_has_pad = true;
+	PAD_Init(); // always returns 1?
+	input_dx = input_dy = 0;
 	input_has_joystick = false;
+	WPAD_SetDataFormat(0, WPAD_FMT_BTNS_ACC_IR);
 }
 
 void input_poll() {
-	WPAD_ScanPads();
+	input_dx = input_dy = 0;
+	input_has_joystick = false;
 
-	expansion_t e;
-	WPAD_Expansion(WPAD_CHAN_0, &e);
+	if(input_has_wpad) {
+		WPAD_ScanPads();
 
-	if(e.type == WPAD_EXP_NUNCHUK && e.nunchuk.js.mag > 0.1F) {
-		input_dx = sin(glm_rad(e.nunchuk.js.ang)) * e.nunchuk.js.mag;
-		input_dy = cos(glm_rad(e.nunchuk.js.ang)) * e.nunchuk.js.mag;
-		input_has_joystick = true;
-	} else {
-		input_dx = input_dy = 0;
-		input_has_joystick = false;
+		expansion_t e;
+		WPAD_Expansion(WPAD_CHAN_0, &e);
+
+		if(e.type == WPAD_EXP_NUNCHUK && e.nunchuk.js.mag > 0.1F) {
+			input_dx = sin(glm_rad(e.nunchuk.js.ang)) * e.nunchuk.js.mag;
+			input_dy = cos(glm_rad(e.nunchuk.js.ang)) * e.nunchuk.js.mag;
+			input_has_joystick = true;
+		}
+	}
+
+	if(input_has_pad) {
+		PAD_ScanPads();
+
+		float dx = (float)PAD_SubStickX(PAD_CHAN0) / 128.0F;
+		float dy = (float)PAD_SubStickY(PAD_CHAN0) / 128.0F;
+
+		if(glm_vec2_distance((vec2) {dx, dy}, GLM_VEC3_ZERO) > glm_pow2(0.1F)) {
+			input_dx = dx;
+			input_dy = dy;
+			input_has_joystick = true;
+		}
 	}
 }
 
-static int input_btn_translate(enum input_button b) {
+static int input_wpad_translate(enum input_button b) {
 	switch(b) {
 		case IB_FORWARD: return WPAD_BUTTON_UP;
 		case IB_BACKWARD: return WPAD_BUTTON_DOWN;
@@ -65,16 +85,42 @@ static int input_btn_translate(enum input_button b) {
 	}
 }
 
+static int input_pad_translate(enum input_button b) {
+	switch(b) {
+		case IB_FORWARD: return PAD_BUTTON_UP;
+		case IB_BACKWARD: return PAD_BUTTON_DOWN;
+		case IB_LEFT: return PAD_BUTTON_LEFT;
+		case IB_RIGHT: return PAD_BUTTON_RIGHT;
+		case IB_ACTION1: return PAD_BUTTON_A;
+		case IB_ACTION2: return PAD_BUTTON_B;
+		case IB_JUMP: return PAD_TRIGGER_L;
+		case IB_INVENTORY: return PAD_BUTTON_X;
+		case IB_HOME: return PAD_BUTTON_START;
+		case IB_SCROLL_LEFT: return PAD_TRIGGER_Z;
+		case IB_SCROLL_RIGHT: return PAD_TRIGGER_R;
+		default: return 0;
+	}
+}
+
 bool input_pressed(enum input_button b) {
-	return WPAD_ButtonsDown(0) & input_btn_translate(b);
+	return (input_has_wpad
+			&& (WPAD_ButtonsDown(WPAD_CHAN_0) & input_wpad_translate(b)))
+		|| (input_has_pad
+			&& (PAD_ButtonsDown(PAD_CHAN0) & input_pad_translate(b)));
 }
 
 bool input_released(enum input_button b) {
-	return WPAD_ButtonsUp(0) & input_btn_translate(b);
+	return (input_has_wpad
+			&& (WPAD_ButtonsUp(WPAD_CHAN_0) & input_wpad_translate(b)))
+		|| (input_has_pad
+			&& (PAD_ButtonsUp(PAD_CHAN0) & input_pad_translate(b)));
 }
 
 bool input_held(enum input_button b) {
-	return WPAD_ButtonsHeld(0) & input_btn_translate(b);
+	return (input_has_wpad
+			&& (WPAD_ButtonsHeld(WPAD_CHAN_0) & input_wpad_translate(b)))
+		|| (input_has_pad
+			&& (PAD_ButtonsHeld(PAD_CHAN0) & input_pad_translate(b)));
 }
 
 bool input_joystick(float dt, float* x, float* y) {
