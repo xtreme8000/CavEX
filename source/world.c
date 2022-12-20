@@ -385,3 +385,40 @@ size_t world_render(struct world* w, struct camera* c, bool pass) {
 
 	return in_view;
 }
+
+bool world_aabb_intersection(struct world* w, struct AABB* a) {
+	assert(w && a);
+
+	w_coord_t min_x = floor(a->x1) - 1;
+	w_coord_t min_y = floor(a->y1) - 1;
+	w_coord_t min_z = floor(a->z1) - 1;
+
+	w_coord_t max_x = ceil(a->x2) + 1;
+	w_coord_t max_y = ceil(a->y2) + 1;
+	w_coord_t max_z = ceil(a->z2) + 1;
+
+	for(w_coord_t x = min_x; x < max_x; x++) {
+		for(w_coord_t z = min_z; z < max_z; z++) {
+			for(w_coord_t y = min_y; y < max_y; y++) {
+				struct block_data blk = world_get_block(w, x, y, z);
+
+				if(blocks[blk.type]) {
+					struct AABB b;
+					if(blocks[blk.type]->getBoundingBox(
+						   &(struct block_info) {.block = &blk,
+												 .neighbours = NULL,
+												 .x = x,
+												 .y = y,
+												 .z = z},
+						   true, &b)) {
+						aabb_translate(&b, x, y, z);
+						if(aabb_intersection(a, &b))
+							return true;
+					}
+				}
+			}
+		}
+	}
+
+	return false;
+}

@@ -152,9 +152,31 @@ void camera_update(struct camera* c, float dt) {
 	c->controller.vy *= powf(air_friction, dt);
 	c->controller.vz *= powf(air_friction, dt);
 
-	c->x += c->controller.vx * dt;
-	c->y += c->controller.vy * dt;
-	c->z += c->controller.vz * dt;
+	struct AABB bbox;
+
+	aabb_setsize_centered(&bbox, 0.6F, 0.6F, 0.6F);
+	aabb_translate(&bbox, c->x + c->controller.vx * dt, c->y, c->z);
+	if(!world_aabb_intersection(&gstate.world, &bbox)) {
+		c->x += c->controller.vx * dt;
+	} else {
+		c->controller.vx = 0;
+	}
+
+	aabb_setsize_centered(&bbox, 0.6F, 0.6F, 0.6F);
+	aabb_translate(&bbox, c->x, c->y + c->controller.vy * dt, c->z);
+	if(!world_aabb_intersection(&gstate.world, &bbox)) {
+		c->y += c->controller.vy * dt;
+	} else {
+		c->controller.vy = 0;
+	}
+
+	aabb_setsize_centered(&bbox, 0.6F, 0.6F, 0.6F);
+	aabb_translate(&bbox, c->x, c->y, c->z + c->controller.vz * dt);
+	if(!world_aabb_intersection(&gstate.world, &bbox)) {
+		c->z += c->controller.vz * dt;
+	} else {
+		c->controller.vz = 0;
+	}
 
 	c->ry = fminf(M_PI - glm_rad(0.5F), fmaxf(glm_rad(0.5F), c->ry));
 

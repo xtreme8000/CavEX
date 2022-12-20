@@ -34,6 +34,18 @@ void aabb_setsize(struct AABB* a, float sx, float sy, float sz) {
 	a->z2 = 0.5F + sz / 2.0F;
 }
 
+void aabb_setsize_centered(struct AABB* a, float sx, float sy, float sz) {
+	assert(a);
+
+	a->x2 = sx / 2.0F;
+	a->y2 = sy / 2.0F;
+	a->z2 = sz / 2.0F;
+
+	a->x1 = -a->x2;
+	a->y1 = -a->y2;
+	a->z1 = -a->z2;
+}
+
 void aabb_translate(struct AABB* a, float x, float y, float z) {
 	assert(a);
 
@@ -88,4 +100,10 @@ bool aabb_intersection_ray(struct AABB* a, struct ray* r, enum side* s) {
 	}
 
 	return tmax > fmax(tmin, 0.0F);
+}
+
+bool aabb_intersection(struct AABB* a, struct AABB* b) {
+	return (a->x1 <= b->x2 && b->x1 <= a->x2)
+		&& (a->y1 <= b->y2 && b->y1 <= a->y2)
+		&& (a->z1 <= b->z2 && b->z1 <= a->z2);
 }

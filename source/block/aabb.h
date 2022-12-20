@@ -35,7 +35,9 @@ struct ray {
 #include "blocks.h"
 
 void aabb_setsize(struct AABB* a, float sx, float sy, float sz);
+void aabb_setsize_centered(struct AABB* a, float sx, float sy, float sz);
 void aabb_translate(struct AABB* a, float x, float y, float z);
 bool aabb_intersection_ray(struct AABB* a, struct ray* r, enum side* s);
+bool aabb_intersection(struct AABB* a, struct AABB* b);
 
 #endif
