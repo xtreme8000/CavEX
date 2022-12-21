@@ -52,7 +52,7 @@ struct block block_fire = {
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
-	.transparent = false,
+	.transparent = true,
 	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_fire,
 	.renderBlockAlways = NULL,
@@ -61,4 +61,9 @@ struct block block_fire = {
 	.can_see_through = true,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };

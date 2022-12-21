@@ -20,9 +20,10 @@
 #ifndef ITEMS_H
 #define ITEMS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
-#include "../block/blocks.h"
+#include "../cglm/cglm.h"
 
 struct item_data {
 	uint16_t id;
@@ -30,8 +31,30 @@ struct item_data {
 	uint8_t count;
 };
 
-static bool item_is_block(struct item_data* item) {
-	return item->id < 256 && blocks[item->id];
-}
+struct item {
+	char name[32];
+	bool has_damage;
+	uint8_t max_stack;
+	void (*renderItem)(struct item*, struct item_data*, mat4, bool);
+	union {
+		struct {
+			uint8_t texture_x : 4;
+			uint8_t texture_y : 4;
+		} item;
+		struct {
+			bool has_default;
+			uint8_t default_metadata : 4;
+			uint8_t default_rotation : 2;
+		} block;
+	} render_data;
+};
+
+#define ITEMS_MAX 512
+
+extern struct item* items[ITEMS_MAX];
+
+void items_init(void);
+struct item* item_get(struct item_data* item);
+bool item_is_block(struct item_data* item);
 
 #endif

@@ -30,6 +30,8 @@
 #include "../../world.h"
 #include "displaylist.h"
 
+#define TEX_OFFSET(x) ((x)*18 + 3)
+
 size_t render_block_pressure_plate(struct displaylist* d,
 								   struct block_info* this, enum side side,
 								   struct block_info* it, uint8_t* vertex_light,

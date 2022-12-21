@@ -71,6 +71,7 @@ int main(void) {
 	input_init();
 	gfx_setup();
 	blocks_init();
+	items_init();
 	screen_set(&screen_ingame);
 
 #ifdef GEKKO
@@ -78,13 +79,8 @@ int main(void) {
 #endif
 
 	gstate.camera = (struct camera) {
-		.x = -344.7F,
-		.y = 78.7F,
-		.z = -378.9F,
-		.rx = glm_rad(275.0F),
-		.ry = glm_rad(92.7F),
-		.controller = {0, 0, 0},
-	};
+		.x = 0, .y = 0, .z = 0, .rx = 0, .ry = 0, .controller = {0, 0, 0}};
+
 	gstate.config.fov = 70.0F;
 	gstate.config.render_distance = 192.0F;
 	gstate.config.fog_distance = 5 * 16.0F;
@@ -93,6 +89,7 @@ int main(void) {
 
 	// world_preload(&gstate.world, loading_progress);
 	gstate.world_loaded = false;
+	gstate.held_item_animation.finished = true;
 
 	ptime_t last_frame = time_get();
 
@@ -125,9 +122,9 @@ int main(void) {
 		bool render_world
 			= gstate.current_screen->render_world && gstate.world_loaded;
 
-		if(render_world) {
-			camera_update(&gstate.camera, gstate.stats.dt);
+		camera_update(&gstate.camera, gstate.stats.dt);
 
+		if(render_world) {
 			world_pre_render(&gstate.world, &gstate.camera, gstate.camera.view);
 
 			struct camera* c = &gstate.camera;
@@ -161,11 +158,11 @@ int main(void) {
 		gfx_fog_color(atmosphere_color[0], atmosphere_color[1],
 					  atmosphere_color[2]);
 
-		if(render_world) {
-			gfx_mode_world();
-			gfx_update_light(daytime_brightness(daytime));
+		gfx_mode_world();
+		gfx_matrix_projection(gstate.camera.projection, true);
 
-			gfx_matrix_projection(gstate.camera.projection, true);
+		if(render_world) {
+			gfx_update_light(daytime_brightness(daytime));
 
 			gutil_sky_box(gstate.camera.view, daytime_celestial_angle(daytime),
 						  top_plane_color, bottom_plane_color);

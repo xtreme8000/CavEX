@@ -38,6 +38,7 @@ enum gfx_texture {
 	TEXTURE_ANIM,
 	TEXTURE_GUI,
 	TEXTURE_GUI2,
+	TEXTURE_ITEMS,
 };
 
 void gfx_setup(void);

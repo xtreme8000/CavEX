@@ -76,6 +76,12 @@ struct block block_coalore = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = false,
+	},
 };
 
 struct block block_ironore = {
@@ -94,6 +100,12 @@ struct block block_ironore = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = false,
+	},
 };
 
 struct block block_goldore = {
@@ -112,6 +124,12 @@ struct block block_goldore = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = false,
+	},
 };
 
 struct block block_diamondore = {
@@ -130,6 +148,12 @@ struct block block_diamondore = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = false,
+	},
 };
 
 struct block block_redstoneore = {
@@ -148,6 +172,12 @@ struct block block_redstoneore = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = false,
+	},
 };
 
 struct block block_lapisore = {
@@ -166,4 +196,10 @@ struct block block_lapisore = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = false,
+	},
 };

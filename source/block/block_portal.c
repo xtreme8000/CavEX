@@ -61,4 +61,9 @@ struct block block_portal = {
 	.can_see_through = true,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };

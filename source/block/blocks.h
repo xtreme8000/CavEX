@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../item/items.h"
 #include "../platform/graphics/displaylist.h"
 
 #define TEXTURE_INDEX(x, y) (((y)*14) + (x))
@@ -112,6 +113,7 @@ struct block {
 		bool cross_random_displacement;
 		bool rail_curved_possible;
 	} render_block_data;
+	struct item block_item;
 };
 
 extern struct block block_bedrock;
@@ -197,6 +199,7 @@ extern struct block block_fence;
 extern struct block* blocks[256];
 
 #include "../platform/graphics/render_block.h"
+#include "../platform/graphics/render_item.h"
 
 void blocks_init(void);
 enum side blocks_side_opposite(enum side s);

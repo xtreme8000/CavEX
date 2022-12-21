@@ -71,6 +71,11 @@ struct block block_tallgrass = {
 	.render_block_data.cross_random_displacement = true,
 	.ignore_lighting = false,
 	.flammable = true,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };
 
 struct block block_deadbush = {
@@ -90,4 +95,9 @@ struct block block_deadbush = {
 	.render_block_data.cross_random_displacement = false,
 	.ignore_lighting = false,
 	.flammable = true,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };

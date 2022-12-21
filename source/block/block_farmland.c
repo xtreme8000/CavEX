@@ -71,4 +71,10 @@ struct block block_farmland = {
 	.can_see_through = true,
 	.ignore_lighting = true,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = false,
+	},
 };

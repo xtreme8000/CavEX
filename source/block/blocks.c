@@ -134,6 +134,7 @@ void blocks_init() {
 			assert(blocks[k]->getBoundingBox);
 			assert(blocks[k]->getBaseColor);
 			assert(blocks[k]->renderBlock);
+			assert(blocks[k]->block_item.renderItem);
 		}
 	}
 }

@@ -52,6 +52,11 @@ void displaylist_destroy(struct displaylist* l) {
 		free(l->data);
 }
 
+void displaylist_reset(struct displaylist* l) {
+	assert(l && !l->finished);
+	l->index = DISPLAYLIST_CLL + 3;
+}
+
 void displaylist_finalize(struct displaylist* l, uint8_t primitve,
 						  uint8_t vtxfmt, uint16_t vtxcnt) {
 	assert(l && !l->finished && l->data);

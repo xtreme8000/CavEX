@@ -84,6 +84,14 @@ struct block block_pumpkin = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = true,
+		.render_data.block.default_metadata = 2,
+		.render_data.block.default_rotation = 0,
+	},
 };
 
 struct block block_pumpkin_lit = {
@@ -102,4 +110,12 @@ struct block block_pumpkin_lit = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = true,
+		.render_data.block.default_metadata = 2,
+		.render_data.block.default_rotation = 0,
+	},
 };

@@ -129,6 +129,14 @@ struct block block_wooden_stairs = {
 	.can_see_through = true,
 	.ignore_lighting = true,
 	.flammable = true,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = true,
+		.render_data.block.default_metadata = 2,
+		.render_data.block.default_rotation = 0,
+	},
 };
 
 struct block block_stone_stairs = {
@@ -147,4 +155,12 @@ struct block block_stone_stairs = {
 	.can_see_through = true,
 	.ignore_lighting = true,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = true,
+		.render_data.block.default_metadata = 2,
+		.render_data.block.default_rotation = 0,
+	},
 };

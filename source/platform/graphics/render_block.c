@@ -28,8 +28,6 @@
 
 #define BLK_LEN 256
 
-#define TEX_OFFSET(x) ((x)*18 + 3)
-
 static inline uint8_t MIN_U8(uint8_t a, uint8_t b) {
 	return a < b ? a : b;
 }

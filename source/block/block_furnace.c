@@ -84,6 +84,14 @@ struct block block_furnaceoff = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = true,
+		.render_data.block.default_metadata = 2,
+		.render_data.block.default_rotation = 0,
+	},
 };
 
 struct block block_furnaceon = {
@@ -102,4 +110,12 @@ struct block block_furnaceon = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = true,
+		.render_data.block.default_metadata = 2,
+		.render_data.block.default_rotation = 0,
+	},
 };

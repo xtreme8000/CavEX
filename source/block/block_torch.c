@@ -79,6 +79,11 @@ struct block block_torch = {
 	.can_see_through = true,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };
 
 struct block block_redstone_torch = {
@@ -97,6 +102,11 @@ struct block block_redstone_torch = {
 	.can_see_through = true,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };
 
 struct block block_redstone_torch_lit = {
@@ -115,4 +125,9 @@ struct block block_redstone_torch_lit = {
 	.can_see_through = true,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };

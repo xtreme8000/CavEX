@@ -86,7 +86,7 @@ static void copy_buffers(u32 cnt) {
 }
 
 static void gfx_load_textures() {
-	GXTexObj terrain, font, anim, gui, gui2, fog;
+	GXTexObj terrain, font, anim, gui, gui2, items, fog;
 	TPLFile spriteTPL;
 	TPL_OpenTPLFromMemory(&spriteTPL, (void*)textures_tpl, textures_tpl_size);
 	TPL_GetTexture(&spriteTPL, texture_terrain, &terrain);
@@ -113,6 +113,11 @@ static void gfx_load_textures() {
 	GX_InitTexObjFilterMode(&gui2, GX_NEAR, GX_NEAR);
 	GX_InitTexObjMaxAniso(&gui2, GX_ANISO_1);
 	GX_LoadTexObj(&gui2, GX_TEXMAP4);
+
+	TPL_GetTexture(&spriteTPL, texture_items, &items);
+	GX_InitTexObjFilterMode(&items, GX_NEAR, GX_NEAR);
+	GX_InitTexObjMaxAniso(&items, GX_ANISO_1);
+	GX_LoadTexObj(&items, GX_TEXMAP5);
 
 	TPL_GetTexture(&spriteTPL, texture_fog, &fog);
 	GX_InitTexObjFilterMode(&fog, GX_LINEAR, GX_LINEAR);
@@ -305,6 +310,9 @@ void gfx_bind_texture(enum gfx_texture tex) {
 			break;
 		case TEXTURE_GUI2:
 			GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP4, GX_COLOR0A0);
+			break;
+		case TEXTURE_ITEMS:
+			GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP5, GX_COLOR0A0);
 			break;
 	}
 }

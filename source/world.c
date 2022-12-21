@@ -341,9 +341,11 @@ size_t world_render(struct world* w, struct camera* c, bool pass) {
 	size_t in_view = 0;
 	ilist_chunks_it_t it;
 
+	gfx_fog(true);
+	gfx_lighting(true);
+
 	if(!pass) {
 		gfx_bind_texture(TEXTURE_TERRAIN);
-		gfx_lighting(true);
 		gfx_blending(MODE_OFF);
 		gfx_alpha_test(true);
 

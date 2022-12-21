@@ -78,6 +78,11 @@ struct block block_rail = {
 	.render_block_data.rail_curved_possible = true,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };
 
 struct block block_powered_rail = {
@@ -97,6 +102,11 @@ struct block block_powered_rail = {
 	.render_block_data.rail_curved_possible = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };
 
 struct block block_detector_rail = {
@@ -116,4 +126,9 @@ struct block block_detector_rail = {
 	.render_block_data.rail_curved_possible = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };

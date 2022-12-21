@@ -51,6 +51,11 @@ struct game_state {
 	uint64_t world_time;
 	ptime_t world_time_start;
 	struct inventory inventory;
+	struct held_anim {
+		ptime_t start;
+		bool type;
+		bool finished;
+	} held_item_animation;
 	bool world_loaded;
 };
 

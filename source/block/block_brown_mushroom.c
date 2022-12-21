@@ -63,4 +63,9 @@ struct block block_brown_mushroom = {
 	.render_block_data.cross_random_displacement = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_flat,
+	},
 };

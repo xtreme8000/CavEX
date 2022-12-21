@@ -77,6 +77,12 @@ struct block block_snow = {
 	.can_see_through = true,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = false,
+	},
 };
 
 struct block block_snow_block = {
@@ -95,4 +101,10 @@ struct block block_snow_block = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = false,
+	},
 };
