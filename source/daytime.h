@@ -22,6 +22,9 @@
 
 #include "cglm/cglm.h"
 
+#define DAY_TICK_MS 50
+#define DAY_LENGTH_TICKS 24000
+
 float daytime_brightness(float time);
 float daytime_celestial_angle(float time);
 void daytime_sky_colors(float time, vec3 top_plane, vec3 bottom_plane,

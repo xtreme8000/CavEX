@@ -113,9 +113,10 @@ int main(void) {
 
 		float daytime
 			= (float)((gstate.world_time
-					   + time_diff_ms(gstate.world_time_start, this_frame) / 50)
-					  % 24000)
-			/ 24000.0F;
+					   + time_diff_ms(gstate.world_time_start, this_frame)
+						   / DAY_TICK_MS)
+					  % DAY_LENGTH_TICKS)
+			/ (float)DAY_LENGTH_TICKS;
 
 		input_poll();
 
