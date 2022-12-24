@@ -38,10 +38,10 @@ void chunk_init(struct chunk* c, struct world* world, w_coord_t x, w_coord_t y,
 				w_coord_t z) {
 	assert(c && world);
 
-	c->blocks = malloc(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 3);
+	c->blocks = malloc(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 5 / 2);
 	assert(c->blocks);
 
-	memset(c->blocks, BLOCK_AIR, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 3);
+	memset(c->blocks, BLOCK_AIR, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 5 / 2);
 
 	c->x = x;
 	c->y = y;
@@ -87,11 +87,22 @@ struct block_data chunk_get_block(struct chunk* c, c_coord_t x, c_coord_t y,
 								  c_coord_t z) {
 	assert(c && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE);
 
+	size_t idx = CHUNK_INDEX(x, y, z) / 2 * 5;
+	size_t off = CHUNK_INDEX(x, y, z) % 2;
+
+	/* storage layout:
+		type 0
+		type 1
+		light 0
+		light 1
+		meta 1/0
+	*/
+
 	return (struct block_data) {
-		.type = c->blocks[CHUNK_INDEX(x, y, z) * 3 + 0],
-		.metadata = c->blocks[CHUNK_INDEX(x, y, z) * 3 + 1],
-		.sky_light = c->blocks[CHUNK_INDEX(x, y, z) * 3 + 2] & 0xF,
-		.torch_light = c->blocks[CHUNK_INDEX(x, y, z) * 3 + 2] >> 4,
+		.type = c->blocks[idx + off + 0],
+		.metadata = (c->blocks[idx + 4] >> (off * 4)) & 0xF,
+		.sky_light = c->blocks[idx + off + 2] & 0xF,
+		.torch_light = c->blocks[idx + off + 2] >> 4,
 	};
 }
 
@@ -119,12 +130,16 @@ void chunk_set_block(struct chunk* c, c_coord_t x, c_coord_t y, c_coord_t z,
 					 struct block_data blk) {
 	assert(c && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE);
 
-	c->blocks[CHUNK_INDEX(x, y, z) * 3 + 0] = blk.type;
-	c->blocks[CHUNK_INDEX(x, y, z) * 3 + 1] = blk.metadata;
-	c->blocks[CHUNK_INDEX(x, y, z) * 3 + 2]
-		= (blk.torch_light << 4) | blk.sky_light;
+	size_t idx = CHUNK_INDEX(x, y, z) / 2 * 5;
+	size_t off = CHUNK_INDEX(x, y, z) % 2;
+
+	c->blocks[idx + off + 0] = blk.type;
+	c->blocks[idx + off + 2] = (blk.torch_light << 4) | blk.sky_light;
+	c->blocks[idx + 4] = (c->blocks[idx + 4] & ~(0x0F << (off * 4)))
+		| (blk.metadata << (off * 4));
 	c->rebuild_displist = true;
 
+	// trigger neighbour chunk updates
 	// TODO: diagonal chunks, just sharing edge or single point
 
 	bool cond[6] = {
