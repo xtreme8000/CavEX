@@ -44,8 +44,10 @@ static bool level_archive_read_internal(nbt_node* root,
 		case TAG_COMPOUND:
 		case TAG_LIST: *((nbt_node**)result) = node; return true;
 		case TAG_STRING:
-			strncpy(result, node->payload.tag_string, length - 1);
-			((char*)result)[length - 1] = 0;
+			if(length > 0) {
+				strncpy(result, node->payload.tag_string, length - 1);
+				((char*)result)[length - 1] = 0;
+			}
 			return true;
 		case TAG_LONG:
 			*((int64_t*)result) = node->payload.tag_long;
