@@ -48,10 +48,20 @@ struct block_info {
 #include "game/camera.h"
 #include "util.h"
 
-DICT_DEF2(dict_chunks, uint64_t, M_BASIC_OPLIST, struct chunk*, M_PTR_OPLIST)
+#define COLUMN_HEIGHT ((WORLD_HEIGHT + CHUNK_SIZE - 1) / CHUNK_SIZE)
+
+struct world_section {
+	int8_t heightmap[CHUNK_SIZE * CHUNK_SIZE];
+	struct chunk* column[COLUMN_HEIGHT];
+};
+
+#define SECTION_TO_ID(x, z) (((int64_t)(z) << 32) | (((int64_t)(x)&0xFFFFFFFF)))
+
+DICT_DEF2(dict_wsection, uint64_t, M_BASIC_OPLIST, struct world_section,
+		  M_POD_OPLIST)
 
 struct world {
-	dict_chunks_t chunks;
+	dict_wsection_t sections;
 	struct chunk* world_chunk_cache;
 	ilist_chunks_t render;
 	ilist_chunks2_t gpu_busy_chunks;
@@ -60,8 +70,7 @@ struct world {
 
 void world_create(struct world* w);
 void world_destroy(struct world* w);
-void world_load_chunk(struct world* w, struct chunk* c);
-void world_unload_chunk(struct world* w, struct chunk* c);
+void world_unload_section(struct world* w, w_coord_t x, w_coord_t z);
 void world_build_chunks(struct world* w, size_t tokens);
 void world_render_completed(struct world* w, bool new_render);
 struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,

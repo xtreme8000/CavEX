@@ -33,47 +33,44 @@
 		 (vec2) {gstate.camera.x, gstate.camera.z})                            \
 	 <= glm_pow2((dist)*gstate.config.fog_distance))
 
-void world_load_chunk(struct world* w, struct chunk* c) {
-	assert(w && c);
-	assert(!dict_chunks_get(
-		w->chunks,
-		CHUNK_TO_ID(c->x / CHUNK_SIZE, c->y / CHUNK_SIZE, c->z / CHUNK_SIZE)));
+void world_unload_section(struct world* w, w_coord_t x, w_coord_t z) {
+	assert(w);
 
-	chunk_ref(c);
-	dict_chunks_set_at(
-		w->chunks,
-		CHUNK_TO_ID(c->x / CHUNK_SIZE, c->y / CHUNK_SIZE, c->z / CHUNK_SIZE),
-		c);
-}
+	struct world_section* s
+		= dict_wsection_get(w->sections, SECTION_TO_ID(x, z));
 
-void world_unload_chunk(struct world* w, struct chunk* c) {
-	assert(w && c);
-	assert(dict_chunks_get(
-		w->chunks,
-		CHUNK_TO_ID(c->x / CHUNK_SIZE, c->y / CHUNK_SIZE, c->z / CHUNK_SIZE)));
+	if(s) {
+		for(size_t k = 0; k < COLUMN_HEIGHT; k++) {
+			struct chunk* c = s->column[k];
+			if(c) {
+				if(w->world_chunk_cache == c)
+					w->world_chunk_cache = NULL;
+				chunk_unref(c);
+			}
+		}
 
-	dict_chunks_erase(
-		w->chunks,
-		CHUNK_TO_ID(c->x / CHUNK_SIZE, c->y / CHUNK_SIZE, c->z / CHUNK_SIZE));
-
-	if(w->world_chunk_cache == c)
-		w->world_chunk_cache = NULL;
-
-	chunk_unref(c);
+		dict_wsection_erase(w->sections, SECTION_TO_ID(x, z));
+	}
 }
 
 static void world_bfs(struct world* w, ilist_chunks_t render, float x, float y,
 					  float z, vec4* planes) {
 	assert(w && render && planes);
 
-	dict_chunks_it_t it;
-	dict_chunks_it(it, w->chunks);
+	dict_wsection_it_t it;
+	dict_wsection_it(it, w->sections);
 
-	while(!dict_chunks_end_p(it)) {
-		struct chunk* c = dict_chunks_ref(it)->value;
-		c->tmp_data.visited = false;
-		c->tmp_data.steps = 0;
-		dict_chunks_next(it);
+	while(!dict_wsection_end_p(it)) {
+		struct world_section* s = &dict_wsection_ref(it)->value;
+		for(size_t k = 0; k < COLUMN_HEIGHT; k++) {
+			if(s->column[k])
+				s->column[k]->tmp_data = (struct chunk_step) {
+					.visited = false,
+					.steps = 0,
+				};
+		}
+
+		dict_wsection_next(it);
 	}
 
 	enum side sides[6]
@@ -129,7 +126,7 @@ static void world_bfs(struct world* w, ilist_chunks_t render, float x, float y,
 void world_create(struct world* w) {
 	assert(w);
 
-	dict_chunks_init(w->chunks);
+	dict_wsection_init(w->sections);
 	ilist_chunks_init(w->render);
 	ilist_chunks2_init(w->gpu_busy_chunks);
 	w->world_chunk_cache = NULL;
@@ -137,7 +134,9 @@ void world_create(struct world* w) {
 }
 
 void world_destroy(struct world* w) {
-	dict_chunks_clear(w->chunks);
+	assert(w);
+
+	dict_wsection_clear(w->sections);
 }
 
 struct block_data world_get_block(struct world* w, w_coord_t x, w_coord_t y,
@@ -173,8 +172,20 @@ void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
 		chunk_init(c, w, cx * CHUNK_SIZE, cy * CHUNK_SIZE, cz * CHUNK_SIZE);
 		chunk_ref(c);
 
-		dict_chunks_set_at(w->chunks, CHUNK_TO_ID(cx, cy, cz), c);
 		w->world_chunk_cache = c;
+
+		struct world_section* s
+			= dict_wsection_get(w->sections, SECTION_TO_ID(cx, cz));
+
+		if(!s) {
+			s = dict_wsection_safe_get(w->sections, SECTION_TO_ID(cx, cz));
+			assert(s);
+			memset(s->heightmap, -1, sizeof(s->heightmap));
+			memset(s->column, 0, sizeof(s->column));
+		}
+
+		assert(s->column[cy] == NULL);
+		s->column[cy] = c;
 	}
 
 	if(c)
@@ -192,12 +203,11 @@ struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
 	   || y + c->y / CHUNK_SIZE >= WORLD_HEIGHT / CHUNK_SIZE)
 		return NULL;
 
-	struct chunk** res = dict_chunks_get(w->chunks,
-										 CHUNK_TO_ID(x + c->x / CHUNK_SIZE,
-													 y + c->y / CHUNK_SIZE,
-													 z + c->z / CHUNK_SIZE));
+	struct world_section* res = dict_wsection_get(
+		w->sections,
+		SECTION_TO_ID(x + c->x / CHUNK_SIZE, z + c->z / CHUNK_SIZE));
 
-	return res ? *res : NULL;
+	return res ? res->column[y + c->y / CHUNK_SIZE] : NULL;
 }
 
 struct chunk* world_find_chunk(struct world* w, w_coord_t x, w_coord_t y,
@@ -216,31 +226,36 @@ struct chunk* world_find_chunk(struct world* w, w_coord_t x, w_coord_t y,
 	   && cz == w->world_chunk_cache->z / CHUNK_SIZE)
 		return w->world_chunk_cache;
 
-	struct chunk** res = dict_chunks_get(w->chunks, CHUNK_TO_ID(cx, cy, cz));
+	struct world_section* res
+		= dict_wsection_get(w->sections, SECTION_TO_ID(cx, cz));
 
 	if(res)
-		w->world_chunk_cache = *res;
+		w->world_chunk_cache = res->column[cy];
 
-	return res ? *res : NULL;
+	return res ? res->column[cy] : NULL;
 }
 
 void world_preload(struct world* w,
 				   void (*progress)(struct world* w, float percent)) {
 	assert(w);
 
-	dict_chunks_it_t it;
-	dict_chunks_it(it, w->chunks);
+	dict_wsection_it_t it;
+	dict_wsection_it(it, w->sections);
 
-	size_t total = dict_chunks_size(w->chunks);
+	size_t total = dict_wsection_size(w->sections);
 	size_t count = 0;
 
-	while(!dict_chunks_end_p(it)) {
-		chunk_check_built(dict_chunks_ref(it)->value);
+	while(!dict_wsection_end_p(it)) {
+		struct world_section* s = &dict_wsection_ref(it)->value;
+		for(size_t k = 0; k < COLUMN_HEIGHT; k++) {
+			if(s->column[k])
+				chunk_check_built(s->column[k]);
+		}
 
 		if(progress)
 			progress(w, (float)count / (float)total);
 		count++;
-		dict_chunks_next(it);
+		dict_wsection_next(it);
 	}
 }
 
@@ -300,13 +315,17 @@ void world_build_chunks(struct world* w, size_t tokens) {
 		ilist_chunks_next(it);
 	}
 
-	dict_chunks_it_t it2;
-	dict_chunks_it(it2, w->chunks);
+	dict_wsection_it_t it2;
+	dict_wsection_it(it2, w->sections);
 
-	while(tokens > 0 && !dict_chunks_end_p(it2)) {
-		if(chunk_check_built(dict_chunks_ref(it2)->value))
-			tokens--;
-		dict_chunks_next(it2);
+	while(tokens > 0 && !dict_wsection_end_p(it2)) {
+		struct world_section* s = &dict_wsection_ref(it2)->value;
+		for(size_t k = 0; k < COLUMN_HEIGHT; k++) {
+			if(s->column[k] && chunk_check_built(s->column[k]))
+				tokens--;
+		}
+
+		dict_wsection_next(it2);
 	}
 }
 
@@ -391,13 +410,13 @@ size_t world_render(struct world* w, struct camera* c, bool pass) {
 bool world_aabb_intersection(struct world* w, struct AABB* a) {
 	assert(w && a);
 
-	w_coord_t min_x = floor(a->x1) - 1;
-	w_coord_t min_y = floor(a->y1) - 1;
-	w_coord_t min_z = floor(a->z1) - 1;
+	w_coord_t min_x = floorf(a->x1) - 1;
+	w_coord_t min_y = floorf(a->y1) - 1;
+	w_coord_t min_z = floorf(a->z1) - 1;
 
-	w_coord_t max_x = ceil(a->x2) + 1;
-	w_coord_t max_y = ceil(a->y2) + 1;
-	w_coord_t max_z = ceil(a->z2) + 1;
+	w_coord_t max_x = ceilf(a->x2) + 1;
+	w_coord_t max_y = ceilf(a->y2) + 1;
+	w_coord_t max_z = ceilf(a->z2) + 1;
 
 	for(w_coord_t x = min_x; x < max_x; x++) {
 		for(w_coord_t z = min_z; z < max_z; z++) {

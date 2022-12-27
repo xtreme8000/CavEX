@@ -64,13 +64,7 @@ void clin_chunk(w_coord_t x, w_coord_t y, w_coord_t z, w_coord_t sx,
 }
 
 void clin_unload_chunk(w_coord_t x, w_coord_t z) {
-	for(w_coord_t k = 0; k < WORLD_HEIGHT; k += CHUNK_SIZE) {
-		struct chunk* c = world_find_chunk(&gstate.world, x * CHUNK_SIZE, k,
-										   z * CHUNK_SIZE);
-
-		if(c)
-			world_unload_chunk(&gstate.world, c);
-	}
+	world_unload_section(&gstate.world, x, z);
 }
 
 void clin_process(struct client_rpc* call) {
