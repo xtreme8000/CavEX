@@ -85,10 +85,12 @@ static void world_bfs(struct world* w, ilist_chunks_t render, float x, float y,
 		return;
 
 	ilist_chunks_push_back(queue, c_camera);
-	c_camera->tmp_data.from = SIDE_MAX;
-	c_camera->tmp_data.used_exit_sides = 0;
-	c_camera->tmp_data.steps = 0;
-	c_camera->tmp_data.visited = true;
+	c_camera->tmp_data = (struct chunk_step) {
+		.from = SIDE_MAX,
+		.used_exit_sides = 0,
+		.steps = 0,
+		.visited = true,
+	};
 
 	while(!ilist_chunks_empty_p(queue)) {
 		struct chunk* current = ilist_chunks_pop_front(queue);
@@ -111,13 +113,13 @@ static void world_bfs(struct world* w, ilist_chunks_t render, float x, float y,
 							   neigh->z + CHUNK_SIZE}},
 				   planes)) {
 				ilist_chunks_push_back(queue, neigh);
-				neigh->tmp_data.from = blocks_side_opposite(sides[s]);
-				neigh->tmp_data.used_exit_sides
-					= current->tmp_data.used_exit_sides
-					| (1 << blocks_side_opposite(sides[s]));
-				neigh->tmp_data.steps
-					= current->tmp_data.steps + (neigh->y < 64) ? 1 : 0;
-				neigh->tmp_data.visited = true;
+				neigh->tmp_data = (struct chunk_step) {
+					.from = blocks_side_opposite(sides[s]),
+					.used_exit_sides = current->tmp_data.used_exit_sides
+						| (1 << blocks_side_opposite(sides[s])),
+					.steps = current->tmp_data.steps + (neigh->y < 64) ? 1 : 0,
+					.visited = true,
+				};
 			}
 		}
 	}
@@ -153,6 +155,52 @@ struct block_data world_get_block(struct world* w, w_coord_t x, w_coord_t y,
 			   };
 }
 
+w_coord_t world_get_height(struct world* w, w_coord_t x, w_coord_t z) {
+	assert(w);
+
+	w_coord_t cx = WCOORD_CHUNK_OFFSET(x);
+	w_coord_t cz = WCOORD_CHUNK_OFFSET(z);
+	struct world_section* s
+		= dict_wsection_get(w->sections, SECTION_TO_ID(cx, cz));
+
+	return s ? s->heightmap[W2C_COORD(x) + W2C_COORD(z) * CHUNK_SIZE] : -1;
+}
+
+void world_copy_heightmap(struct world* w, struct chunk* c, int8_t* heightmap) {
+	assert(w && c && heightmap);
+	struct world_section* s = dict_wsection_get(
+		w->sections, SECTION_TO_ID(c->x / CHUNK_SIZE, c->z / CHUNK_SIZE));
+	assert(s);
+
+	memcpy(heightmap, s->heightmap, sizeof(s->heightmap));
+}
+
+static void wsection_heightmap_update(struct world_section* s, c_coord_t x,
+									  w_coord_t y, c_coord_t z, uint8_t type) {
+	assert(s);
+
+	int8_t* height = s->heightmap + x + z * CHUNK_SIZE;
+
+	if(blocks[type]) {
+		if(y > *height)
+			*height = y;
+	} else if(y == *height) {
+		while(y >= 0) {
+			struct chunk* c = s->column[y / CHUNK_SIZE];
+			struct block_data blk = chunk_get_block(c, x, W2C_COORD(y), z);
+			if(c) {
+				if(blocks[blk.type])
+					break;
+				y--;
+			} else {
+				y -= CHUNK_SIZE;
+			}
+		}
+
+		*height = y;
+	}
+}
+
 void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
 					 struct block_data blk) {
 	assert(w);
@@ -160,22 +208,22 @@ void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
 	if(y < 0 || y >= WORLD_HEIGHT)
 		return;
 
+	w_coord_t cx = WCOORD_CHUNK_OFFSET(x);
+	w_coord_t cz = WCOORD_CHUNK_OFFSET(z);
+	struct world_section* s
+		= dict_wsection_get(w->sections, SECTION_TO_ID(cx, cz));
+
 	struct chunk* c = world_find_chunk(w, x, y, z);
 
 	if(!c) {
 		c = malloc(sizeof(struct chunk));
 		assert(c);
 
-		int cx = WCOORD_CHUNK_OFFSET(x);
-		int cy = y / CHUNK_SIZE;
-		int cz = WCOORD_CHUNK_OFFSET(z);
+		w_coord_t cy = y / CHUNK_SIZE;
 		chunk_init(c, w, cx * CHUNK_SIZE, cy * CHUNK_SIZE, cz * CHUNK_SIZE);
 		chunk_ref(c);
 
 		w->world_chunk_cache = c;
-
-		struct world_section* s
-			= dict_wsection_get(w->sections, SECTION_TO_ID(cx, cz));
 
 		if(!s) {
 			s = dict_wsection_safe_get(w->sections, SECTION_TO_ID(cx, cz));
@@ -188,8 +236,8 @@ void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
 		s->column[cy] = c;
 	}
 
-	if(c)
-		chunk_set_block(c, W2C_COORD(x), W2C_COORD(y), W2C_COORD(z), blk);
+	chunk_set_block(c, W2C_COORD(x), W2C_COORD(y), W2C_COORD(z), blk);
+	wsection_heightmap_update(s, W2C_COORD(x), y, W2C_COORD(z), blk.type);
 }
 
 struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
@@ -305,7 +353,7 @@ void world_pre_render(struct world* w, struct camera* c, mat4 view) {
 	}
 }
 
-void world_build_chunks(struct world* w, size_t tokens) {
+size_t world_build_chunks(struct world* w, size_t tokens) {
 	ilist_chunks_it_t it;
 	ilist_chunks_it(it, w->render);
 
@@ -327,6 +375,8 @@ void world_build_chunks(struct world* w, size_t tokens) {
 
 		dict_wsection_next(it2);
 	}
+
+	return tokens;
 }
 
 void world_render_completed(struct world* w, bool new_render) {

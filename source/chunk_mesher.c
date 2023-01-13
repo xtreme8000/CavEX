@@ -559,8 +559,7 @@ bool chunk_mesher_send(struct chunk* c) {
 	for(w_coord_t y = -1; y < CHUNK_SIZE + 1; y++) {
 		for(w_coord_t z = -1; z < CHUNK_SIZE + 1; z++) {
 			for(w_coord_t x = -1; x < CHUNK_SIZE + 1; x++) {
-				bd[BLK_INDEX(x + 1, y + 1, z + 1)]
-					= chunk_lookup_block(c, x, y, z);
+				BLK_DATA(bd, x, y, z) = chunk_lookup_block(c, x, y, z);
 			}
 		}
 	}

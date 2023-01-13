@@ -57,7 +57,7 @@ struct world_section {
 
 #define SECTION_TO_ID(x, z) (((int64_t)(z) << 32) | (((int64_t)(x)&0xFFFFFFFF)))
 
-DICT_DEF2(dict_wsection, uint64_t, M_BASIC_OPLIST, struct world_section,
+DICT_DEF2(dict_wsection, int64_t, M_BASIC_OPLIST, struct world_section,
 		  M_POD_OPLIST)
 
 struct world {
@@ -71,7 +71,9 @@ struct world {
 void world_create(struct world* w);
 void world_destroy(struct world* w);
 void world_unload_section(struct world* w, w_coord_t x, w_coord_t z);
-void world_build_chunks(struct world* w, size_t tokens);
+w_coord_t world_get_height(struct world* w, w_coord_t x, w_coord_t z);
+void world_copy_heightmap(struct world* w, struct chunk* c, int8_t* heightmap);
+size_t world_build_chunks(struct world* w, size_t tokens);
 void world_render_completed(struct world* w, bool new_render);
 struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
 										 enum side s);
