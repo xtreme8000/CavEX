@@ -35,8 +35,8 @@ void blocks_init() {
 	blocks[5] = &block_planks;
 	blocks[6] = &block_sapling;
 	blocks[7] = &block_bedrock;
-	blocks[8] = &block_water;
-	blocks[9] = &block_water;
+	blocks[8] = &block_water_flowing;
+	blocks[9] = &block_water_still;
 	blocks[10] = &block_lava;
 	blocks[11] = &block_lava;
 	blocks[12] = &block_sand;
