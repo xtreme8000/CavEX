@@ -60,6 +60,7 @@ struct block block_spawner = {
 	.luminance = 0,
 	.double_sided = false,
 	.can_see_through = true,
+	.opacity = 1,
 	.ignore_lighting = false,
 	.flammable = false,
 	.block_item = {

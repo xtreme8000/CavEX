@@ -104,7 +104,8 @@ struct block {
 	size_t (*renderBlockAlways)(struct displaylist*, struct block_info*,
 								enum side, struct block_info*, uint8_t*, bool);
 	bool transparent;
-	int luminance;
+	uint8_t luminance : 4;
+	uint8_t opacity : 4;
 	bool double_sided;
 	bool can_see_through;
 	bool ignore_lighting;

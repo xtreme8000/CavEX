@@ -78,6 +78,7 @@ struct block block_leaves = {
 	.luminance = 0,
 	.double_sided = true,
 	.can_see_through = true,
+	.opacity = 1,
 	.ignore_lighting = false,
 	.flammable = true,
 	.block_item = {

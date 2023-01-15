@@ -26,6 +26,8 @@
 
 #include "cglm/cglm.h"
 
+#include "stack.h"
+
 #define WORLD_HEIGHT 128
 
 typedef int32_t w_coord_t;
@@ -55,6 +57,11 @@ struct world_section {
 	struct chunk* column[COLUMN_HEIGHT];
 };
 
+struct world_modification_entry {
+	w_coord_t x, y, z;
+	struct block_data blk;
+};
+
 #define SECTION_TO_ID(x, z) (((int64_t)(z) << 32) | (((int64_t)(x)&0xFFFFFFFF)))
 
 DICT_DEF2(dict_wsection, int64_t, M_BASIC_OPLIST, struct world_section,
@@ -66,6 +73,7 @@ struct world {
 	ilist_chunks_t render;
 	ilist_chunks2_t gpu_busy_chunks;
 	ptime_t anim_timer;
+	struct stack lighting_updates;
 };
 
 void world_create(struct world* w);
@@ -77,12 +85,15 @@ size_t world_build_chunks(struct world* w, size_t tokens);
 void world_render_completed(struct world* w, bool new_render);
 struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
 										 enum side s);
+struct chunk* world_chunk_from_section(struct world* w, struct world_section* s,
+									   w_coord_t y);
 struct chunk* world_find_chunk(struct world* w, w_coord_t x, w_coord_t y,
 							   w_coord_t z);
 struct block_data world_get_block(struct world* w, w_coord_t x, w_coord_t y,
 								  w_coord_t z);
 void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
-					 struct block_data blk);
+					 struct block_data blk, bool light_update);
+void world_update_lighting(struct world* w);
 void world_preload(struct world* w,
 				   void (*progress)(struct world* w, float percent));
 bool world_block_intersection(struct world* w, struct ray* r, w_coord_t x,

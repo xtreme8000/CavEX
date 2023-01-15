@@ -47,7 +47,8 @@ void clin_chunk(w_coord_t x, w_coord_t y, w_coord_t z, w_coord_t sx,
 									.metadata = md,
 									.sky_light = (*lighting_t) & 0xF,
 									.torch_light = (*lighting_t) >> 4,
-								});
+								},
+								false);
 				ids_t++;
 				lighting_t++;
 

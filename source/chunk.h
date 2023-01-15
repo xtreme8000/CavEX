@@ -79,6 +79,8 @@ struct block_data chunk_lookup_block(struct chunk* c, w_coord_t x, w_coord_t y,
 void chunk_set_block(struct chunk* c, c_coord_t x, c_coord_t y, c_coord_t z,
 					 struct block_data blk);
 bool chunk_check_built(struct chunk* c);
+void chunk_set_light(struct chunk* c, c_coord_t x, c_coord_t y, c_coord_t z,
+					 uint8_t light);
 void chunk_render(struct chunk* c, bool pass, float x, float y, float z);
 void chunk_pre_render(struct chunk* c, mat4 view, bool has_fog);
 

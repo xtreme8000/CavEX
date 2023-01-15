@@ -60,6 +60,7 @@ struct block block_cobweb = {
 	.luminance = 0,
 	.double_sided = true,
 	.can_see_through = true,
+	.opacity = 1,
 	.render_block_data.cross_random_displacement = false,
 	.ignore_lighting = false,
 	.flammable = false,

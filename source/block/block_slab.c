@@ -77,6 +77,7 @@ struct block block_slab = {
 	.luminance = 0,
 	.double_sided = false,
 	.can_see_through = true,
+	.opacity = 15,
 	.ignore_lighting = true,
 	.flammable = false,
 	.block_item = {

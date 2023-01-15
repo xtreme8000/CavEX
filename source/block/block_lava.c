@@ -73,6 +73,7 @@ struct block block_lava = {
 	.luminance = 15,
 	.double_sided = false,
 	.can_see_through = true,
+	.opacity = 15,
 	.ignore_lighting = false,
 	.flammable = false,
 	.block_item = {

@@ -59,6 +59,7 @@ struct block block_fire = {
 	.luminance = 15,
 	.double_sided = false,
 	.can_see_through = true,
+	.opacity = 0,
 	.ignore_lighting = false,
 	.flammable = false,
 	.block_item = {

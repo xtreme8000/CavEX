@@ -59,6 +59,7 @@ struct block block_portal = {
 	.luminance = 11,
 	.double_sided = false,
 	.can_see_through = true,
+	.opacity = 1,
 	.ignore_lighting = false,
 	.flammable = false,
 	.block_item = {

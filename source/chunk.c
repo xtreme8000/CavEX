@@ -126,20 +126,8 @@ struct block_data chunk_lookup_block(struct chunk* c, w_coord_t x, w_coord_t y,
 		};
 }
 
-void chunk_set_block(struct chunk* c, c_coord_t x, c_coord_t y, c_coord_t z,
-					 struct block_data blk) {
-	assert(c && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE);
-
-	size_t idx = CHUNK_INDEX(x, y, z) / 2 * 5;
-	size_t off = CHUNK_INDEX(x, y, z) % 2;
-
-	c->blocks[idx + off + 0] = blk.type;
-	c->blocks[idx + off + 2] = (blk.torch_light << 4) | blk.sky_light;
-	c->blocks[idx + 4] = (c->blocks[idx + 4] & ~(0x0F << (off * 4)))
-		| (blk.metadata << (off * 4));
-	c->rebuild_displist = true;
-
-	// trigger neighbour chunk updates
+static void chunk_trigger_neighbour_update(struct chunk* c, c_coord_t x,
+										   c_coord_t y, c_coord_t z) {
 	// TODO: diagonal chunks, just sharing edge or single point
 
 	bool cond[6] = {
@@ -161,6 +149,35 @@ void chunk_set_block(struct chunk* c, c_coord_t x, c_coord_t y, c_coord_t z,
 				other->rebuild_displist = true;
 		}
 	}
+}
+
+void chunk_set_light(struct chunk* c, c_coord_t x, c_coord_t y, c_coord_t z,
+					 uint8_t light) {
+	assert(c && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE);
+
+	size_t idx = CHUNK_INDEX(x, y, z) / 2 * 5;
+	size_t off = CHUNK_INDEX(x, y, z) % 2;
+
+	c->blocks[idx + off + 2] = light;
+	c->rebuild_displist = true;
+
+	chunk_trigger_neighbour_update(c, x, y, z);
+}
+
+void chunk_set_block(struct chunk* c, c_coord_t x, c_coord_t y, c_coord_t z,
+					 struct block_data blk) {
+	assert(c && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE);
+
+	size_t idx = CHUNK_INDEX(x, y, z) / 2 * 5;
+	size_t off = CHUNK_INDEX(x, y, z) % 2;
+
+	c->blocks[idx + off + 0] = blk.type;
+	c->blocks[idx + off + 2] = (blk.torch_light << 4) | blk.sky_light;
+	c->blocks[idx + 4] = (c->blocks[idx + 4] & ~(0x0F << (off * 4)))
+		| (blk.metadata << (off * 4));
+	c->rebuild_displist = true;
+
+	chunk_trigger_neighbour_update(c, x, y, z);
 }
 
 bool chunk_check_built(struct chunk* c) {

@@ -131,12 +131,28 @@ void world_create(struct world* w) {
 	dict_wsection_init(w->sections);
 	ilist_chunks_init(w->render);
 	ilist_chunks2_init(w->gpu_busy_chunks);
+	stack_create(&w->lighting_updates, 16,
+				 sizeof(struct world_modification_entry));
 	w->world_chunk_cache = NULL;
 	w->anim_timer = time_get();
 }
 
 void world_destroy(struct world* w) {
 	assert(w);
+
+	stack_destroy(&w->lighting_updates);
+
+	dict_wsection_it_t it;
+	dict_wsection_it(it, w->sections);
+
+	while(!dict_wsection_end_p(it)) {
+		struct world_section* s = &dict_wsection_ref(it)->value;
+		for(size_t k = 0; k < COLUMN_HEIGHT; k++) {
+			if(s->column[k])
+				chunk_unref(s->column[k]);
+		}
+		dict_wsection_next(it);
+	}
 
 	dict_wsection_clear(w->sections);
 }
@@ -181,7 +197,8 @@ static void wsection_heightmap_update(struct world_section* s, c_coord_t x,
 
 	int8_t* height = s->heightmap + x + z * CHUNK_SIZE;
 
-	if(blocks[type]) {
+	if(blocks[type]
+	   && (!blocks[type]->can_see_through || blocks[type]->opacity > 0)) {
 		if(y > *height)
 			*height = y;
 	} else if(y == *height) {
@@ -189,7 +206,9 @@ static void wsection_heightmap_update(struct world_section* s, c_coord_t x,
 			struct chunk* c = s->column[y / CHUNK_SIZE];
 			struct block_data blk = chunk_get_block(c, x, W2C_COORD(y), z);
 			if(c) {
-				if(blocks[blk.type])
+				if(blocks[blk.type]
+				   && (!blocks[blk.type]->can_see_through
+					   || blocks[blk.type]->opacity > 0))
 					break;
 				y--;
 			} else {
@@ -202,42 +221,158 @@ static void wsection_heightmap_update(struct world_section* s, c_coord_t x,
 }
 
 void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
-					 struct block_data blk) {
+					 struct block_data blk, bool light_update) {
 	assert(w);
 
 	if(y < 0 || y >= WORLD_HEIGHT)
 		return;
 
-	w_coord_t cx = WCOORD_CHUNK_OFFSET(x);
-	w_coord_t cz = WCOORD_CHUNK_OFFSET(z);
-	struct world_section* s
-		= dict_wsection_get(w->sections, SECTION_TO_ID(cx, cz));
+	if(light_update) {
+		stack_push(&w->lighting_updates,
+				   &(struct world_modification_entry) {
+					   .x = x,
+					   .y = y,
+					   .z = z,
+					   .blk = blk,
+				   });
+	} else {
+		w_coord_t cx = WCOORD_CHUNK_OFFSET(x);
+		w_coord_t cz = WCOORD_CHUNK_OFFSET(z);
+		struct world_section* s
+			= dict_wsection_get(w->sections, SECTION_TO_ID(cx, cz));
 
-	struct chunk* c = world_find_chunk(w, x, y, z);
+		struct chunk* c = world_find_chunk(w, x, y, z);
 
-	if(!c) {
-		c = malloc(sizeof(struct chunk));
-		assert(c);
+		if(!c) {
+			c = malloc(sizeof(struct chunk));
+			assert(c);
 
-		w_coord_t cy = y / CHUNK_SIZE;
-		chunk_init(c, w, cx * CHUNK_SIZE, cy * CHUNK_SIZE, cz * CHUNK_SIZE);
-		chunk_ref(c);
+			w_coord_t cy = y / CHUNK_SIZE;
+			chunk_init(c, w, cx * CHUNK_SIZE, cy * CHUNK_SIZE, cz * CHUNK_SIZE);
+			chunk_ref(c);
 
-		w->world_chunk_cache = c;
+			w->world_chunk_cache = c;
 
-		if(!s) {
-			s = dict_wsection_safe_get(w->sections, SECTION_TO_ID(cx, cz));
-			assert(s);
-			memset(s->heightmap, -1, sizeof(s->heightmap));
-			memset(s->column, 0, sizeof(s->column));
+			if(!s) {
+				s = dict_wsection_safe_get(w->sections, SECTION_TO_ID(cx, cz));
+				assert(s);
+				memset(s->heightmap, -1, sizeof(s->heightmap));
+				memset(s->column, 0, sizeof(s->column));
+			}
+
+			assert(s->column[cy] == NULL);
+			s->column[cy] = c;
 		}
 
-		assert(s->column[cy] == NULL);
-		s->column[cy] = c;
+		chunk_set_block(c, W2C_COORD(x), W2C_COORD(y), W2C_COORD(z), blk);
+		wsection_heightmap_update(s, W2C_COORD(x), y, W2C_COORD(z), blk.type);
+	}
+}
+
+static inline int8_t MAX_I8(int8_t a, int8_t b) {
+	return a > b ? a : b;
+}
+
+struct lighting_update_entry {
+	w_coord_t x, y, z;
+};
+
+void world_update_lighting(struct world* w) {
+	assert(w);
+
+	if(stack_empty(&w->lighting_updates))
+		return;
+
+	struct world_modification_entry source;
+	stack_pop(&w->lighting_updates, &source);
+
+	struct stack queue;
+	stack_create(&queue, 128, sizeof(struct lighting_update_entry));
+	stack_push(&queue,
+			   &(struct lighting_update_entry) {
+				   .x = source.x,
+				   .y = source.y,
+				   .z = source.z,
+			   });
+
+	world_set_block(w, source.x, source.y, source.z, source.blk, false);
+
+	while(!stack_empty(&queue)) {
+		struct lighting_update_entry current;
+		stack_pop(&queue, &current);
+
+		struct world_section* s
+			= dict_wsection_get(w->sections,
+								SECTION_TO_ID(WCOORD_CHUNK_OFFSET(current.x),
+											  WCOORD_CHUNK_OFFSET(current.z)));
+		struct chunk* c = world_chunk_from_section(w, s, current.y);
+		struct block_data old
+			= chunk_get_block(c, W2C_COORD(current.x), W2C_COORD(current.y),
+							  W2C_COORD(current.z));
+
+		uint8_t old_light = (old.torch_light << 4) | old.sky_light;
+		uint8_t new_light_sky = 0, new_light_torch = 0;
+
+		if(current.y > s->heightmap[W2C_COORD(current.x)
+									+ W2C_COORD(current.z) * CHUNK_SIZE])
+			new_light_sky = 0xF;
+
+		if(blocks[old.type])
+			new_light_torch = blocks[old.type]->luminance;
+
+		if(!blocks[old.type] || blocks[old.type]->can_see_through) {
+			for(enum side s = 0; s < SIDE_MAX; s++) {
+				int x, y, z;
+				blocks_side_offset(s, &x, &y, &z);
+
+				struct chunk* c_other = world_find_chunk(
+					w, current.x + x, current.y + y, current.z + z);
+
+				if(c_other) {
+					struct block_data other = chunk_get_block(
+						c_other, W2C_COORD(current.x + x),
+						W2C_COORD(current.y + y), W2C_COORD(current.z + z));
+					int8_t opacity = blocks[old.type] ?
+						MAX_I8(blocks[old.type]->opacity, 1) :
+						1;
+
+					new_light_sky
+						= MAX_I8(MAX_I8((int8_t)other.sky_light - opacity, 0),
+								 new_light_sky);
+					new_light_torch
+						= MAX_I8(MAX_I8((int8_t)other.torch_light - opacity, 0),
+								 new_light_torch);
+				}
+			}
+		}
+
+		uint8_t new_light = (new_light_torch << 4) | new_light_sky;
+
+		if(old_light != new_light
+		   || (source.x == current.x && source.y == current.y
+			   && source.z == current.z)) {
+			chunk_set_light(c, W2C_COORD(current.x), W2C_COORD(current.y),
+							W2C_COORD(current.z), new_light);
+
+			for(enum side s = 0; s < SIDE_MAX; s++) {
+				int x, y, z;
+				blocks_side_offset(s, &x, &y, &z);
+
+				struct chunk* c_other = world_find_chunk(
+					w, current.x + x, current.y + y, current.z + z);
+
+				if(c_other)
+					stack_push(&queue,
+							   &(struct lighting_update_entry) {
+								   .x = current.x + x,
+								   .y = current.y + y,
+								   .z = current.z + z,
+							   });
+			}
+		}
 	}
 
-	chunk_set_block(c, W2C_COORD(x), W2C_COORD(y), W2C_COORD(z), blk);
-	wsection_heightmap_update(s, W2C_COORD(x), y, W2C_COORD(z), blk.type);
+	stack_destroy(&queue);
 }
 
 struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
@@ -256,6 +391,12 @@ struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
 		SECTION_TO_ID(x + c->x / CHUNK_SIZE, z + c->z / CHUNK_SIZE));
 
 	return res ? res->column[y + c->y / CHUNK_SIZE] : NULL;
+}
+
+struct chunk* world_chunk_from_section(struct world* w, struct world_section* s,
+									   w_coord_t y) {
+	assert(w);
+	return (y >= 0 && y < WORLD_HEIGHT && s) ? s->column[y / CHUNK_SIZE] : NULL;
 }
 
 struct chunk* world_find_chunk(struct world* w, w_coord_t x, w_coord_t y,

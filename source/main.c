@@ -143,6 +143,8 @@ int main(void) {
 			gstate.current_screen->update(gstate.current_screen,
 										  gstate.stats.dt);
 
+		world_update_lighting(&gstate.world);
+
 		gfx_flip_buffers(&gstate.stats.dt_gpu, &gstate.stats.dt_vsync);
 
 		// must not modify displaylists while still rendering!
