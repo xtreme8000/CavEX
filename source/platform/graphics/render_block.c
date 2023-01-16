@@ -1344,6 +1344,76 @@ size_t render_block_fence(struct displaylist* d, struct block_info* this,
 	return 1;
 }
 
+size_t render_block_trapdoor(struct displaylist* d, struct block_info* this,
+							 enum side side, struct block_info* it,
+							 uint8_t* vertex_light, bool count_only) {
+	size_t count = 0;
+	uint8_t tex = blocks[this->block->type]->getTextureIndex(this, side);
+	uint8_t luminance = blocks[this->block->type]->luminance;
+	uint8_t tex_x = TEX_OFFSET(TEXTURE_X(tex));
+	uint8_t tex_y = TEX_OFFSET(TEXTURE_Y(tex));
+	int16_t x = W2C_COORD(this->x);
+	int16_t y = W2C_COORD(this->y);
+	int16_t z = W2C_COORD(this->z);
+
+	if(this->block->metadata & 0x04) {
+		enum side front = (enum side[]) {SIDE_FRONT, SIDE_BACK, SIDE_LEFT,
+										 SIDE_RIGHT}[this->block->metadata & 3];
+
+		if(side == front) {
+			if(!count_only)
+				render_block_side(d, W2C_COORD(this->x), W2C_COORD(this->y),
+								  W2C_COORD(this->z), 0, 256, tex, luminance,
+								  true, BLK_LEN / 16 * 13, false, 0, side,
+								  vertex_light);
+			count++;
+		} else if(side == blocks_side_opposite(front)) {
+			if(!count_only)
+				render_block_side(d, W2C_COORD(this->x), W2C_COORD(this->y),
+								  W2C_COORD(this->z), 0, 256, tex, luminance,
+								  true, 0, false, 0, side, vertex_light);
+			count++;
+		} else if(side == SIDE_TOP || side == SIDE_BOTTOM) {
+			if(!count_only)
+				render_block_side_adv(
+					d,
+					x * BLK_LEN + (front == SIDE_LEFT ? BLK_LEN / 16 * 13 : 0),
+					y * BLK_LEN + (side == SIDE_TOP ? BLK_LEN : 0),
+					z * BLK_LEN + (front == SIDE_FRONT ? BLK_LEN / 16 * 13 : 0),
+					(front == SIDE_LEFT || front == SIDE_RIGHT) ?
+						BLK_LEN / 16 * 3 :
+						BLK_LEN,
+					(front == SIDE_FRONT || front == SIDE_BACK) ?
+						BLK_LEN / 16 * 3 :
+						BLK_LEN,
+					tex_x + (front == SIDE_LEFT ? 13 : 0),
+					tex_y + (front == SIDE_FRONT ? 13 : 0), side == SIDE_BOTTOM,
+					0, true, side, vertex_light, luminance);
+			count++;
+		} else {
+			if(!count_only)
+				render_block_side_adv(
+					d,
+					x * BLK_LEN + (side == SIDE_RIGHT ? BLK_LEN : 0)
+						+ (front == SIDE_LEFT ? BLK_LEN / 16 * 13 : 0),
+					y * BLK_LEN,
+					z * BLK_LEN + (side == SIDE_BACK ? BLK_LEN : 0)
+						+ (front == SIDE_FRONT ? BLK_LEN / 16 * 13 : 0),
+					BLK_LEN / 16 * 3, BLK_LEN, tex_x, tex_y, false, 0, true,
+					side, vertex_light, luminance);
+			count++;
+		}
+	} else {
+		if(!count_only)
+			render_block_side(d, W2C_COORD(this->x), W2C_COORD(this->y),
+							  W2C_COORD(this->z), 0, BLK_LEN / 16 * 3, tex,
+							  luminance, true, 0, false, 0, side, vertex_light);
+		count++;
+	}
+
+	return count;
+}
+
 size_t render_block_layer(struct displaylist* d, struct block_info* this,
 						  enum side side, struct block_info* it,
 						  uint8_t* vertex_light, bool count_only) {

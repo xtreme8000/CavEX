@@ -123,7 +123,7 @@ void blocks_init() {
 	// repeater
 	// repeater
 	blocks[95] = &block_locked_chest;
-	// trap door
+	blocks[96] = &block_trapdoor;
 
 	for(int k = 0; k < 256; k++) {
 		if(blocks[k]) {

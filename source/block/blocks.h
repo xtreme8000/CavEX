@@ -197,6 +197,7 @@ extern struct block block_dispenser;
 extern struct block block_tnt;
 extern struct block block_cobweb;
 extern struct block block_fence;
+extern struct block block_trapdoor;
 
 extern struct block* blocks[256];
 
