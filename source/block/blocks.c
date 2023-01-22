@@ -91,14 +91,14 @@ void blocks_init() {
 	blocks[61] = &block_furnaceoff;
 	blocks[62] = &block_furnaceon;
 	// sign standing
-	// wooden door
+	blocks[64] = &block_wooden_door;
 	blocks[65] = &block_ladder;
 	blocks[66] = &block_rail;
 	blocks[67] = &block_stone_stairs;
 	// sign wall mounted
 	// lever
 	blocks[70] = &block_stone_pressure_plate;
-	// iron door
+	blocks[71] = &block_iron_door;
 	blocks[72] = &block_wooden_pressure_plate;
 	blocks[73] = &block_redstoneore;
 	blocks[74] = &block_redstoneore;
