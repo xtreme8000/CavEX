@@ -20,6 +20,7 @@
 #ifndef SERVER_LOCAL
 #define SERVER_LOCAL
 
+#include <m-lib/m-string.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -47,6 +48,7 @@ struct server_local {
 	size_t loaded_regions_length;
 	uint64_t world_time;
 	ptime_t world_time_start;
+	string_t level_name;
 	struct level_archive level;
 };
 

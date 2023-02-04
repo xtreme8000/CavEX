@@ -46,7 +46,7 @@ static bool has_chunk(struct server_local* s, w_coord_t x, w_coord_t z) {
 	}
 
 	struct region_archive ra;
-	if(!region_archive_create(&ra, "world", CHUNK_REGION_COORD(x),
+	if(!region_archive_create(&ra, s->level_name, CHUNK_REGION_COORD(x),
 							  CHUNK_REGION_COORD(z)))
 		return false;
 
@@ -100,6 +100,50 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				s->player.z = call->payload.player_pos.z;
 				s->player.has_pos = true;
 			}
+			break;
+		case SRPC_UNLOAD_WORLD:
+			// save chunks here, then destroy all
+			clin_rpc_send(&(struct client_rpc) {
+				.type = CRPC_WORLD_RESET,
+			});
+
+			ilist_regions_init(s->loaded_regions_lru);
+
+			for(size_t k = 0; k < s->loaded_regions_length; k++)
+				region_archive_destroy(s->loaded_regions + k);
+
+			level_archive_destroy(&s->level);
+
+			s->loaded_chunks_length = 0;
+			s->loaded_regions_length = 0;
+			s->player.has_pos = false;
+			s->player.finished_loading = false;
+			string_reset(s->level_name);
+			break;
+		case SRPC_LOAD_WORLD:
+			assert(s->loaded_chunks_length == 0
+				   && s->loaded_regions_length == 0);
+
+			string_set(s->level_name, call->payload.load_world.name);
+			string_clear(call->payload.load_world.name);
+
+			clin_rpc_send(&(struct client_rpc) {
+				.type = CRPC_WORLD_RESET,
+			});
+
+			if(level_archive_create(&s->level, s->level_name)) {
+				vec3 pos;
+				if(level_archive_read_player(&s->level, pos, NULL, NULL)) {
+					s->player.x = pos[0];
+					s->player.y = pos[1];
+					s->player.z = pos[2];
+					s->player.has_pos = true;
+				}
+
+				if(level_archive_read(&s->level, LEVEL_TIME, &s->world_time, 0))
+					s->world_time_start = time_get();
+			}
+
 			break;
 	}
 }
@@ -236,19 +280,7 @@ void server_local_create(struct server_local* s) {
 	s->world_time_start = time_get();
 	s->player.has_pos = false;
 	s->player.finished_loading = false;
-
-	level_archive_create(&s->level, "world/level.dat");
-
-	vec3 pos;
-	if(level_archive_read_player(&s->level, pos, NULL, NULL)) {
-		s->player.x = pos[0];
-		s->player.y = pos[1];
-		s->player.z = pos[2];
-		s->player.has_pos = true;
-	}
-
-	if(level_archive_read(&s->level, LEVEL_TIME, &s->world_time, 0))
-		s->world_time_start = time_get();
+	string_init(s->level_name);
 
 	ilist_regions_init(s->loaded_regions_lru);
 

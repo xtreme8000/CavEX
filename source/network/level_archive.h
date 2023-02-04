@@ -20,6 +20,7 @@
 #ifndef LEVEL_ARCHIVE_H
 #define LEVEL_ARCHIVE_H
 
+#include <m-lib/m-string.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -38,6 +39,8 @@ struct level_archive_tag {
 	(struct level_archive_tag) { ".Data.LevelName", TAG_STRING }
 #define LEVEL_TIME                                                             \
 	(struct level_archive_tag) { ".Data.Time", TAG_LONG }
+#define LEVEL_DISK_SIZE                                                        \
+	(struct level_archive_tag) { ".Data.SizeOnDisk", TAG_LONG }
 #define LEVEL_LAST_PLAYED                                                      \
 	(struct level_archive_tag) { ".Data.LastPlayed", TAG_LONG }
 #define LEVEL_RANDOM_SEED                                                      \
@@ -66,7 +69,7 @@ struct level_archive {
 	nbt_node* data;
 };
 
-bool level_archive_create(struct level_archive* la, char* filename);
+bool level_archive_create(struct level_archive* la, string_t filename);
 bool level_archive_read(struct level_archive* la, struct level_archive_tag tag,
 						void* result, size_t length);
 bool level_archive_read_inventory(struct level_archive* la,

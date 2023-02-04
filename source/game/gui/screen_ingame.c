@@ -20,6 +20,7 @@
 #include <stddef.h>
 
 #include "../../block/blocks.h"
+#include "../../network/server_interface.h"
 #include "../../platform/graphics/gfx.h"
 #include "../../platform/graphics/gfx_util.h"
 #include "../../platform/graphics/gui_util.h"
@@ -144,6 +145,13 @@ static void screen_ingame_update(struct screen* s, float dt) {
 																   slot + 1);
 	}
 
+	if(input_pressed(IB_HOME)) {
+		screen_set(&screen_select_world);
+		svin_rpc_send(&(struct server_rpc) {
+			.type = SRPC_UNLOAD_WORLD,
+		});
+	}
+
 	struct block_data in_block
 		= world_get_block(&gstate.world, floorf(gstate.camera.x),
 						  floorf(gstate.camera.y), floorf(gstate.camera.z));
@@ -197,6 +205,7 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 		}
 		icon_offset += gutil_control_icon(icon_offset, CONTROL_Z, "Mine");
 	}
+	icon_offset += gutil_control_icon(icon_offset, CONTROL_HOME, "Quit");
 
 	gfx_bind_texture(TEXTURE_GUI);
 

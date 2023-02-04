@@ -53,6 +53,27 @@ void world_unload_section(struct world* w, w_coord_t x, w_coord_t z) {
 	}
 }
 
+void world_unload_all(struct world* w) {
+	assert(w);
+
+	dict_wsection_it_t it;
+	dict_wsection_it(it, w->sections);
+
+	while(!dict_wsection_end_p(it)) {
+		struct world_section* s = &dict_wsection_ref(it)->value;
+		for(size_t k = 0; k < COLUMN_HEIGHT; k++) {
+			if(s->column[k])
+				chunk_unref(s->column[k]);
+		}
+
+		dict_wsection_next(it);
+	}
+
+	stack_clear(&w->lighting_updates);
+	dict_wsection_reset(w->sections);
+	w->world_chunk_cache = NULL;
+}
+
 static void world_bfs(struct world* w, ilist_chunks_t render, float x, float y,
 					  float z, vec4* planes) {
 	assert(w && render && planes);
@@ -140,21 +161,14 @@ void world_create(struct world* w) {
 void world_destroy(struct world* w) {
 	assert(w);
 
+	world_unload_all(w);
 	stack_destroy(&w->lighting_updates);
-
-	dict_wsection_it_t it;
-	dict_wsection_it(it, w->sections);
-
-	while(!dict_wsection_end_p(it)) {
-		struct world_section* s = &dict_wsection_ref(it)->value;
-		for(size_t k = 0; k < COLUMN_HEIGHT; k++) {
-			if(s->column[k])
-				chunk_unref(s->column[k]);
-		}
-		dict_wsection_next(it);
-	}
-
 	dict_wsection_clear(w->sections);
+}
+
+size_t world_loaded_chunks(struct world* w) {
+	assert(w);
+	return dict_wsection_size(w->sections);
 }
 
 struct block_data world_get_block(struct world* w, w_coord_t x, w_coord_t y,
@@ -492,6 +506,11 @@ void world_pre_render(struct world* w, struct camera* c, mat4 view) {
 			ilist_chunks_next(it);
 		}
 	}
+}
+
+void world_pre_render_clear(struct world* w) {
+	assert(w);
+	ilist_chunks_init(w->render);
 }
 
 size_t world_build_chunks(struct world* w, size_t tokens) {

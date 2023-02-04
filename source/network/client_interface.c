@@ -21,7 +21,7 @@
 #include "../game/game_state.h"
 #include "server_interface.h"
 
-#define RPC_INBOX_SIZE 8
+#define RPC_INBOX_SIZE 16
 static struct client_rpc rpc_msg[RPC_INBOX_SIZE];
 mqbox_t clin_inbox;
 mqbox_t clin_empty_msg;
@@ -64,10 +64,6 @@ void clin_chunk(w_coord_t x, w_coord_t y, w_coord_t z, w_coord_t sx,
 	free(lighting);
 }
 
-void clin_unload_chunk(w_coord_t x, w_coord_t z) {
-	world_unload_section(&gstate.world, x, z);
-}
-
 void clin_process(struct client_rpc* call) {
 	assert(call);
 
@@ -80,8 +76,8 @@ void clin_process(struct client_rpc* call) {
 					   call->payload.chunk.lighting);
 			break;
 		case CRPC_UNLOAD_CHUNK:
-			clin_unload_chunk(call->payload.unload_chunk.x,
-							  call->payload.unload_chunk.z);
+			world_unload_section(&gstate.world, call->payload.unload_chunk.x,
+								 call->payload.unload_chunk.z);
 			break;
 		case CRPC_PLAYER_POS:
 			gstate.camera.x = call->payload.player_pos.position[0];
@@ -91,6 +87,14 @@ void clin_process(struct client_rpc* call) {
 			gstate.camera.ry
 				= glm_rad(call->payload.player_pos.rotation[1] + 90.0F);
 			gstate.world_loaded = true;
+			break;
+		case CRPC_WORLD_RESET:
+			world_unload_all(&gstate.world);
+			inventory_clear(&gstate.inventory);
+			gstate.world_loaded = false;
+
+			if(gstate.current_screen == &screen_ingame)
+				screen_set(&screen_load_world);
 			break;
 		case CRPC_INVENTORY_SLOT:
 			inventory_set_slot(&gstate.inventory,
@@ -112,6 +116,8 @@ void clin_init() {
 		MQ_Send(clin_empty_msg, rpc_msg + k, MQ_MSG_BLOCK);
 }
 
+static ptime_t last_pos_update = 0;
+
 void clin_update() {
 	mqmsg_t call;
 	while(MQ_Receive(clin_inbox, &call, MQ_MSG_NOBLOCK)) {
@@ -119,13 +125,14 @@ void clin_update() {
 		MQ_Send(clin_empty_msg, call, MQ_MSG_BLOCK);
 	}
 
-	if(gstate.world_loaded) {
+	if(gstate.world_loaded && time_diff_ms(last_pos_update, time_get()) >= 50) {
 		svin_rpc_send(&(struct server_rpc) {
 			.type = SRPC_PLAYER_POS,
 			.payload.player_pos.x = gstate.camera.x,
 			.payload.player_pos.y = gstate.camera.y,
 			.payload.player_pos.z = gstate.camera.z,
 		});
+		last_pos_update = time_get();
 	}
 }
 

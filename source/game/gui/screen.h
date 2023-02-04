@@ -25,15 +25,16 @@
 #include "../../cglm/cglm.h"
 
 struct screen {
-	void (*reset)(struct screen* s);
+	void (*reset)(struct screen* s, int width, int height);
 	void (*update)(struct screen* s, float dt);
 	void (*render2D)(struct screen* s, int width, int height);
 	void (*render3D)(struct screen* s, mat4 view);
 	bool render_world;
-	void* user;
 };
 
 extern struct screen screen_ingame;
+extern struct screen screen_load_world;
+extern struct screen screen_select_world;
 
 void screen_set(struct screen* s);
 

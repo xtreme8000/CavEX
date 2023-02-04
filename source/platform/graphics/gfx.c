@@ -450,3 +450,12 @@ void gfx_lighting(bool enable) {
 void gfx_culling(bool enable) {
 	GX_SetCullMode(enable ? GX_CULL_BACK : GX_CULL_NONE);
 }
+
+void gfx_scissor(bool enable, uint32_t x, uint32_t y, uint32_t width,
+				 uint32_t height) {
+	if(enable) {
+		GX_SetScissor(x, y, width, height);
+	} else {
+		GX_SetScissor(0, 0, 0x3FF, 0x3FF);
+	}
+}

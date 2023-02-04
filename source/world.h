@@ -79,6 +79,7 @@ struct world {
 void world_create(struct world* w);
 void world_destroy(struct world* w);
 void world_unload_section(struct world* w, w_coord_t x, w_coord_t z);
+void world_unload_all(struct world* w);
 w_coord_t world_get_height(struct world* w, w_coord_t x, w_coord_t z);
 void world_copy_heightmap(struct world* w, struct chunk* c, int8_t* heightmap);
 size_t world_build_chunks(struct world* w, size_t tokens);
@@ -99,7 +100,9 @@ void world_preload(struct world* w,
 bool world_block_intersection(struct world* w, struct ray* r, w_coord_t x,
 							  w_coord_t y, w_coord_t z, enum side* s);
 void world_pre_render(struct world* w, struct camera* c, mat4 view);
+void world_pre_render_clear(struct world* w);
 size_t world_render(struct world* w, struct camera* c, bool pass);
 bool world_aabb_intersection(struct world* w, struct AABB* a);
+size_t world_loaded_chunks(struct world* w);
 
 #endif

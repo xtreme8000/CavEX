@@ -21,6 +21,7 @@
 #define REGION_ARCHIVE_H
 
 #include <m-lib/m-i-list.h>
+#include <m-lib/m-string.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -29,7 +30,7 @@
 struct region_archive {
 	w_coord_t x, z;
 	uint32_t* offsets;
-	char file_name[64];
+	string_t file_name;
 	ILIST_INTERFACE(ilist_regions, struct region_archive);
 };
 
@@ -41,7 +42,7 @@ ILIST_DEF(ilist_regions, struct region_archive, M_POD_OPLIST)
 
 #define CHUNK_REGION_COORD(x) ((w_coord_t)floor(x / (float)REGION_SIZE))
 
-bool region_archive_create(struct region_archive* ra, char* world_name,
+bool region_archive_create(struct region_archive* ra, string_t world_name,
 						   w_coord_t x, w_coord_t z);
 void region_archive_destroy(struct region_archive* ra);
 bool region_archive_contains(struct region_archive* ra, w_coord_t x,

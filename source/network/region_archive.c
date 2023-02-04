@@ -18,12 +18,13 @@
 */
 
 #include <assert.h>
+#include <m-lib/m-string.h>
 
 #include "../cNBT/nbt.h"
 
 #include "region_archive.h"
 
-bool region_archive_create(struct region_archive* ra, char* world_name,
+bool region_archive_create(struct region_archive* ra, string_t world_name,
 						   w_coord_t x, w_coord_t z) {
 	assert(ra && world_name);
 
@@ -32,15 +33,17 @@ bool region_archive_create(struct region_archive* ra, char* world_name,
 	if(!ra->offsets)
 		return false;
 
-	snprintf(ra->file_name, sizeof(ra->file_name), "%s/region/r.%i.%i.mcr",
-			 world_name, x, z); // TODO
+	string_init_printf(ra->file_name, "saves/%s/region/r.%i.%i.mcr", world_name,
+					   x, z);
+
 	ra->x = x;
 	ra->z = z;
 
-	FILE* f = fopen(ra->file_name, "rb");
+	FILE* f = fopen(string_get_cstr(ra->file_name), "rb");
 
 	if(!f) {
 		free(ra->offsets);
+		string_clear(ra->file_name);
 		return false;
 	}
 
@@ -48,6 +51,7 @@ bool region_archive_create(struct region_archive* ra, char* world_name,
 			  f)) {
 		free(ra->offsets);
 		fclose(f);
+		string_clear(ra->file_name);
 		return false;
 	}
 
@@ -62,6 +66,7 @@ void region_archive_destroy(struct region_archive* ra) {
 	assert(ra && ra->offsets);
 
 	free(ra->offsets);
+	string_clear(ra->file_name);
 }
 
 bool region_archive_contains(struct region_archive* ra, w_coord_t x,
@@ -98,7 +103,7 @@ bool region_archive_get_blocks(struct region_archive* ra, w_coord_t x,
 
 	// TODO: little endian
 
-	FILE* f = fopen(ra->file_name, "rb");
+	FILE* f = fopen(string_get_cstr(ra->file_name), "rb");
 
 	if(!f)
 		return false;

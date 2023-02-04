@@ -43,56 +43,27 @@
 #include "cNBT/nbt.h"
 #include "cglm/cglm.h"
 
-void loading_progress(struct world* w, float p) {
-	gfx_clear_buffers(0, 0, 0);
-	gfx_mode_gui();
-	gutil_bg();
-
-	// TODO
-
-	gutil_text((gfx_width() - gutil_font_width("Generating level", 16)) / 2,
-			   gfx_height() / 2 - 40, "Generating level", 16);
-
-	gutil_text((gfx_width() - gutil_font_width("Building terrain", 16)) / 2,
-			   gfx_height() / 2 + 8, "Building terrain", 16);
-
-	gfx_texture(false);
-	gutil_texquad_col((gfx_width() - 200) / 2, gfx_height() / 2 + 32, 0, 0, 0,
-					  0, 200, 4, 128, 128, 128);
-	gutil_texquad_col((gfx_width() - 200) / 2, gfx_height() / 2 + 32, 0, 0, 0,
-					  0, 200 * p, 4, 128, 255, 128);
-	gfx_texture(true);
-
-	gfx_finish(false);
-}
-
 int main(void) {
-	time_reset();
-	input_init();
-	gfx_setup();
-	blocks_init();
-	items_init();
-	screen_set(&screen_ingame);
+	gstate.camera = (struct camera) {
+		.x = 0, .y = 0, .z = 0, .rx = 0, .ry = 0, .controller = {0, 0, 0}};
+	gstate.config.fov = 70.0F;
+	gstate.config.render_distance = 192.0F;
+	gstate.config.fog_distance = 5 * 16.0F;
+	gstate.world_loaded = false;
+	gstate.held_item_animation.finished = true;
 
 #ifdef GEKKO
 	fatInitDefault();
 #endif
 
-	gstate.camera = (struct camera) {
-		.x = 0, .y = 0, .z = 0, .rx = 0, .ry = 0, .controller = {0, 0, 0}};
-
-	gstate.config.fov = 70.0F;
-	gstate.config.render_distance = 192.0F;
-	gstate.config.fog_distance = 5 * 16.0F;
+	time_reset();
+	input_init();
+	gfx_setup();
+	blocks_init();
+	items_init();
+	screen_set(&screen_select_world);
 
 	world_create(&gstate.world);
-
-	// world_preload(&gstate.world, loading_progress);
-	gstate.world_loaded = false;
-	gstate.held_item_animation.finished = true;
-
-	ptime_t last_frame = time_get();
-
 	inventory_clear(&gstate.inventory);
 
 	clin_init();
@@ -101,6 +72,8 @@ int main(void) {
 
 	struct server_local server;
 	server_local_create(&server);
+
+	ptime_t last_frame = time_get();
 
 	while(1) {
 		ptime_t this_frame = time_get();
@@ -134,16 +107,16 @@ int main(void) {
 							c->z + cos(c->rx) * sin(c->ry) * 16.0F,
 							&gstate.camera_hit);
 		} else {
+			world_pre_render_clear(&gstate.world);
 			gstate.camera_hit.hit = false;
 		}
 
+		world_update_lighting(&gstate.world);
 		world_build_chunks(&gstate.world, CHUNK_MESHER_QLENGTH);
 
 		if(gstate.current_screen->update)
 			gstate.current_screen->update(gstate.current_screen,
 										  gstate.stats.dt);
-
-		world_update_lighting(&gstate.world);
 
 		gfx_flip_buffers(&gstate.stats.dt_gpu, &gstate.stats.dt_vsync);
 
@@ -199,9 +172,6 @@ int main(void) {
 		daytime = fmaxf(fminf(daytime, 1), 0);
 
 		gfx_finish(true);
-
-		if(input_pressed(IB_HOME))
-			exit(0);
 	}
 	return 0;
 }

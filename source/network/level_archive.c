@@ -18,13 +18,23 @@
 */
 
 #include <assert.h>
-#include <string.h>
 
 #include "level_archive.h"
 
-bool level_archive_create(struct level_archive* la, char* filename) {
+bool level_archive_create(struct level_archive* la, string_t filename) {
 	assert(la && filename);
-	la->data = nbt_parse_path(filename);
+
+	string_t tmp;
+	string_init_printf(tmp, "saves/%s/level.dat", filename);
+	char* c_tmp = string_clear_get_str(tmp);
+
+	if(!c_tmp)
+		return false;
+
+	la->data = nbt_parse_path(c_tmp);
+
+	free(c_tmp);
+
 	return la->data;
 }
 

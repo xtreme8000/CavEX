@@ -22,7 +22,7 @@
 
 #include "server_interface.h"
 
-#define RPC_INBOX_SIZE 8
+#define RPC_INBOX_SIZE 16
 static struct server_rpc rpc_msg[RPC_INBOX_SIZE];
 mqbox_t svin_inbox;
 mqbox_t svin_empty_msg;

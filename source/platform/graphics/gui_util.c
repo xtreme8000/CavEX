@@ -37,26 +37,27 @@ int gutil_control_icon(int x, enum gutil_control_icon icon, char* str) {
 }
 
 void gutil_texquad_col(int x, int y, int tx, int ty, int sx, int sy, int width,
-					   int height, uint8_t r, uint8_t g, uint8_t b) {
+					   int height, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 	GX_Begin(GX_QUADS, GX_VTXFMT2, 4);
 	GX_Position3s16(x, y, -2);
-	GX_Color4u8(r, g, b, 0xFF);
+	GX_Color4u8(r, g, b, a);
 	GX_TexCoord2u16(tx, ty);
 	GX_Position3s16(x + width, y, -2);
-	GX_Color4u8(r, g, b, 0xFF);
+	GX_Color4u8(r, g, b, a);
 	GX_TexCoord2u16(tx + sx, ty);
 	GX_Position3s16(x + width, y + height, -2);
-	GX_Color4u8(r, g, b, 0xFF);
+	GX_Color4u8(r, g, b, a);
 	GX_TexCoord2u16(tx + sx, ty + sy);
 	GX_Position3s16(x, y + height, -2);
-	GX_Color4u8(r, g, b, 0xFF);
+	GX_Color4u8(r, g, b, a);
 	GX_TexCoord2u16(tx, ty + sy);
 	GX_End();
 }
 
 void gutil_texquad(int x, int y, int tx, int ty, int sx, int sy, int width,
 				   int height) {
-	gutil_texquad_col(x, y, tx, ty, sx, sy, width, height, 0xFF, 0xFF, 0xFF);
+	gutil_texquad_col(x, y, tx, ty, sx, sy, width, height, 0xFF, 0xFF, 0xFF,
+					  0xFF);
 }
 
 void gutil_texquad_rt(int x, int y, int tx, int ty, int sx, int sy, int width,

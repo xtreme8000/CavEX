@@ -31,6 +31,7 @@ enum client_rpc_type {
 	CRPC_INVENTORY_SLOT,
 	CRPC_PLAYER_POS,
 	CRPC_TIME_SET,
+	CRPC_WORLD_RESET,
 };
 
 struct client_rpc {
