@@ -56,6 +56,9 @@ struct client_rpc {
 			vec2 rotation;
 		} player_pos;
 		uint64_t time_set;
+		struct {
+			enum world_dim dimension;
+		} world_reset;
 	} payload;
 };
 

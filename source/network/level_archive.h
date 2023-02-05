@@ -29,6 +29,7 @@
 #include "../cglm/cglm.h"
 
 #include "../item/items.h"
+#include "../world.h"
 
 struct level_archive_tag {
 	const char* name;
@@ -53,6 +54,8 @@ struct level_archive_tag {
 	(struct level_archive_tag) { ".Data.Player.Rotation", TAG_LIST }
 #define LEVEL_PLAYER_VELOCITY                                                  \
 	(struct level_archive_tag) { ".Data.Player.Motion", TAG_LIST }
+#define LEVEL_PLAYER_DIMENSION                                                 \
+	(struct level_archive_tag) { ".Data.Player.Dimension", TAG_INT }
 
 #define LEVEL_PLAYER_INVENTORY                                                 \
 	(struct level_archive_tag) { ".Data.Player.Inventory", TAG_LIST }
@@ -75,7 +78,8 @@ bool level_archive_read(struct level_archive* la, struct level_archive_tag tag,
 bool level_archive_read_inventory(struct level_archive* la,
 								  struct item_data* inventory, size_t length);
 bool level_archive_read_player(struct level_archive* la, vec3 position,
-							   vec2 rotation, vec3 velocity);
+							   vec2 rotation, vec3 velocity,
+							   enum world_dim* dimension);
 void level_archive_destroy(struct level_archive* la);
 
 #endif

@@ -653,3 +653,20 @@ bool world_aabb_intersection(struct world* w, struct AABB* a) {
 
 	return false;
 }
+
+static const float light_lookup_overworld[16] = {
+	0.05F,	0.067F, 0.085F, 0.106F, 0.129F, 0.156F, 0.186F, 0.221F,
+	0.261F, 0.309F, 0.367F, 0.437F, 0.525F, 0.638F, 0.789F, 1.0F,
+};
+
+static const float light_lookup_nether[16] = {
+	0.1F, 0.116F, 0.133F, 0.153F, 0.175F, 0.2F,	  0.229F, 0.262F,
+	0.3F, 0.345F, 0.4F,	  0.467F, 0.55F,  0.657F, 0.8F,	  1.0F,
+};
+
+const float* world_dimension_light(struct world* w) {
+	assert(w);
+
+	return (w->dimension == WORLD_DIM_OVERWORLD) ? light_lookup_overworld :
+												   light_lookup_nether;
+}

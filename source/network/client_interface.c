@@ -92,6 +92,7 @@ void clin_process(struct client_rpc* call) {
 			world_unload_all(&gstate.world);
 			inventory_clear(&gstate.inventory);
 			gstate.world_loaded = false;
+			gstate.world.dimension = call->payload.world_reset.dimension;
 
 			if(gstate.current_screen == &screen_ingame)
 				screen_set(&screen_load_world);

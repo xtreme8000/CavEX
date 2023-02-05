@@ -47,7 +47,7 @@ static bool has_chunk(struct server_local* s, w_coord_t x, w_coord_t z) {
 
 	struct region_archive ra;
 	if(!region_archive_create(&ra, s->level_name, CHUNK_REGION_COORD(x),
-							  CHUNK_REGION_COORD(z)))
+							  CHUNK_REGION_COORD(z), s->player.dimension))
 		return false;
 
 	struct region_archive* lru;
@@ -105,6 +105,7 @@ static void server_local_process(struct server_rpc* call, void* user) {
 			// save chunks here, then destroy all
 			clin_rpc_send(&(struct client_rpc) {
 				.type = CRPC_WORLD_RESET,
+				.payload.world_reset.dimension = WORLD_DIM_OVERWORLD,
 			});
 
 			ilist_regions_init(s->loaded_regions_lru);
@@ -127,23 +128,26 @@ static void server_local_process(struct server_rpc* call, void* user) {
 			string_set(s->level_name, call->payload.load_world.name);
 			string_clear(call->payload.load_world.name);
 
-			clin_rpc_send(&(struct client_rpc) {
-				.type = CRPC_WORLD_RESET,
-			});
-
 			if(level_archive_create(&s->level, s->level_name)) {
 				vec3 pos;
-				if(level_archive_read_player(&s->level, pos, NULL, NULL)) {
+				enum world_dim dim;
+				if(level_archive_read_player(&s->level, pos, NULL, NULL,
+											 &dim)) {
 					s->player.x = pos[0];
 					s->player.y = pos[1];
 					s->player.z = pos[2];
+					s->player.dimension = dim;
 					s->player.has_pos = true;
 				}
 
 				if(level_archive_read(&s->level, LEVEL_TIME, &s->world_time, 0))
 					s->world_time_start = time_get();
-			}
 
+				clin_rpc_send(&(struct client_rpc) {
+					.type = CRPC_WORLD_RESET,
+					.payload.world_reset.dimension = dim,
+				});
+			}
 			break;
 	}
 }
@@ -236,7 +240,8 @@ static void server_local_update(struct server_local* s) {
 		struct client_rpc pos;
 		pos.type = CRPC_PLAYER_POS;
 		if(level_archive_read_player(&s->level, pos.payload.player_pos.position,
-									 pos.payload.player_pos.rotation, NULL))
+									 pos.payload.player_pos.rotation, NULL,
+									 NULL))
 			clin_rpc_send(&pos);
 
 		s->world_time_start = time_get();

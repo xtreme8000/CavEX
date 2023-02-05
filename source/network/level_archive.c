@@ -62,6 +62,7 @@ static bool level_archive_read_internal(nbt_node* root,
 		case TAG_LONG:
 			*((int64_t*)result) = node->payload.tag_long;
 			return true;
+		case TAG_INT: *((int32_t*)result) = node->payload.tag_int; return true;
 		case TAG_SHORT:
 			*((int16_t*)result) = node->payload.tag_short;
 			return true;
@@ -130,6 +131,7 @@ bool level_archive_read_inventory(struct level_archive* la,
 }
 
 // could use float* instead of vec3, but not sure of possible alignment for vec3
+// (right now this means we can read three values at most)
 static bool read_vector(nbt_node* node, nbt_type type, vec3 result,
 						size_t amount) {
 	assert(node && node->type == TAG_LIST && result && amount <= 3);
@@ -153,7 +155,8 @@ static bool read_vector(nbt_node* node, nbt_type type, vec3 result,
 }
 
 bool level_archive_read_player(struct level_archive* la, vec3 position,
-							   vec2 rotation, vec3 velocity) {
+							   vec2 rotation, vec3 velocity,
+							   enum world_dim* dimension) {
 	assert(la && la->data);
 
 	nbt_node* pos;
@@ -166,6 +169,10 @@ bool level_archive_read_player(struct level_archive* la, vec3 position,
 
 	nbt_node* rot;
 	if(!level_archive_read(la, LEVEL_PLAYER_ROTATION, &rot, 0))
+		return false;
+
+	int32_t* dim;
+	if(!level_archive_read(la, LEVEL_PLAYER_DIMENSION, &dim, 0))
 		return false;
 
 	if(position && !read_vector(pos, TAG_DOUBLE, position, 3))
@@ -182,6 +189,10 @@ bool level_archive_read_player(struct level_archive* la, vec3 position,
 		rotation[0] = tmp[0];
 		rotation[1] = tmp[1];
 	}
+
+	// ensures output is valid dimension
+	if(dimension)
+		*dimension = (dim == 0) ? WORLD_DIM_OVERWORLD : WORLD_DIM_NETHER;
 
 	return true;
 }

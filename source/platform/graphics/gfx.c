@@ -43,11 +43,6 @@ static uint8_t colors[256 * 3] ATTRIBUTE_ALIGN(32);
 static bool gfx_matrix_texture_prev = false;
 static bool gfx_fog_prev = false;
 
-static const float light_lookup[16] = {
-	0.05F,	0.067F, 0.085F, 0.106F, 0.129F, 0.156F, 0.186F, 0.221F,
-	0.261F, 0.309F, 0.367F, 0.437F, 0.525F, 0.638F, 0.789F, 1.0F,
-};
-
 /*static void* thread_vsync(void* user) {
 	void* current_frame = NULL;
 
@@ -236,13 +231,14 @@ void gfx_setup() {
 
 	GX_SetTexCoordGen(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_POS, GX_TEXMTX1);
 
-	gfx_update_light(1.0F);
+	// gfx_update_light(1.0F);
 
 	GX_DrawDone();
 }
 
-void gfx_update_light(float daytime) {
-	assert(daytime > -GLM_FLT_EPSILON && daytime < 1.0F + GLM_FLT_EPSILON);
+void gfx_update_light(float daytime, const float* light_lookup) {
+	assert(daytime > -GLM_FLT_EPSILON && daytime < 1.0F + GLM_FLT_EPSILON
+		   && light_lookup);
 
 	for(int sky = 0; sky < 16; sky++) {
 		for(int torch = 0; torch < 16; torch++) {

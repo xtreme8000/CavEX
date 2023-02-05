@@ -137,10 +137,13 @@ int main(void) {
 		gfx_matrix_projection(gstate.camera.projection, true);
 
 		if(render_world) {
-			gfx_update_light(daytime_brightness(daytime));
+			gfx_update_light(daytime_brightness(daytime),
+							 world_dimension_light(&gstate.world));
 
-			gutil_sky_box(gstate.camera.view, daytime_celestial_angle(daytime),
-						  top_plane_color, bottom_plane_color);
+			if(gstate.world.dimension == WORLD_DIM_OVERWORLD)
+				gutil_sky_box(gstate.camera.view,
+							  daytime_celestial_angle(daytime), top_plane_color,
+							  bottom_plane_color);
 
 			gstate.stats.chunks_rendered
 				= world_render(&gstate.world, &gstate.camera, false);

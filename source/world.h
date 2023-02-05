@@ -67,6 +67,11 @@ struct world_modification_entry {
 DICT_DEF2(dict_wsection, int64_t, M_BASIC_OPLIST, struct world_section,
 		  M_POD_OPLIST)
 
+enum world_dim {
+	WORLD_DIM_NETHER = -1,
+	WORLD_DIM_OVERWORLD = 0,
+};
+
 struct world {
 	dict_wsection_t sections;
 	struct chunk* world_chunk_cache;
@@ -74,6 +79,7 @@ struct world {
 	ilist_chunks2_t gpu_busy_chunks;
 	ptime_t anim_timer;
 	struct stack lighting_updates;
+	enum world_dim dimension;
 };
 
 void world_create(struct world* w);
@@ -104,5 +110,6 @@ void world_pre_render_clear(struct world* w);
 size_t world_render(struct world* w, struct camera* c, bool pass);
 bool world_aabb_intersection(struct world* w, struct AABB* a);
 size_t world_loaded_chunks(struct world* w);
+const float* world_dimension_light(struct world* w);
 
 #endif

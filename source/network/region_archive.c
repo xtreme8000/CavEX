@@ -25,7 +25,7 @@
 #include "region_archive.h"
 
 bool region_archive_create(struct region_archive* ra, string_t world_name,
-						   w_coord_t x, w_coord_t z) {
+						   w_coord_t x, w_coord_t z, enum world_dim dimension) {
 	assert(ra && world_name);
 
 	ra->offsets = malloc(sizeof(uint32_t) * REGION_SIZE * REGION_SIZE);
@@ -33,8 +33,13 @@ bool region_archive_create(struct region_archive* ra, string_t world_name,
 	if(!ra->offsets)
 		return false;
 
-	string_init_printf(ra->file_name, "saves/%s/region/r.%i.%i.mcr", world_name,
-					   x, z);
+	if(dimension == WORLD_DIM_OVERWORLD) {
+		string_init_printf(ra->file_name, "saves/%s/region/r.%i.%i.mcr",
+						   world_name, x, z);
+	} else {
+		string_init_printf(ra->file_name, "saves/%s/DIM-1/region/r.%i.%i.mcr",
+						   world_name, x, z);
+	}
 
 	ra->x = x;
 	ra->z = z;

@@ -73,9 +73,9 @@ void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
 	GX_TexCoord2u8(0, 0);
 	GX_End();
 
-	gfx_blending(MODE_BLEND2);
 	gfx_fog(false);
 	gfx_texture(true);
+	gfx_blending(MODE_BLEND2);
 	gfx_bind_texture(TEXTURE_GUI2);
 
 	mat4 tmp;
