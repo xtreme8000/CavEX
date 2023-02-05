@@ -99,11 +99,6 @@ static void screen_ingame_update(struct screen* s, float dt) {
 								.torch_light = 0,
 							},
 							true);
-			gstate.held_item_animation = (struct held_anim) {
-				.start = time_get(),
-				.type = false,
-				.finished = false,
-			};
 		} else if(input_pressed(IB_ACTION2)) {
 			struct item_data item;
 			if(inventory_get_slot(&gstate.inventory,
@@ -130,6 +125,13 @@ static void screen_ingame_update(struct screen* s, float dt) {
 			};
 		}
 	}
+
+	if(input_pressed(IB_ACTION1))
+		gstate.held_item_animation = (struct held_anim) {
+			.start = time_get(),
+			.type = false,
+			.finished = false,
+		};
 
 	size_t slot = inventory_get_hotbar(&gstate.inventory);
 
@@ -204,6 +206,8 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 				icon_offset, CONTROL_C, item_is_block(&item) ? "Place" : "Use");
 		}
 		icon_offset += gutil_control_icon(icon_offset, CONTROL_Z, "Mine");
+	} else {
+		icon_offset += gutil_control_icon(icon_offset, CONTROL_Z, "Punch");
 	}
 	icon_offset += gutil_control_icon(icon_offset, CONTROL_HOME, "Quit");
 
