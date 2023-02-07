@@ -26,7 +26,7 @@
 
 #include "../world.h"
 #include "level_archive.h"
-#include "region_archive.h"
+#include "server_world.h"
 
 #define MAX_REGIONS 4
 #define MAX_VIEW_DISTANCE 5 // in chunks
@@ -39,14 +39,7 @@ struct server_local {
 		bool has_pos;
 		bool finished_loading;
 	} player;
-	struct loaded_chunk {
-		w_coord_t x, z; // not!!! stored in multiples of CHUNK_SIZE
-		bool modified;
-	} loaded_chunks[MAX_CHUNKS];
-	size_t loaded_chunks_length;
-	struct region_archive loaded_regions[MAX_REGIONS];
-	ilist_regions_t loaded_regions_lru;
-	size_t loaded_regions_length;
+	struct server_world world;
 	uint64_t world_time;
 	ptime_t world_time_start;
 	string_t level_name;

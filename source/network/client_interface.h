@@ -42,7 +42,8 @@ struct client_rpc {
 			w_coord_t sx, sy, sz;
 			uint8_t* ids;
 			uint8_t* metadata;
-			uint8_t* lighting;
+			uint8_t* lighting_sky;
+			uint8_t* lighting_torch;
 		} chunk;
 		struct {
 			w_coord_t x, z;

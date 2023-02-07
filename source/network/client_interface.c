@@ -28,40 +28,49 @@ mqbox_t clin_empty_msg;
 
 void clin_chunk(w_coord_t x, w_coord_t y, w_coord_t z, w_coord_t sx,
 				w_coord_t sy, w_coord_t sz, uint8_t* ids, uint8_t* metadata,
-				uint8_t* lighting) {
+				uint8_t* lighting_sky, uint8_t* lighting_torch) {
 	assert(sx > 0 && sz > 0 && y >= 0 && y + sy <= WORLD_HEIGHT);
-	assert(ids && metadata && lighting);
+	assert(ids && metadata && lighting_sky && lighting_torch);
 
 	uint8_t* ids_t = ids;
 	uint8_t* metadata_t = metadata;
-	uint8_t* lighting_t = lighting;
+	uint8_t* lighting_s_t = lighting_sky;
+	uint8_t* lighting_t_t = lighting_torch;
 	bool flip = true;
 
 	for(w_coord_t ox = x; ox < x + sx; ox++) {
 		for(w_coord_t oz = z; oz < z + sz; oz++) {
 			for(w_coord_t oy = y; oy < y + sy; oy++) {
 				uint8_t md = flip ? (*metadata_t) & 0xF : (*metadata_t) >> 4;
+				uint8_t sky
+					= flip ? (*lighting_s_t) & 0xF : (*lighting_s_t) >> 4;
+				uint8_t torch
+					= flip ? (*lighting_t_t) & 0xF : (*lighting_t_t) >> 4;
+
 				world_set_block(&gstate.world, ox, oy, oz,
 								(struct block_data) {
 									.type = *ids_t,
 									.metadata = md,
-									.sky_light = (*lighting_t) & 0xF,
-									.torch_light = (*lighting_t) >> 4,
+									.sky_light = sky,
+									.torch_light = torch,
 								},
 								false);
 				ids_t++;
-				lighting_t++;
 
 				flip = !flip;
-				if(flip)
+				if(flip) {
+					lighting_s_t++;
+					lighting_t_t++;
 					metadata_t++;
+				}
 			}
 		}
 	}
 
 	free(ids);
 	free(metadata);
-	free(lighting);
+	free(lighting_sky);
+	free(lighting_torch);
 }
 
 void clin_process(struct client_rpc* call) {
@@ -73,7 +82,8 @@ void clin_process(struct client_rpc* call) {
 					   call->payload.chunk.z, call->payload.chunk.sx,
 					   call->payload.chunk.sy, call->payload.chunk.sz,
 					   call->payload.chunk.ids, call->payload.chunk.metadata,
-					   call->payload.chunk.lighting);
+					   call->payload.chunk.lighting_sky,
+					   call->payload.chunk.lighting_torch);
 			break;
 		case CRPC_UNLOAD_CHUNK:
 			world_unload_section(&gstate.world, call->payload.unload_chunk.x,
