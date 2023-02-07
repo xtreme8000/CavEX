@@ -80,7 +80,8 @@ void displaylist_pos(struct displaylist* l, int16_t x, int16_t y, int16_t z) {
 	}
 
 	if(l->index + 9 > l->length) {
-		l->length *= 2;
+		l->length = (l->length * 5 / 4 + 9 + DISPLAYLIST_CLL - 1)
+			/ DISPLAYLIST_CLL * DISPLAYLIST_CLL;
 		l->data = realloc(l->data, l->length + DISPLAYLIST_CLL);
 		assert(l->data);
 	}
