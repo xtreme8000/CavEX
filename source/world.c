@@ -193,10 +193,11 @@ w_coord_t world_get_height(struct world* w, w_coord_t x, w_coord_t z) {
 	struct world_section* s
 		= dict_wsection_get(w->sections, SECTION_TO_ID(cx, cz));
 
-	return s ? s->heightmap[W2C_COORD(x) + W2C_COORD(z) * CHUNK_SIZE] : -1;
+	return s ? s->heightmap[W2C_COORD(x) + W2C_COORD(z) * CHUNK_SIZE] : 0;
 }
 
-void world_copy_heightmap(struct world* w, struct chunk* c, int8_t* heightmap) {
+void world_copy_heightmap(struct world* w, struct chunk* c,
+						  uint8_t* heightmap) {
 	assert(w && c && heightmap);
 	struct world_section* s = dict_wsection_get(
 		w->sections, SECTION_TO_ID(c->x / CHUNK_SIZE, c->z / CHUNK_SIZE));
@@ -209,28 +210,27 @@ static void wsection_heightmap_update(struct world_section* s, c_coord_t x,
 									  w_coord_t y, c_coord_t z, uint8_t type) {
 	assert(s);
 
-	int8_t* height = s->heightmap + x + z * CHUNK_SIZE;
+	uint8_t* height = s->heightmap + x + z * CHUNK_SIZE;
 
 	if(blocks[type]
 	   && (!blocks[type]->can_see_through || blocks[type]->opacity > 0)) {
-		if(y > *height)
-			*height = y;
-	} else if(y == *height) {
-		while(y >= 0) {
-			struct chunk* c = s->column[y / CHUNK_SIZE];
-			struct block_data blk = chunk_get_block(c, x, W2C_COORD(y), z);
+		if(y >= *height)
+			*height = y + 1;
+	} else if(y < *height) {
+		while(*height > 0) {
+			struct chunk* c = s->column[(*height - 1) / CHUNK_SIZE];
+			struct block_data blk
+				= chunk_get_block(c, x, W2C_COORD(*height - 1), z);
 			if(c) {
 				if(blocks[blk.type]
 				   && (!blocks[blk.type]->can_see_through
 					   || blocks[blk.type]->opacity > 0))
 					break;
-				y--;
+				(*height)--;
 			} else {
-				y -= CHUNK_SIZE;
+				(*height) -= CHUNK_SIZE;
 			}
 		}
-
-		*height = y;
 	}
 }
 
@@ -270,7 +270,7 @@ void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
 			if(!s) {
 				s = dict_wsection_safe_get(w->sections, SECTION_TO_ID(cx, cz));
 				assert(s);
-				memset(s->heightmap, -1, sizeof(s->heightmap));
+				memset(s->heightmap, 0, sizeof(s->heightmap));
 				memset(s->column, 0, sizeof(s->column));
 			}
 
@@ -327,8 +327,8 @@ void world_update_lighting(struct world* w) {
 		uint8_t old_light = (old.torch_light << 4) | old.sky_light;
 		uint8_t new_light_sky = 0, new_light_torch = 0;
 
-		if(current.y > s->heightmap[W2C_COORD(current.x)
-									+ W2C_COORD(current.z) * CHUNK_SIZE])
+		if(current.y >= s->heightmap[W2C_COORD(current.x)
+									 + W2C_COORD(current.z) * CHUNK_SIZE])
 			new_light_sky = 0xF;
 
 		if(blocks[old.type])

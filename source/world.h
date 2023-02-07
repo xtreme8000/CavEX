@@ -53,7 +53,7 @@ struct block_info {
 #define COLUMN_HEIGHT ((WORLD_HEIGHT + CHUNK_SIZE - 1) / CHUNK_SIZE)
 
 struct world_section {
-	int8_t heightmap[CHUNK_SIZE * CHUNK_SIZE];
+	uint8_t heightmap[CHUNK_SIZE * CHUNK_SIZE];
 	struct chunk* column[COLUMN_HEIGHT];
 };
 
@@ -87,7 +87,7 @@ void world_destroy(struct world* w);
 void world_unload_section(struct world* w, w_coord_t x, w_coord_t z);
 void world_unload_all(struct world* w);
 w_coord_t world_get_height(struct world* w, w_coord_t x, w_coord_t z);
-void world_copy_heightmap(struct world* w, struct chunk* c, int8_t* heightmap);
+void world_copy_heightmap(struct world* w, struct chunk* c, uint8_t* heightmap);
 size_t world_build_chunks(struct world* w, size_t tokens);
 void world_render_completed(struct world* w, bool new_render);
 struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,
