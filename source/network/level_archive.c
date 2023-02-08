@@ -25,7 +25,7 @@ bool level_archive_create(struct level_archive* la, string_t filename) {
 	assert(la && filename);
 
 	string_t tmp;
-	string_init_printf(tmp, "saves/%s/level.dat", filename);
+	string_init_printf(tmp, "saves/%s/level.dat", string_get_cstr(filename));
 	char* c_tmp = string_clear_get_str(tmp);
 
 	if(!c_tmp)

@@ -70,10 +70,10 @@ bool region_archive_create_new(struct region_archive* ra, string_t world_name,
 
 	if(dimension == WORLD_DIM_OVERWORLD) {
 		string_init_printf(ra->file_name, "saves/%s/region/r.%i.%i.mcr",
-						   world_name, x, z);
+						   string_get_cstr(world_name), x, z);
 	} else {
 		string_init_printf(ra->file_name, "saves/%s/DIM-1/region/r.%i.%i.mcr",
-						   world_name, x, z);
+						   string_get_cstr(world_name), x, z);
 	}
 
 	FILE* f = fopen(string_get_cstr(ra->file_name), "w");
@@ -111,10 +111,10 @@ bool region_archive_create(struct region_archive* ra, string_t world_name,
 
 	if(dimension == WORLD_DIM_OVERWORLD) {
 		string_init_printf(ra->file_name, "saves/%s/region/r.%i.%i.mcr",
-						   world_name, x, z);
+						   string_get_cstr(world_name), x, z);
 	} else {
 		string_init_printf(ra->file_name, "saves/%s/DIM-1/region/r.%i.%i.mcr",
-						   world_name, x, z);
+						   string_get_cstr(world_name), x, z);
 	}
 
 	ra->x = x;
