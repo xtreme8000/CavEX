@@ -90,15 +90,19 @@ static void screen_ingame_render3D(struct screen* s, mat4 view) {
 static void screen_ingame_update(struct screen* s, float dt) {
 	if(gstate.camera_hit.hit) {
 		if(input_pressed(IB_ACTION1)) {
-			world_set_block(&gstate.world, gstate.camera_hit.x,
-							gstate.camera_hit.y, gstate.camera_hit.z,
-							(struct block_data) {
-								.type = BLOCK_AIR,
-								.metadata = 0,
-								.sky_light = 0,
-								.torch_light = 0,
-							},
-							true);
+			struct block_data blk = (struct block_data) {
+				.type = BLOCK_AIR,
+				.metadata = 0,
+				.sky_light = 0,
+				.torch_light = 0,
+			};
+			svin_rpc_send(&(struct server_rpc) {
+				.type = SRPC_SET_BLOCK,
+				.payload.set_block.x = gstate.camera_hit.x,
+				.payload.set_block.y = gstate.camera_hit.y,
+				.payload.set_block.z = gstate.camera_hit.z,
+				.payload.set_block.block = blk,
+			});
 		} else if(input_pressed(IB_ACTION2)) {
 			struct item_data item;
 			if(inventory_get_slot(&gstate.inventory,
@@ -107,16 +111,20 @@ static void screen_ingame_update(struct screen* s, float dt) {
 			   && item_is_block(&item)) {
 				int x, y, z;
 				blocks_side_offset(gstate.camera_hit.side, &x, &y, &z);
-				world_set_block(&gstate.world, gstate.camera_hit.x + x,
-								gstate.camera_hit.y + y,
-								gstate.camera_hit.z + z,
-								(struct block_data) {
-									.type = item.id,
-									.metadata = 0,
-									.sky_light = 0,
-									.torch_light = 0,
-								},
-								true);
+
+				struct block_data blk = (struct block_data) {
+					.type = item.id,
+					.metadata = 0,
+					.sky_light = 0,
+					.torch_light = 0,
+				};
+				svin_rpc_send(&(struct server_rpc) {
+					.type = SRPC_SET_BLOCK,
+					.payload.set_block.x = gstate.camera_hit.x + x,
+					.payload.set_block.y = gstate.camera_hit.y + y,
+					.payload.set_block.z = gstate.camera_hit.z + z,
+					.payload.set_block.block = blk,
+				});
 			}
 			gstate.held_item_animation = (struct held_anim) {
 				.start = time_get(),

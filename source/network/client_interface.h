@@ -32,6 +32,7 @@ enum client_rpc_type {
 	CRPC_PLAYER_POS,
 	CRPC_TIME_SET,
 	CRPC_WORLD_RESET,
+	CRPC_SET_BLOCK,
 };
 
 struct client_rpc {
@@ -60,6 +61,10 @@ struct client_rpc {
 		struct {
 			enum world_dim dimension;
 		} world_reset;
+		struct {
+			w_coord_t x, y, z;
+			struct block_data block;
+		} set_block;
 	} payload;
 };
 

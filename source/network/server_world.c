@@ -19,10 +19,15 @@
 
 #include <assert.h>
 
+#include "../lighting.h"
+#include "../util.h"
 #include "server_world.h"
 
 #define CHUNK_DIST2(x1, x2, z1, z2)                                            \
 	(((x1) - (x2)) * ((x1) - (x2)) + ((z1) - (z2)) * ((z1) - (z2)))
+
+#define S_CHUNK_IDX(x, y, z)                                                   \
+	((y) + (W2C_COORD(z) + W2C_COORD(x) * CHUNK_SIZE) * WORLD_HEIGHT)
 
 void server_world_chunk_destroy(struct server_chunk* sc) {
 	assert(sc);
@@ -31,6 +36,7 @@ void server_world_chunk_destroy(struct server_chunk* sc) {
 	free(sc->metadata);
 	free(sc->lighting_sky);
 	free(sc->lighting_torch);
+	free(sc->heightmap);
 }
 
 void server_world_create(struct server_world* w, string_t level_name,
@@ -60,6 +66,96 @@ void server_world_destroy(struct server_world* w) {
 	}
 
 	dict_server_chunks_clear(w->chunks);
+	string_clear(w->level_name);
+}
+
+static bool server_chunk_get_block(void* user, c_coord_t x, w_coord_t y,
+								   c_coord_t z, struct block_data* blk) {
+	assert(user && blk);
+	struct server_chunk* sc = user;
+
+	if(y < 0 || y >= WORLD_HEIGHT)
+		return false;
+
+	size_t idx = S_CHUNK_IDX(x, y, z);
+
+	*blk = (struct block_data) {
+		.type = sc->ids[idx],
+		.metadata = nibble_read(sc->metadata, idx),
+		.sky_light = nibble_read(sc->lighting_sky, idx),
+		.torch_light = nibble_read(sc->lighting_torch, idx),
+	};
+
+	return true;
+}
+
+static bool server_world_light_get_block(void* user, w_coord_t x, w_coord_t y,
+										 w_coord_t z, struct block_data* blk,
+										 uint8_t* height) {
+	assert(user);
+	struct server_world* w = user;
+
+	if(y < 0 || y >= WORLD_HEIGHT)
+		return false;
+
+	struct server_chunk* sc = dict_server_chunks_get(
+		w->chunks, S_CHUNK_ID(WCOORD_CHUNK_OFFSET(x), WCOORD_CHUNK_OFFSET(z)));
+
+	if(!sc)
+		return false;
+
+	if(blk)
+		server_chunk_get_block(sc, W2C_COORD(x), y, W2C_COORD(z), blk);
+
+	if(height)
+		*height = sc->heightmap[W2C_COORD(x) + W2C_COORD(z) * CHUNK_SIZE];
+
+	return true;
+}
+
+static void server_world_light_set_light(void* user, w_coord_t x, w_coord_t y,
+										 w_coord_t z, uint8_t light) {
+	assert(user);
+	struct server_world* w = user;
+	struct server_chunk* sc = dict_server_chunks_get(
+		w->chunks, S_CHUNK_ID(WCOORD_CHUNK_OFFSET(x), WCOORD_CHUNK_OFFSET(z)));
+	assert(sc);
+
+	size_t idx = S_CHUNK_IDX(x, y, z);
+	nibble_write(sc->lighting_sky, idx, light & 0xF);
+	nibble_write(sc->lighting_torch, idx, light >> 4);
+}
+
+bool server_world_set_block(struct server_world* w, w_coord_t x, w_coord_t y,
+							w_coord_t z, struct block_data blk) {
+	assert(w && y >= 0 && y < WORLD_HEIGHT);
+
+	struct server_chunk* sc = dict_server_chunks_get(
+		w->chunks, S_CHUNK_ID(WCOORD_CHUNK_OFFSET(x), WCOORD_CHUNK_OFFSET(z)));
+
+	if(sc) {
+		size_t idx = S_CHUNK_IDX(x, y, z);
+		sc->modified = true;
+		sc->ids[idx] = blk.type;
+		nibble_write(sc->metadata, idx, blk.metadata);
+
+		if(w->dimension != WORLD_DIM_NETHER)
+			lighting_heightmap_update(sc->heightmap, W2C_COORD(x), y,
+									  W2C_COORD(z), blk.type,
+									  server_chunk_get_block, sc);
+
+		lighting_update_at_block(
+			(struct world_modification_entry) {
+				.x = x,
+				.y = y,
+				.z = z,
+				.blk = blk,
+			},
+			w->dimension == WORLD_DIM_NETHER, server_world_light_get_block,
+			server_world_light_set_light, w);
+	}
+
+	return sc;
 }
 
 bool server_world_furthest_chunk(struct server_world* w, w_coord_t dist,
@@ -155,6 +251,7 @@ void server_world_save_chunk_obj(struct server_world* w, bool erase,
 		}
 
 		region_archive_set_blocks(ra, x, z, c);
+		c->modified = false;
 	}
 
 	if(erase) {

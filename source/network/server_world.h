@@ -32,7 +32,7 @@ struct server_chunk {
 	uint8_t* metadata;
 	uint8_t* lighting_sky;
 	uint8_t* lighting_torch;
-	int8_t heightmap[CHUNK_SIZE * CHUNK_SIZE];
+	uint8_t* heightmap;
 	bool modified;
 };
 
@@ -57,6 +57,9 @@ struct server_world {
 void server_world_create(struct server_world* w, string_t level_name,
 						 enum world_dim dimension);
 void server_world_destroy(struct server_world* w);
+
+bool server_world_set_block(struct server_world* w, w_coord_t x, w_coord_t y,
+							w_coord_t z, struct block_data blk);
 
 bool server_world_furthest_chunk(struct server_world* w, w_coord_t dist,
 								 w_coord_t px, w_coord_t pz, w_coord_t* x,

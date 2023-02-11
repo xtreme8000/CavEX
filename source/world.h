@@ -57,11 +57,6 @@ struct world_section {
 	struct chunk* column[COLUMN_HEIGHT];
 };
 
-struct world_modification_entry {
-	w_coord_t x, y, z;
-	struct block_data blk;
-};
-
 #define SECTION_TO_ID(x, z) (((int64_t)(z) << 32) | (((int64_t)(x)&0xFFFFFFFF)))
 
 DICT_DEF2(dict_wsection, int64_t, M_BASIC_OPLIST, struct world_section,

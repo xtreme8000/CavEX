@@ -20,6 +20,7 @@
 #ifndef SERVER_INTERFACE_H
 #define SERVER_INTERFACE_H
 
+#include "../world.h"
 #include <m-lib/m-string.h>
 #include <stdbool.h>
 
@@ -27,6 +28,7 @@ enum server_rpc_type {
 	SRPC_PLAYER_POS,
 	SRPC_LOAD_WORLD,
 	SRPC_UNLOAD_WORLD,
+	SRPC_SET_BLOCK,
 };
 
 struct server_rpc {
@@ -38,6 +40,10 @@ struct server_rpc {
 		struct {
 			string_t name;
 		} load_world;
+		struct {
+			w_coord_t x, y, z;
+			struct block_data block;
+		} set_block;
 	} payload;
 };
 

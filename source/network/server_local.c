@@ -45,6 +45,21 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				s->player.has_pos = true;
 			}
 			break;
+		case SRPC_SET_BLOCK:
+			if(s->player.has_pos) {
+				server_world_set_block(&s->world, call->payload.set_block.x,
+									   call->payload.set_block.y,
+									   call->payload.set_block.z,
+									   call->payload.set_block.block);
+				clin_rpc_send(&(struct client_rpc) {
+					.type = CRPC_SET_BLOCK,
+					.payload.set_block.x = call->payload.set_block.x,
+					.payload.set_block.y = call->payload.set_block.y,
+					.payload.set_block.z = call->payload.set_block.z,
+					.payload.set_block.block = call->payload.set_block.block,
+				});
+			}
+			break;
 		case SRPC_UNLOAD_WORLD:
 			// save chunks here, then destroy all
 			clin_rpc_send(&(struct client_rpc) {
@@ -137,19 +152,16 @@ static void server_local_update(struct server_local* s) {
 	struct server_chunk* sc;
 	if(c_nearest
 	   && server_world_load_chunk(&s->world, c_nearest_x, c_nearest_z, &sc)) {
-		void* ids = malloc(CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT);
-		void* metadata = malloc(CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT / 2);
-		void* lighting_sky = malloc(CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT / 2);
-		void* lighting_torch
-			= malloc(CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT / 2);
+		size_t sz = CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT;
+		void* ids = malloc(sz);
+		void* metadata = malloc(sz / 2);
+		void* lighting_sky = malloc(sz / 2);
+		void* lighting_torch = malloc(sz / 2);
 
-		memcpy(ids, sc->ids, CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT);
-		memcpy(metadata, sc->metadata,
-			   CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT / 2);
-		memcpy(lighting_sky, sc->lighting_sky,
-			   CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT / 2);
-		memcpy(lighting_torch, sc->lighting_torch,
-			   CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT / 2);
+		memcpy(ids, sc->ids, sz);
+		memcpy(metadata, sc->metadata, sz / 2);
+		memcpy(lighting_sky, sc->lighting_sky, sz / 2);
+		memcpy(lighting_torch, sc->lighting_torch, sz / 2);
 
 		clin_rpc_send(&(struct client_rpc) {
 			.type = CRPC_CHUNK,

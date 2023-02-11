@@ -116,6 +116,12 @@ void clin_process(struct client_rpc* call) {
 			gstate.world_time = call->payload.time_set;
 			gstate.world_time_start = time_get();
 			break;
+		case CRPC_SET_BLOCK:
+			world_set_block(&gstate.world, call->payload.set_block.x,
+							call->payload.set_block.y,
+							call->payload.set_block.z,
+							call->payload.set_block.block, true);
+			break;
 	}
 }
 

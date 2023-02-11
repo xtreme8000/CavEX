@@ -20,6 +20,7 @@
 #include <assert.h>
 
 #include "game/game_state.h"
+#include "lighting.h"
 #include "platform/graphics/gfx.h"
 #include "world.h"
 
@@ -206,32 +207,14 @@ void world_copy_heightmap(struct world* w, struct chunk* c,
 	memcpy(heightmap, s->heightmap, sizeof(s->heightmap));
 }
 
-static void wsection_heightmap_update(struct world_section* s, c_coord_t x,
-									  w_coord_t y, c_coord_t z, uint8_t type) {
-	assert(s);
-
-	uint8_t* height = s->heightmap + x + z * CHUNK_SIZE;
-
-	if(blocks[type]
-	   && (!blocks[type]->can_see_through || blocks[type]->opacity > 0)) {
-		if(y >= *height)
-			*height = y + 1;
-	} else if(y < *height) {
-		while(*height > 0) {
-			struct chunk* c = s->column[(*height - 1) / CHUNK_SIZE];
-			struct block_data blk
-				= chunk_get_block(c, x, W2C_COORD(*height - 1), z);
-			if(c) {
-				if(blocks[blk.type]
-				   && (!blocks[blk.type]->can_see_through
-					   || blocks[blk.type]->opacity > 0))
-					break;
-				(*height)--;
-			} else {
-				(*height) -= CHUNK_SIZE;
-			}
-		}
-	}
+static bool wsection_heightmap_get_block(void* user, c_coord_t x, w_coord_t y,
+										 c_coord_t z, struct block_data* blk) {
+	assert(user);
+	struct world_section* s = user;
+	struct chunk* c = s->column[y / CHUNK_SIZE];
+	if(c)
+		*blk = chunk_get_block(c, x, W2C_COORD(y), z);
+	return c;
 }
 
 void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
@@ -279,17 +262,46 @@ void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
 		}
 
 		chunk_set_block(c, W2C_COORD(x), W2C_COORD(y), W2C_COORD(z), blk);
-		wsection_heightmap_update(s, W2C_COORD(x), y, W2C_COORD(z), blk.type);
+		lighting_heightmap_update(s->heightmap, W2C_COORD(x), y, W2C_COORD(z),
+								  blk.type, wsection_heightmap_get_block, s);
 	}
 }
 
-static inline int8_t MAX_I8(int8_t a, int8_t b) {
-	return a > b ? a : b;
+static bool world_light_get_block(void* user, w_coord_t x, w_coord_t y,
+								  w_coord_t z, struct block_data* blk,
+								  uint8_t* height) {
+	assert(user);
+	struct world* w = user;
+
+	struct world_section* s = dict_wsection_get(
+		w->sections,
+		SECTION_TO_ID(WCOORD_CHUNK_OFFSET(x), WCOORD_CHUNK_OFFSET(z)));
+
+	if(!s)
+		return false;
+
+	struct chunk* c = world_chunk_from_section(w, s, y);
+
+	if(!c)
+		return false;
+
+	if(blk)
+		*blk = chunk_get_block(c, W2C_COORD(x), W2C_COORD(y), W2C_COORD(z));
+
+	if(height)
+		*height = s->heightmap[W2C_COORD(x) + W2C_COORD(z) * CHUNK_SIZE];
+
+	return true;
 }
 
-struct lighting_update_entry {
-	w_coord_t x, y, z;
-};
+static void world_light_set_light(void* user, w_coord_t x, w_coord_t y,
+								  w_coord_t z, uint8_t light) {
+	assert(user);
+	struct chunk* c = world_find_chunk((struct world*)user, x, y, z);
+	assert(c);
+
+	chunk_set_light(c, W2C_COORD(x), W2C_COORD(y), W2C_COORD(z), light);
+}
 
 void world_update_lighting(struct world* w) {
 	assert(w);
@@ -300,93 +312,9 @@ void world_update_lighting(struct world* w) {
 	struct world_modification_entry source;
 	stack_pop(&w->lighting_updates, &source);
 
-	struct stack queue;
-	stack_create(&queue, 128, sizeof(struct lighting_update_entry));
-	stack_push(&queue,
-			   &(struct lighting_update_entry) {
-				   .x = source.x,
-				   .y = source.y,
-				   .z = source.z,
-			   });
-
 	world_set_block(w, source.x, source.y, source.z, source.blk, false);
-
-	while(!stack_empty(&queue)) {
-		struct lighting_update_entry current;
-		stack_pop(&queue, &current);
-
-		struct world_section* s
-			= dict_wsection_get(w->sections,
-								SECTION_TO_ID(WCOORD_CHUNK_OFFSET(current.x),
-											  WCOORD_CHUNK_OFFSET(current.z)));
-		struct chunk* c = world_chunk_from_section(w, s, current.y);
-		struct block_data old
-			= chunk_get_block(c, W2C_COORD(current.x), W2C_COORD(current.y),
-							  W2C_COORD(current.z));
-
-		uint8_t old_light = (old.torch_light << 4) | old.sky_light;
-		uint8_t new_light_sky = 0, new_light_torch = 0;
-
-		if(current.y >= s->heightmap[W2C_COORD(current.x)
-									 + W2C_COORD(current.z) * CHUNK_SIZE])
-			new_light_sky = 0xF;
-
-		if(blocks[old.type])
-			new_light_torch = blocks[old.type]->luminance;
-
-		if(!blocks[old.type] || blocks[old.type]->can_see_through) {
-			for(enum side s = 0; s < SIDE_MAX; s++) {
-				int x, y, z;
-				blocks_side_offset(s, &x, &y, &z);
-
-				struct chunk* c_other = world_find_chunk(
-					w, current.x + x, current.y + y, current.z + z);
-
-				if(c_other) {
-					struct block_data other = chunk_get_block(
-						c_other, W2C_COORD(current.x + x),
-						W2C_COORD(current.y + y), W2C_COORD(current.z + z));
-					int8_t opacity = blocks[old.type] ?
-						MAX_I8(blocks[old.type]->opacity, 1) :
-						1;
-
-					new_light_sky
-						= MAX_I8(MAX_I8((int8_t)other.sky_light - opacity, 0),
-								 new_light_sky);
-					new_light_torch
-						= MAX_I8(MAX_I8((int8_t)other.torch_light - opacity, 0),
-								 new_light_torch);
-				}
-			}
-		}
-
-		uint8_t new_light = (new_light_torch << 4) | new_light_sky;
-
-		if(old_light != new_light
-		   || (source.x == current.x && source.y == current.y
-			   && source.z == current.z)) {
-			chunk_set_light(c, W2C_COORD(current.x), W2C_COORD(current.y),
-							W2C_COORD(current.z), new_light);
-
-			for(enum side s = 0; s < SIDE_MAX; s++) {
-				int x, y, z;
-				blocks_side_offset(s, &x, &y, &z);
-
-				struct chunk* c_other = world_find_chunk(
-					w, current.x + x, current.y + y, current.z + z);
-
-				if(c_other)
-					stack_push(&queue,
-							   &(struct lighting_update_entry) {
-								   .x = current.x + x,
-								   .y = current.y + y,
-								   .z = current.z + z,
-							   });
-			}
-		}
-	}
-
-	stack_destroy(&queue);
+	lighting_update_at_block(source, false, world_light_get_block,
+							 world_light_set_light, w);
 }
 
 struct chunk* world_find_chunk_neighbour(struct world* w, struct chunk* c,

@@ -273,13 +273,13 @@ bool region_archive_get_blocks(struct region_archive* ra, w_coord_t x,
 	n_metadata->type = TAG_INVALID;
 	n_skyl->type = TAG_INVALID;
 	n_torchl->type = TAG_INVALID;
+	n_height->type = TAG_INVALID;
 
 	sc->ids = n_blocks->payload.tag_byte_array.data;
 	sc->metadata = n_metadata->payload.tag_byte_array.data;
 	sc->lighting_sky = n_skyl->payload.tag_byte_array.data;
 	sc->lighting_torch = n_torchl->payload.tag_byte_array.data;
-
-	memcpy(sc->heightmap, n_height, CHUNK_SIZE * CHUNK_SIZE);
+	sc->heightmap = n_height->payload.tag_byte_array.data;
 
 	nbt_free(chunk);
 
@@ -412,7 +412,7 @@ bool region_archive_set_blocks(struct region_archive* ra, w_coord_t x,
 		{
 			.type = TAG_BYTE_ARRAY,
 			.name = "HeightMap",
-			.payload.tag_byte_array.data = (uint8_t*)sc->heightmap,
+			.payload.tag_byte_array.data = sc->heightmap,
 			.payload.tag_byte_array.length = CHUNK_SIZE * CHUNK_SIZE,
 		},
 		{

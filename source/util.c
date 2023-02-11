@@ -69,3 +69,12 @@ void hsv2rgb(float* h, float* s, float* v) {
 	*s = g;
 	*v = b;
 }
+
+inline uint8_t nibble_read(uint8_t* base, size_t idx) {
+	return (base[idx / 2] >> ((idx % 2) * 4)) & 0xF;
+}
+
+inline void nibble_write(uint8_t* base, size_t idx, uint8_t data) {
+	base[idx / 2] = (base[idx / 2] & ~(0x0F << ((idx % 2) * 4)))
+		| (data << ((idx % 2) * 4));
+}

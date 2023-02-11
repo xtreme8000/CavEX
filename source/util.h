@@ -20,6 +20,7 @@
 #ifndef HASH_H
 #define HASH_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 typedef uint64_t ptime_t;
@@ -32,5 +33,8 @@ float time_diff_s(ptime_t f, ptime_t s);
 uint32_t hash_u32(uint32_t x);
 
 void hsv2rgb(float* h, float* s, float* v);
+
+uint8_t nibble_read(uint8_t* base, size_t idx);
+void nibble_write(uint8_t* base, size_t idx, uint8_t data);
 
 #endif
