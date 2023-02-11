@@ -199,9 +199,6 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 		gutil_text(4, 4 + 17 * 5, str, 16);
 	}
 
-	sprintf(str, "mem used %iKiB", mallinfo().uordblks / 1024);
-	gutil_text(4, 4 + 17 * 6, str, 16);
-
 	int icon_offset = 32;
 	icon_offset += gutil_control_icon(icon_offset, CONTROL_A, "Inventory");
 	icon_offset += gutil_control_icon(icon_offset, CONTROL_B, "Jump");

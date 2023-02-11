@@ -30,7 +30,7 @@
 
 #define GAME_NAME "CavEX"
 #define VERSION_MAJOR 0
-#define VERSION_MINOR 1
+#define VERSION_MINOR 2
 #define VERSION_PATCH 0
 
 struct game_state {

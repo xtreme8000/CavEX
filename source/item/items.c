@@ -70,7 +70,7 @@ void items_init() {
 	items[283] = &item_gold_sword;
 	items[284] = &item_gold_shovel;
 	items[285] = &item_gold_pickaxe;
-	items[286] = item_gold_axe;
+	items[286] = &item_gold_axe;
 	// string
 	// feather
 	// gunpowder
