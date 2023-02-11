@@ -258,7 +258,7 @@ bool level_archive_read_player(struct level_archive* la, vec3 position,
 	if(!level_archive_read(la, LEVEL_PLAYER_ROTATION, &rot, 0))
 		return false;
 
-	int32_t* dim;
+	int32_t dim;
 	if(dimension && !level_archive_read(la, LEVEL_PLAYER_DIMENSION, &dim, 0))
 		return false;
 
