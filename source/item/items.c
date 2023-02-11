@@ -60,25 +60,25 @@ void items_init() {
 	items[273] = &item_stone_shovel;
 	items[274] = &item_stone_pickaxe;
 	items[275] = &item_stone_axe;
-	// diamond sword
-	// diamond shovel
-	// diamond pickaxe
-	// diamond axe
+	items[276] = &item_diamond_sword;
+	items[277] = &item_diamond_shovel;
+	items[278] = &item_diamond_pickaxe;
+	items[279] = &item_diamond_axe;
 	items[280] = &item_stick;
 	// bowl
 	// soup
-	// gold sword
-	// gold shovel
-	// gold pickaxe
-	// gold axe
+	items[283] = &item_gold_sword;
+	items[284] = &item_gold_shovel;
+	items[285] = &item_gold_pickaxe;
+	items[286] = item_gold_axe;
 	// string
 	// feather
 	// gunpowder
 	items[290] = &item_wood_hoe;
 	items[291] = &item_stone_hoe;
 	items[292] = &item_iron_hoe;
-	// diamond hoe
-	// gold hoe
+	items[293] = &item_diamond_hoe;
+	items[294] = &item_gold_hoe;
 	// seeds
 	// wheat
 	// bread

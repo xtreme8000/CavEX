@@ -214,6 +214,136 @@ static struct item item_stone_hoe = {
 	},
 };
 
+static struct item item_diamond_sword = {
+	.name = "Diamond Sword",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.render_data = {
+		.item = {
+			.texture_x = 3,
+			.texture_y = 4,
+		},
+	},
+};
+
+static struct item item_diamond_shovel = {
+	.name = "Diamond Shovel",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.render_data = {
+		.item = {
+			.texture_x = 3,
+			.texture_y = 5,
+		},
+	},
+};
+
+static struct item item_diamond_pickaxe = {
+	.name = "Diamond Pickaxe",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.render_data = {
+		.item = {
+			.texture_x = 3,
+			.texture_y = 6,
+		},
+	},
+};
+
+static struct item item_diamond_axe = {
+	.name = "Diamond Axe",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.render_data = {
+		.item = {
+			.texture_x = 3,
+			.texture_y = 7,
+		},
+	},
+};
+
+static struct item item_diamond_hoe = {
+	.name = "Diamond Hoe",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.render_data = {
+		.item = {
+			.texture_x = 3,
+			.texture_y = 8,
+		},
+	},
+};
+
+static struct item item_gold_sword = {
+	.name = "Gold Sword",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.render_data = {
+		.item = {
+			.texture_x = 4,
+			.texture_y = 4,
+		},
+	},
+};
+
+static struct item item_gold_shovel = {
+	.name = "Gold Shovel",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.render_data = {
+		.item = {
+			.texture_x = 4,
+			.texture_y = 5,
+		},
+	},
+};
+
+static struct item item_gold_pickaxe = {
+	.name = "Gold Pickaxe",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.render_data = {
+		.item = {
+			.texture_x = 4,
+			.texture_y = 6,
+		},
+	},
+};
+
+static struct item item_gold_axe = {
+	.name = "Gold Axe",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.render_data = {
+		.item = {
+			.texture_x = 4,
+			.texture_y = 7,
+		},
+	},
+};
+
+static struct item item_gold_hoe = {
+	.name = "Gold Hoe",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.render_data = {
+		.item = {
+			.texture_x = 4,
+			.texture_y = 8,
+		},
+	},
+};
+
 static struct item item_flint_steel = {
 	.name = "Flint and Steel",
 	.has_damage = true,
