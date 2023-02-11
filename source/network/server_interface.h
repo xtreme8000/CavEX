@@ -36,6 +36,7 @@ struct server_rpc {
 	union {
 		struct {
 			double x, y, z;
+			float rx, ry;
 		} player_pos;
 		struct {
 			string_t name;

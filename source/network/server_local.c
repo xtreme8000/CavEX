@@ -42,6 +42,8 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				s->player.x = call->payload.player_pos.x;
 				s->player.y = call->payload.player_pos.y;
 				s->player.z = call->payload.player_pos.z;
+				s->player.rx = call->payload.player_pos.rx;
+				s->player.ry = call->payload.player_pos.ry;
 				s->player.has_pos = true;
 			}
 			break;
@@ -67,6 +69,10 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				.payload.world_reset.dimension = WORLD_DIM_OVERWORLD,
 			});
 
+			level_archive_write_player(
+				&s->level, (vec3) {s->player.x, s->player.y, s->player.z},
+				(vec2) {s->player.rx, s->player.ry}, NULL, s->player.dimension);
+
 			server_world_destroy(&s->world);
 			level_archive_destroy(&s->level);
 
@@ -82,13 +88,15 @@ static void server_local_process(struct server_rpc* call, void* user) {
 
 			if(level_archive_create(&s->level, s->level_name)) {
 				vec3 pos;
+				vec2 rot;
 				enum world_dim dim;
-				if(level_archive_read_player(&s->level, pos, NULL, NULL,
-											 &dim)) {
+				if(level_archive_read_player(&s->level, pos, rot, NULL, &dim)) {
 					server_world_create(&s->world, s->level_name, dim);
 					s->player.x = pos[0];
 					s->player.y = pos[1];
 					s->player.z = pos[2];
+					s->player.rx = rot[0];
+					s->player.ry = rot[1];
 					s->player.dimension = dim;
 					s->player.has_pos = true;
 				}

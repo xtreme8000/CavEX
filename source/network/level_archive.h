@@ -70,11 +70,18 @@ struct level_archive_tag {
 
 struct level_archive {
 	nbt_node* data;
+	string_t file_name;
+	bool modified;
 };
 
 bool level_archive_create(struct level_archive* la, string_t filename);
 bool level_archive_read(struct level_archive* la, struct level_archive_tag tag,
 						void* result, size_t length);
+bool level_archive_write(struct level_archive* la, struct level_archive_tag tag,
+						 void* data);
+bool level_archive_write_player(struct level_archive* la, vec3 position,
+								vec2 rotation, vec3 velocity,
+								enum world_dim dimension);
 bool level_archive_read_inventory(struct level_archive* la,
 								  struct item_data* inventory, size_t length);
 bool level_archive_read_player(struct level_archive* la, vec3 position,

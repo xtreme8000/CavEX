@@ -35,6 +35,7 @@
 struct server_local {
 	struct {
 		double x, y, z;
+		float rx, ry;
 		enum world_dim dimension;
 		bool has_pos;
 		bool finished_loading;

@@ -93,9 +93,9 @@ void clin_process(struct client_rpc* call) {
 			gstate.camera.x = call->payload.player_pos.position[0];
 			gstate.camera.y = call->payload.player_pos.position[1];
 			gstate.camera.z = call->payload.player_pos.position[2];
-			gstate.camera.rx = glm_rad(call->payload.player_pos.rotation[0]);
-			gstate.camera.ry
-				= glm_rad(call->payload.player_pos.rotation[1] + 90.0F);
+			gstate.camera.rx = glm_rad(-call->payload.player_pos.rotation[0]);
+			gstate.camera.ry = glm_rad(glm_clamp(
+				call->payload.player_pos.rotation[1] + 90.0F, 0.0F, 180.0F));
 			gstate.world_loaded = true;
 			break;
 		case CRPC_WORLD_RESET:
@@ -148,6 +148,8 @@ void clin_update() {
 			.payload.player_pos.x = gstate.camera.x,
 			.payload.player_pos.y = gstate.camera.y,
 			.payload.player_pos.z = gstate.camera.z,
+			.payload.player_pos.rx = -glm_deg(gstate.camera.rx),
+			.payload.player_pos.ry = glm_deg(gstate.camera.ry) - 90.0F,
 		});
 		last_pos_update = time_get();
 	}

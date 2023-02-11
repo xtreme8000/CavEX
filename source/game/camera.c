@@ -178,7 +178,7 @@ void camera_update(struct camera* c, float dt) {
 		c->controller.vz = 0;
 	}
 
-	c->ry = fminf(M_PI - glm_rad(0.5F), fmaxf(glm_rad(0.5F), c->ry));
+	c->ry = glm_clamp(c->ry, glm_rad(0.5F), M_PI - glm_rad(0.5F));
 
 	glm_perspective(glm_rad(gstate.config.fov),
 					(float)gfx_width() / (float)gfx_height(), 0.1F,

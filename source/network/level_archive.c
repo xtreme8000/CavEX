@@ -24,16 +24,12 @@
 bool level_archive_create(struct level_archive* la, string_t filename) {
 	assert(la && filename);
 
-	string_t tmp;
-	string_init_printf(tmp, "saves/%s/level.dat", string_get_cstr(filename));
-	char* c_tmp = string_clear_get_str(tmp);
+	la->modified = false;
 
-	if(!c_tmp)
-		return false;
+	string_init_printf(la->file_name, "saves/%s/level.dat",
+					   string_get_cstr(filename));
 
-	la->data = nbt_parse_path(c_tmp);
-
-	free(c_tmp);
+	la->data = nbt_parse_path(string_get_cstr(la->file_name));
 
 	return la->data;
 }
@@ -76,6 +72,38 @@ bool level_archive_read(struct level_archive* la, struct level_archive_tag tag,
 	assert(la && result);
 	assert(la->data);
 	return level_archive_read_internal(la->data, tag, result, length);
+}
+
+static bool level_archive_write_internal(nbt_node* root,
+										 struct level_archive_tag tag,
+										 void* data) {
+	assert(root && data);
+
+	nbt_node* node = nbt_find_by_path(root, tag.name);
+
+	if(!node || node->type != tag.type)
+		return false;
+
+	switch(tag.type) {
+		case TAG_LONG: node->payload.tag_long = *(int64_t*)data; return true;
+		case TAG_INT: node->payload.tag_int = *(int32_t*)data; return true;
+		case TAG_SHORT: node->payload.tag_short = *(int16_t*)data; return true;
+		case TAG_BYTE: node->payload.tag_byte = *(int8_t*)data; return true;
+		default: return false;
+	}
+}
+
+bool level_archive_write(struct level_archive* la, struct level_archive_tag tag,
+						 void* data) {
+	assert(la && data);
+	assert(la->data);
+
+	if(level_archive_write_internal(la->data, tag, data)) {
+		la->modified = true;
+		return true;
+	}
+
+	return false;
 }
 
 bool level_archive_read_inventory(struct level_archive* la,
@@ -154,6 +182,65 @@ static bool read_vector(nbt_node* node, nbt_type type, vec3 result,
 	return k == amount;
 }
 
+static bool write_vector(nbt_node* node, nbt_type type, vec3 data,
+						 size_t amount) {
+	assert(node && node->type == TAG_LIST && data && amount <= 3);
+
+	size_t k = 0;
+	struct list_head* current;
+	list_for_each(current, &node->payload.tag_list->entry) {
+		nbt_node* obj = list_entry(current, struct nbt_list, entry)->data;
+		if(obj && obj->type == type && k < amount) {
+			switch(type) {
+				case TAG_DOUBLE: obj->payload.tag_double = data[k++]; break;
+				case TAG_FLOAT: obj->payload.tag_float = data[k++]; break;
+				default: return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	return k == amount;
+}
+
+bool level_archive_write_player(struct level_archive* la, vec3 position,
+								vec2 rotation, vec3 velocity,
+								enum world_dim dimension) {
+	assert(la && la->data);
+
+	nbt_node* pos;
+	if(!level_archive_read(la, LEVEL_PLAYER_POSITION, &pos, 0))
+		return false;
+
+	nbt_node* vel;
+	if(!level_archive_read(la, LEVEL_PLAYER_VELOCITY, &vel, 0))
+		return false;
+
+	nbt_node* rot;
+	if(!level_archive_read(la, LEVEL_PLAYER_ROTATION, &rot, 0))
+		return false;
+
+	int32_t dim = dimension;
+	if(!level_archive_write(la, LEVEL_PLAYER_DIMENSION, &dim))
+		return false;
+
+	if(position && !write_vector(pos, TAG_DOUBLE, position, 3))
+		return false;
+
+	if(velocity && !write_vector(vel, TAG_DOUBLE, velocity, 3))
+		return false;
+
+	if(rotation
+	   && !write_vector(rot, TAG_FLOAT, (vec3) {rotation[0], rotation[1], 0.0F},
+						2))
+		return false;
+
+	la->modified = true;
+
+	return true;
+}
+
 bool level_archive_read_player(struct level_archive* la, vec3 position,
 							   vec2 rotation, vec3 velocity,
 							   enum world_dim* dimension) {
@@ -172,7 +259,7 @@ bool level_archive_read_player(struct level_archive* la, vec3 position,
 		return false;
 
 	int32_t* dim;
-	if(!level_archive_read(la, LEVEL_PLAYER_DIMENSION, &dim, 0))
+	if(dimension && !level_archive_read(la, LEVEL_PLAYER_DIMENSION, &dim, 0))
 		return false;
 
 	if(position && !read_vector(pos, TAG_DOUBLE, position, 3))
@@ -199,5 +286,16 @@ bool level_archive_read_player(struct level_archive* la, vec3 position,
 
 void level_archive_destroy(struct level_archive* la) {
 	assert(la && la->data);
+
+	if(la->modified) {
+		FILE* f = fopen(string_get_cstr(la->file_name), "wb");
+
+		if(f) {
+			nbt_dump_file(la->data, f, STRAT_GZIP);
+			fclose(f);
+		}
+	}
+
+	string_clear(la->file_name);
 	nbt_free(la->data);
 }
