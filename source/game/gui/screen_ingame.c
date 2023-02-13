@@ -214,7 +214,7 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	} else {
 		icon_offset += gutil_control_icon(icon_offset, CONTROL_Z, "Punch");
 	}
-	icon_offset += gutil_control_icon(icon_offset, CONTROL_HOME, "Quit");
+	icon_offset += gutil_control_icon(icon_offset, CONTROL_HOME, "Save & quit");
 
 	gfx_bind_texture(TEXTURE_GUI);
 

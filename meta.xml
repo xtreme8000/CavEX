@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <app version="1">
 	<name>CavEX</name>
-	<version>Alpha 0.2.0</version>
+	<version>Alpha 0.2.1</version>
 	<release_date>20230211000000</release_date>
 	<coder>ByteBit/xtreme8000</coder>
 	<short_description>Beta 1.7.3 for the Wii</short_description>

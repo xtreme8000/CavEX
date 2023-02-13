@@ -124,6 +124,7 @@ static void server_world_light_set_light(void* user, w_coord_t x, w_coord_t y,
 	size_t idx = S_CHUNK_IDX(x, y, z);
 	nibble_write(sc->lighting_sky, idx, light & 0xF);
 	nibble_write(sc->lighting_torch, idx, light >> 4);
+	sc->modified = true;
 }
 
 bool server_world_set_block(struct server_world* w, w_coord_t x, w_coord_t y,
