@@ -132,12 +132,13 @@ static void screen_ingame_update(struct screen* s, float dt) {
 						.payload.set_block.block = blk,
 					});
 				}
+
+				gstate.held_item_animation = (struct held_anim) {
+					.start = time_get(),
+					.type = true,
+					.finished = false,
+				};
 			}
-			gstate.held_item_animation = (struct held_anim) {
-				.start = time_get(),
-				.type = true,
-				.finished = false,
-			};
 		}
 	}
 
