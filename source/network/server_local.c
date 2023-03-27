@@ -49,7 +49,8 @@ static void server_local_process(struct server_rpc* call, void* user) {
 			}
 			break;
 		case SRPC_SET_BLOCK:
-			if(s->player.has_pos) {
+			if(s->player.has_pos && call->payload.set_block.y >= 0
+			   && call->payload.set_block.y < WORLD_HEIGHT) {
 				server_world_set_block(&s->world, call->payload.set_block.x,
 									   call->payload.set_block.y,
 									   call->payload.set_block.z,

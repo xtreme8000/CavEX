@@ -116,19 +116,22 @@ static void screen_ingame_update(struct screen* s, float dt) {
 				int x, y, z;
 				blocks_side_offset(gstate.camera_hit.side, &x, &y, &z);
 
-				struct block_data blk = (struct block_data) {
-					.type = item.id,
-					.metadata = 0,
-					.sky_light = 0,
-					.torch_light = 0,
-				};
-				svin_rpc_send(&(struct server_rpc) {
-					.type = SRPC_SET_BLOCK,
-					.payload.set_block.x = gstate.camera_hit.x + x,
-					.payload.set_block.y = gstate.camera_hit.y + y,
-					.payload.set_block.z = gstate.camera_hit.z + z,
-					.payload.set_block.block = blk,
-				});
+				if(gstate.camera_hit.y + y >= 0
+				   && gstate.camera_hit.y + y < WORLD_HEIGHT) {
+					struct block_data blk = (struct block_data) {
+						.type = item.id,
+						.metadata = 0,
+						.sky_light = 0,
+						.torch_light = 0,
+					};
+					svin_rpc_send(&(struct server_rpc) {
+						.type = SRPC_SET_BLOCK,
+						.payload.set_block.x = gstate.camera_hit.x + x,
+						.payload.set_block.y = gstate.camera_hit.y + y,
+						.payload.set_block.z = gstate.camera_hit.z + z,
+						.payload.set_block.block = blk,
+					});
+				}
 			}
 			gstate.held_item_animation = (struct held_anim) {
 				.start = time_get(),
