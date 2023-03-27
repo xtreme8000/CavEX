@@ -47,10 +47,6 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 	}
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_FLUID;
-}
-
 static uint8_t getTextureIndex1(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(1, 0);
 }
@@ -59,19 +55,13 @@ static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(5, 0);
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	return 0xFFFFFF;
-}
-
 struct block block_water_still = {
 	.name = "Water",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex1,
 	.transparent = true,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_fluid,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -89,13 +79,11 @@ struct block block_water_still = {
 
 struct block block_water_flowing = {
 	.name = "Water",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex2,
 	.transparent = true,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_fluid,
 	.renderBlockAlways = NULL,
 	.luminance = 0,

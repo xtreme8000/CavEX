@@ -97,10 +97,6 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 	}
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_STAIRS;
-}
-
 static uint8_t getTextureIndex1(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(4, 0);
 }
@@ -109,19 +105,13 @@ static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(0, 1);
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	return 0xFFFFFF;
-}
-
 struct block block_wooden_stairs = {
 	.name = "Stairs",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial1,
 	.getTextureIndex = getTextureIndex1,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_stairs,
 	.renderBlockAlways = render_block_stairs_always,
 	.luminance = 0,
@@ -142,13 +132,11 @@ struct block block_wooden_stairs = {
 
 struct block block_stone_stairs = {
 	.name = "Stairs",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial2,
 	.getTextureIndex = getTextureIndex2,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_stairs,
 	.renderBlockAlways = render_block_stairs_always,
 	.luminance = 0,

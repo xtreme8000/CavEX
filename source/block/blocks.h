@@ -49,22 +49,6 @@ enum side {
 	SIDE_MAX
 };
 
-enum block_render_type {
-	RENDERTYPE_FULL,
-	RENDERTYPE_FULL_OVERLAY,
-	RENDERTYPE_HALF,
-	RENDERTYPE_STAIRS,
-	RENDERTYPE_CROSS,
-	RENDERTYPE_CAKE,
-	RENDERTYPE_FLAT,
-	RENDERTYPE_LADDER,
-	RENDERTYPE_CACTUS,
-	RENDERTYPE_DOOR,
-	RENDERTYPE_TRAPDOOR,
-	RENDERTYPE_FLUID,
-	RENDERTYPE_LAYER
-};
-
 enum block_type {
 	BLOCK_AIR = 0,
 	BLOCK_STONE = 1,
@@ -92,13 +76,11 @@ enum block_type {
 
 struct block {
 	char name[32];
-	enum block_render_type (*getRenderType)(struct block_info*);
 	enum block_material (*getMaterial)(struct block_info*);
 	uint8_t (*getTextureIndex)(struct block_info*, enum side);
 	struct face_occlusion* (*getSideMask)(struct block_info*, enum side,
 										  struct block_info*);
 	bool (*getBoundingBox)(struct block_info*, bool, struct AABB*);
-	uint32_t (*getBaseColor)(struct block_info*, enum side);
 	size_t (*renderBlock)(struct displaylist*, struct block_info*, enum side,
 						  struct block_info*, uint8_t*, bool);
 	size_t (*renderBlockAlways)(struct displaylist*, struct block_info*,

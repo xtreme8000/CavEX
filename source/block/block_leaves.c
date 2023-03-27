@@ -43,10 +43,6 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 		&sides_mask;
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_FULL;
-}
-
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	switch(this->block->metadata & 0x3) {
 		case 1: return TEXTURE_INDEX(4, 8);
@@ -55,24 +51,13 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	}
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	switch(this->block->metadata & 0x3) {
-		case 0: return 0x619961;
-		case 1: return 0x48B518;
-		case 2: return 0x80A755;
-		default: return 0xFFFFFF;
-	}
-}
-
 struct block block_leaves = {
 	.name = "Leaves",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 0,

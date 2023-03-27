@@ -49,27 +49,17 @@ getSideMask2(struct block_info* this, enum side side, struct block_info* it) {
 	return face_occlusion_full();
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_LAYER;
-}
-
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(2, 4);
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	return 0xFFFFFF;
-}
-
 struct block block_snow = {
 	.name = "Snow",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask1,
 	.getBoundingBox = getBoundingBox1,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_layer,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -88,13 +78,11 @@ struct block block_snow = {
 
 struct block block_snow_block = {
 	.name = "Snow Block",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask2,
 	.getBoundingBox = getBoundingBox2,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 0,

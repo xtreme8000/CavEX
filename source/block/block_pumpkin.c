@@ -34,10 +34,6 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 	return face_occlusion_full();
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_FULL;
-}
-
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	switch(side) {
 		case SIDE_FRONT:
@@ -64,19 +60,13 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	}
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	return 0xFFFFFF;
-}
-
 struct block block_pumpkin = {
 	.name = "Pumpkin",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -96,13 +86,11 @@ struct block block_pumpkin = {
 
 struct block block_pumpkin_lit = {
 	.name = "Jack o'Lantern",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 15,

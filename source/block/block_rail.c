@@ -39,10 +39,6 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 	return face_occlusion_empty();
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_FLAT;
-}
-
 static uint8_t getTextureIndex1(struct block_info* this, enum side side) {
 	return (this->block->metadata < 6) ? TEXTURE_INDEX(0, 8) :
 										 TEXTURE_INDEX(0, 7);
@@ -57,19 +53,13 @@ static uint8_t getTextureIndex3(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(3, 12);
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	return 0xFFFFFF;
-}
-
 struct block block_rail = {
 	.name = "Rail",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex1,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_rail,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -88,13 +78,11 @@ struct block block_rail = {
 
 struct block block_powered_rail = {
 	.name = "Powered rail",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex2,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_rail,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -113,13 +101,11 @@ struct block block_powered_rail = {
 
 struct block block_detector_rail = {
 	.name = "Detector rail",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex3,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_rail,
 	.renderBlockAlways = NULL,
 	.luminance = 0,

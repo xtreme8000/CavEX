@@ -34,10 +34,6 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 	return face_occlusion_empty();
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_CROSS;
-}
-
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	switch(this->block->metadata) {
 		case 1: return TEXTURE_INDEX(7, 2);
@@ -46,19 +42,13 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	}
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	return 0xFFFFFF;
-}
-
 struct block block_sapling = {
 	.name = "Sapling",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_cross,
 	.renderBlockAlways = NULL,
 	.luminance = 0,

@@ -43,10 +43,6 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 	return face_occlusion_empty();
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_CROSS;
-}
-
 static uint8_t getTextureIndex1(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(0, 5);
 }
@@ -59,19 +55,13 @@ static uint8_t getTextureIndex3(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(3, 6);
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	return 0xFFFFFF;
-}
-
 struct block block_torch = {
 	.name = "Torch",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex1,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_torch,
 	.renderBlockAlways = NULL,
 	.luminance = 14,
@@ -89,13 +79,11 @@ struct block block_torch = {
 
 struct block block_redstone_torch = {
 	.name = "Redstone Torch",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex2,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_torch,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -113,13 +101,11 @@ struct block block_redstone_torch = {
 
 struct block block_redstone_torch_lit = {
 	.name = "Redstone Torch",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex3,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_torch,
 	.renderBlockAlways = NULL,
 	.luminance = 7,

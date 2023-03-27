@@ -34,10 +34,6 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 	return face_occlusion_full();
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_FULL;
-}
-
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	switch(this->block->type) {
 		case 14: // gold
@@ -56,19 +52,13 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	}
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	return 0xFFFFFF;
-}
-
 struct block block_coalore = {
 	.name = "Coal ore",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -86,13 +76,11 @@ struct block block_coalore = {
 
 struct block block_ironore = {
 	.name = "Iron ore",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -110,13 +98,11 @@ struct block block_ironore = {
 
 struct block block_goldore = {
 	.name = "Gold ore",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -134,13 +120,11 @@ struct block block_goldore = {
 
 struct block block_diamondore = {
 	.name = "Diamond ore",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -158,13 +142,11 @@ struct block block_diamondore = {
 
 struct block block_redstoneore = {
 	.name = "Redstone ore",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -182,13 +164,11 @@ struct block block_redstoneore = {
 
 struct block block_lapisore = {
 	.name = "Lapis lazuli ore",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 0,

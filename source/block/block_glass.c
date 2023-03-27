@@ -35,27 +35,17 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 													face_occlusion_empty();
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_FULL;
-}
-
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(1, 3);
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	return 0xFFFFFF;
-}
-
 struct block block_glass = {
 	.name = "Glass",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
 	.luminance = 0,

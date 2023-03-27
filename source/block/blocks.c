@@ -127,12 +127,10 @@ void blocks_init() {
 
 	for(int k = 0; k < 256; k++) {
 		if(blocks[k]) {
-			assert(blocks[k]->getRenderType);
 			assert(blocks[k]->getMaterial);
 			assert(blocks[k]->getTextureIndex);
 			assert(blocks[k]->getSideMask);
 			assert(blocks[k]->getBoundingBox);
-			assert(blocks[k]->getBaseColor);
 			assert(blocks[k]->renderBlock);
 			assert(blocks[k]->block_item.renderItem);
 		}

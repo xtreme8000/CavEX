@@ -34,10 +34,6 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 	return face_occlusion_empty();
 }
 
-static enum block_render_type getRenderType(struct block_info* this) {
-	return RENDERTYPE_CROSS;
-}
-
 static uint8_t getTextureIndex1(struct block_info* this, enum side side) {
 	switch(this->block->metadata) {
 		case 1: return TEXTURE_INDEX(5, 12); // tallgrass
@@ -50,19 +46,13 @@ static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(6, 3); // deadbush
 }
 
-static uint32_t getBaseColor(struct block_info* this, enum side side) {
-	return (this->block->metadata == 0) ? 0xFFFFFF : 0x619961;
-}
-
 struct block block_tallgrass = {
 	.name = "Tallgrass",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex1,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_cross,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
@@ -81,13 +71,11 @@ struct block block_tallgrass = {
 
 struct block block_deadbush = {
 	.name = "Deadbush",
-	.getRenderType = getRenderType,
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex2,
 	.transparent = false,
-	.getBaseColor = getBaseColor,
 	.renderBlock = render_block_cross,
 	.renderBlockAlways = NULL,
 	.luminance = 0,
