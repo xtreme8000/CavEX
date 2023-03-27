@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef GEKKO
+#ifdef PLATFORM_WII
 #include <fat.h>
 #endif
 
@@ -52,7 +52,7 @@ int main(void) {
 	gstate.world_loaded = false;
 	gstate.held_item_animation.finished = true;
 
-#ifdef GEKKO
+#ifdef PLATFORM_WII
 	fatInitDefault();
 #endif
 
@@ -87,8 +87,6 @@ int main(void) {
 						   / DAY_TICK_MS)
 					  % DAY_LENGTH_TICKS)
 			/ (float)DAY_LENGTH_TICKS;
-
-		input_poll();
 
 		clin_update();
 
@@ -128,8 +126,13 @@ int main(void) {
 		daytime_sky_colors(daytime, top_plane_color, bottom_plane_color,
 						   atmosphere_color);
 
-		gfx_clear_buffers(atmosphere_color[0], atmosphere_color[1],
-						  atmosphere_color[2]);
+		if(render_world) {
+			gfx_clear_buffers(atmosphere_color[0], atmosphere_color[1],
+							  atmosphere_color[2]);
+		} else {
+			gfx_clear_buffers(128, 128, 128);
+		}
+
 		gfx_fog_color(atmosphere_color[0], atmosphere_color[1],
 					  atmosphere_color[2]);
 
@@ -174,6 +177,7 @@ int main(void) {
 
 		daytime = fmaxf(fminf(daytime, 1), 0);
 
+		input_poll();
 		gfx_finish(true);
 	}
 	return 0;

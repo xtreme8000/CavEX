@@ -18,11 +18,11 @@
 */
 
 #include <assert.h>
-#include <gccore.h>
 #include <stdint.h>
 
 #include "chunk_mesher.h"
 #include "platform/graphics/displaylist.h"
+#include "platform/thread.h"
 #include "stack.h"
 #include "world.h"
 
@@ -30,6 +30,10 @@
 	((x) + ((z) + (y) * (CHUNK_SIZE + 2)) * (CHUNK_SIZE + 2))
 #define BLK_INDEX2(x, y, z) ((x) + ((z) + (y)*CHUNK_SIZE) * CHUNK_SIZE)
 #define BLK_DATA(b, x, y, z) ((b)[BLK_INDEX((x) + 1, (y) + 1, (z) + 1)])
+
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
 
 struct chunk_mesher_rpc {
 	struct chunk* chunk;
@@ -46,9 +50,9 @@ struct chunk_mesher_rpc {
 };
 
 static struct chunk_mesher_rpc rpc_msg[CHUNK_MESHER_QLENGTH];
-static mqbox_t mesher_requests;
-static mqbox_t mesher_results;
-static mqbox_t mesher_empty_msg;
+static struct thread_channel mesher_requests;
+static struct thread_channel mesher_results;
+static struct thread_channel mesher_empty_msg;
 
 static int chunk_test_side(enum side* on_sides, c_coord_t x, c_coord_t y,
 						   c_coord_t z) {
@@ -479,8 +483,7 @@ static void chunk_mesher_build(struct chunk_mesher_rpc* req) {
 
 	for(int k = 0; k < 13; k++) {
 		if(vertices[k] > 0 && vertices[k] <= 0xFFFF * 4) {
-			displaylist_finalize(req->result.mesh + k, GX_QUADS, GX_VTXFMT0,
-								 vertices[k]);
+			displaylist_finalize(req->result.mesh + k, vertices[k]);
 			req->result.has_displist[k] = true;
 		} else {
 			displaylist_destroy(req->result.mesh + k);
@@ -495,29 +498,30 @@ static void chunk_mesher_build(struct chunk_mesher_rpc* req) {
 static void* chunk_mesher_local_thread(void* user) {
 	while(1) {
 		struct chunk_mesher_rpc* request;
-		MQ_Receive(mesher_requests, (mqmsg_t*)&request, MQ_MSG_BLOCK);
+		tchannel_receive(&mesher_requests, (void**)&request, true);
 		chunk_mesher_build(request);
-		MQ_Send(mesher_results, request, MQ_MSG_BLOCK);
+		tchannel_send(&mesher_results, request, true);
 	}
 
 	return NULL;
 }
 
 void chunk_mesher_init() {
-	MQ_Init(&mesher_requests, CHUNK_MESHER_QLENGTH);
-	MQ_Init(&mesher_results, CHUNK_MESHER_QLENGTH);
-	MQ_Init(&mesher_empty_msg, CHUNK_MESHER_QLENGTH);
+	tchannel_init(&mesher_requests, CHUNK_MESHER_QLENGTH);
+	tchannel_init(&mesher_results, CHUNK_MESHER_QLENGTH);
+	tchannel_init(&mesher_empty_msg, CHUNK_MESHER_QLENGTH);
 
 	for(int k = 0; k < CHUNK_MESHER_QLENGTH; k++)
-		MQ_Send(mesher_empty_msg, rpc_msg + k, MQ_MSG_BLOCK);
+		tchannel_send(&mesher_empty_msg, rpc_msg + k, true);
 
-	lwp_t thread;
-	LWP_CreateThread(&thread, chunk_mesher_local_thread, NULL, NULL, 0, 4);
+	struct thread t;
+	thread_create(&t, chunk_mesher_local_thread, NULL, 4);
 }
 
 void chunk_mesher_receive() {
 	struct chunk_mesher_rpc* result;
-	while(MQ_Receive(mesher_results, (mqmsg_t*)&result, MQ_MSG_NOBLOCK)) {
+
+	while(tchannel_receive(&mesher_results, (void**)&result, false)) {
 		for(int k = 0; k < 13; k++) {
 			if(result->chunk->has_displist[k])
 				displaylist_destroy(result->chunk->mesh + k);
@@ -531,7 +535,7 @@ void chunk_mesher_receive() {
 
 		chunk_unref(result->chunk);
 
-		MQ_Send(mesher_empty_msg, result, MQ_MSG_BLOCK);
+		tchannel_send(&mesher_empty_msg, result, true);
 	}
 }
 
@@ -539,7 +543,7 @@ bool chunk_mesher_send(struct chunk* c) {
 	assert(c);
 
 	struct chunk_mesher_rpc* request;
-	if(!MQ_Receive(mesher_empty_msg, (mqmsg_t*)&request, MQ_MSG_NOBLOCK))
+	if(!tchannel_receive(&mesher_empty_msg, (void**)&request, false))
 		return false;
 
 	struct block_data* bd
@@ -547,7 +551,7 @@ bool chunk_mesher_send(struct chunk* c) {
 				 * sizeof(struct block_data));
 
 	if(!bd) {
-		MQ_Send(mesher_empty_msg, request, MQ_MSG_BLOCK);
+		tchannel_send(&mesher_empty_msg, request, true);
 		return false;
 	}
 
@@ -564,6 +568,6 @@ bool chunk_mesher_send(struct chunk* c) {
 		}
 	}
 
-	MQ_Send(mesher_requests, request, MQ_MSG_BLOCK);
+	tchannel_send(&mesher_requests, request, true);
 	return true;
 }

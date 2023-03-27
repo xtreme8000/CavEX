@@ -18,10 +18,71 @@
 */
 
 #include <assert.h>
-#include <wiiuse/wpad.h>
 
 #include "../cglm/cglm.h"
 #include "input.h"
+
+#ifdef PLATFORM_PC
+
+#include <GLFW/glfw3.h>
+
+extern GLFWwindow* window;
+
+static bool input_key_held[IB_MAX];
+static bool input_key_pressed[IB_MAX];
+static bool input_key_released[IB_MAX];
+static float joystick_x = 0, joystick_y = 0;
+
+void input_init() {
+	for(size_t k = 0; k < IB_MAX; k++) {
+		input_key_held[k] = false;
+		input_key_pressed[k] = false;
+		input_key_released[k] = false;
+	}
+}
+
+void input_poll() {
+	for(size_t k = 0; k < IB_MAX; k++) {
+		input_key_pressed[k] = false;
+		input_key_released[k] = false;
+	}
+}
+
+void input_set_status(enum input_button b, bool pressed) {
+	assert(b < IB_MAX);
+	input_key_held[b] = pressed;
+	input_key_pressed[b] = pressed;
+	input_key_released[b] = !pressed;
+}
+
+void input_set_joystick(float x, float y) {
+	joystick_x = x;
+	joystick_y = y;
+}
+
+bool input_pressed(enum input_button b) {
+	return input_key_pressed[b];
+}
+
+bool input_released(enum input_button b) {
+	return input_key_released[b];
+}
+
+bool input_held(enum input_button b) {
+	return input_key_held[b];
+}
+
+bool input_joystick(float dt, float* x, float* y) {
+	*x = joystick_x;
+	*y = joystick_y;
+	return true;
+}
+
+#endif
+
+#ifdef PLATFORM_WII
+
+#include <wiiuse/wpad.h>
 
 static bool input_has_wpad;
 static bool input_has_pad;
@@ -129,3 +190,5 @@ bool input_joystick(float dt, float* x, float* y) {
 	*y = input_dy * dt;
 	return input_has_joystick;
 }
+
+#endif

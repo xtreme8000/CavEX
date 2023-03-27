@@ -1,5 +1,5 @@
 /*
-	Copyright (c) 2022 ByteBit/xtreme8000
+	Copyright (c) 2023 ByteBit/xtreme8000
 
 	This file is part of CavEX.
 
@@ -18,7 +18,6 @@
 */
 
 #include <assert.h>
-#include <gccore.h>
 
 #include "../../game/game_state.h"
 #include "gfx.h"
@@ -43,35 +42,26 @@ void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
 	gfx_fog_pos(0, 0, gstate.config.fog_distance);
 
 	// render a bit larger for possible inaccuracy
-	int16_t size = (gstate.config.fog_distance + 4) * 256;
+	float size = gstate.config.fog_distance + 4;
 
-	GX_Begin(GX_QUADS, GX_VTXFMT3, 8);
-	GX_Position3s16(-size, 16 * 256, -size);
-	GX_Color4u8(color_top[0], color_top[1], color_top[2], 255);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(-size, 16 * 256, size);
-	GX_Color4u8(color_top[0], color_top[1], color_top[2], 255);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(size, 16 * 256, size);
-	GX_Color4u8(color_top[0], color_top[1], color_top[2], 255);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(size, 16 * 256, -size);
-	GX_Color4u8(color_top[0], color_top[1], color_top[2], 255);
-	GX_TexCoord2u8(0, 0);
+	gfx_draw_quads(4,
+				   (int16_t[]) {-size, 16, -size, -size, 16, size, size, 16,
+								size, size, 16, -size},
+				   (uint8_t[]) {color_top[0], color_top[1], color_top[2], 0xFF,
+								color_top[0], color_top[1], color_top[2], 0xFF,
+								color_top[0], color_top[1], color_top[2], 0xFF,
+								color_top[0], color_top[1], color_top[2], 0xFF},
+				   (uint16_t[]) {0, 0, 0, 0, 0, 0, 0, 0});
 
-	GX_Position3s16(-size, -32 * 256, -size);
-	GX_Color4u8(color_bottom[0], color_bottom[1], color_bottom[2], 255);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(size, -32 * 256, -size);
-	GX_Color4u8(color_bottom[0], color_bottom[1], color_bottom[2], 255);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(size, -32 * 256, size);
-	GX_Color4u8(color_bottom[0], color_bottom[1], color_bottom[2], 255);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(-size, -32 * 256, size);
-	GX_Color4u8(color_bottom[0], color_bottom[1], color_bottom[2], 255);
-	GX_TexCoord2u8(0, 0);
-	GX_End();
+	gfx_draw_quads(
+		4,
+		(int16_t[]) {-size, -32, -size, size, -32, -size, size, -32, size,
+					 -size, -32, size},
+		(uint8_t[]) {color_bottom[0], color_bottom[1], color_bottom[2], 0xFF,
+					 color_bottom[0], color_bottom[1], color_bottom[2], 0xFF,
+					 color_bottom[0], color_bottom[1], color_bottom[2], 0xFF,
+					 color_bottom[0], color_bottom[1], color_bottom[2], 0xFF},
+		(uint16_t[]) {0, 0, 0, 0, 0, 0, 0, 0});
 
 	gfx_fog(false);
 	gfx_texture(true);
@@ -85,36 +75,23 @@ void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
 	glm_rotate_x(tmp, glm_rad(celestial_angle * 360.0F), model_view);
 	gfx_matrix_modelview(model_view);
 
-	GX_Begin(GX_QUADS, GX_VTXFMT3, 8);
-	GX_Position3s16(-30 * 256, 100 * 256, -30 * 256);
-	GX_Color4u8(255, 255, 255, 255);
-	GX_TexCoord2u8(201, 65);
-	GX_Position3s16(-30 * 256, 100 * 256, 30 * 256);
-	GX_Color4u8(255, 255, 255, 255);
-	GX_TexCoord2u8(201, 65 + 32);
-	GX_Position3s16(30 * 256, 100 * 256, 30 * 256);
-	GX_Color4u8(255, 255, 255, 255);
-	GX_TexCoord2u8(201 + 32, 65 + 32);
-	GX_Position3s16(30 * 256, 100 * 256, -30 * 256);
-	GX_Color4u8(255, 255, 255, 255);
-	GX_TexCoord2u8(201 + 32, 65);
+	gfx_draw_quads(
+		4, (int16_t[]) {-30, 100, -30, -30, 100, 30, 30, 100, 30, 30, 100, -30},
+		(uint8_t[]) {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+					 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
+		(uint16_t[]) {201, 65, 201, 65 + 32, 201 + 32, 65 + 32, 201 + 32, 65});
 
-	GX_Position3s16(-20 * 256, -100 * 256, -20 * 256);
-	GX_Color4u8(255, 255, 255, 255);
-	GX_TexCoord2u8(201, 32);
-	GX_Position3s16(20 * 256, -100 * 256, -20 * 256);
-	GX_Color4u8(255, 255, 255, 255);
-	GX_TexCoord2u8(201 + 32, 32);
-	GX_Position3s16(20 * 256, -100 * 256, 20 * 256);
-	GX_Color4u8(255, 255, 255, 255);
-	GX_TexCoord2u8(201 + 32, 32 + 32);
-	GX_Position3s16(-20 * 256, -100 * 256, 20 * 256);
-	GX_Color4u8(255, 255, 255, 255);
-	GX_TexCoord2u8(201, 32 + 32);
-	GX_End();
+	gfx_draw_quads(
+		4,
+		(int16_t[]) {-20, -100, -20, 20, -100, -20, 20, -100, 20, -20, -100,
+					 20},
+		(uint8_t[]) {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+					 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
+		(uint16_t[]) {201, 32, 201, 32 + 32, 201 + 32, 32 + 32, 201 + 32, 32});
 
 	gfx_blending(MODE_OFF);
 	gfx_write_buffers(true, true, true);
+	gfx_alpha_test(true);
 }
 
 void gutil_block_selection(mat4 view_matrix, struct block_info* this) {
@@ -137,117 +114,53 @@ void gutil_block_selection(mat4 view_matrix, struct block_info* this) {
 					 model_view);
 	gfx_matrix_modelview(model_view);
 
-	GX_Begin(GX_LINES, GX_VTXFMT3, 24);
+	gfx_draw_lines(
+		24,
+		(int16_t[]) {
+			// bottom
+			-pad + box.x1 * 256, -pad + box.y1 * 256, -pad + box.z1 * 256,
+			box.x2 * 256 + pad, -pad + box.y1 * 256, -pad + box.z1 * 256,
 
-	// bottom
-	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
+			-pad + box.x1 * 256, -pad + box.y1 * 256, -pad + box.z1 * 256,
+			-pad + box.x1 * 256, -pad + box.y1 * 256, box.z2 * 256 + pad,
 
-	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
-					box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
+			box.x2 * 256 + pad, -pad + box.y1 * 256, box.z2 * 256 + pad,
+			box.x2 * 256 + pad, -pad + box.y1 * 256, -pad + box.z1 * 256,
 
-	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
-					box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
+			box.x2 * 256 + pad, -pad + box.y1 * 256, box.z2 * 256 + pad,
+			-pad + box.x1 * 256, -pad + box.y1 * 256, box.z2 * 256 + pad,
 
-	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
-					box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
-					box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
+			// top
+			-pad + box.x1 * 256, box.y2 * 256 + pad, -pad + box.z1 * 256,
+			box.x2 * 256 + pad, box.y2 * 256 + pad, -pad + box.z1 * 256,
 
-	// top
-	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
+			-pad + box.x1 * 256, box.y2 * 256 + pad, -pad + box.z1 * 256,
+			-pad + box.x1 * 256, box.y2 * 256 + pad, box.z2 * 256 + pad,
 
-	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
-					box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
+			box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad,
+			box.x2 * 256 + pad, box.y2 * 256 + pad, -pad + box.z1 * 256,
 
-	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
+			box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad,
+			-pad + box.x1 * 256, box.y2 * 256 + pad, box.z2 * 256 + pad,
 
-	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
-					box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
+			// vertical
+			-pad + box.x1 * 256, -pad + box.y1 * 256, -pad + box.z1 * 256,
+			-pad + box.x1 * 256, box.y2 * 256 + pad, -pad + box.z1 * 256,
 
-	// vertical
-	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
+			box.x2 * 256 + pad, -pad + box.y1 * 256, -pad + box.z1 * 256,
+			box.x2 * 256 + pad, box.y2 * 256 + pad, -pad + box.z1 * 256,
 
-	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad,
-					-pad + box.z1 * 256);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
+			-pad + box.x1 * 256, -pad + box.y1 * 256, box.z2 * 256 + pad,
+			-pad + box.x1 * 256, box.y2 * 256 + pad, box.z2 * 256 + pad,
 
-	GX_Position3s16(-pad + box.x1 * 256, -pad + box.y1 * 256,
-					box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(-pad + box.x1 * 256, box.y2 * 256 + pad,
-					box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-
-	GX_Position3s16(box.x2 * 256 + pad, -pad + box.y1 * 256,
-					box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-	GX_Position3s16(box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad);
-	GX_Color4u8(0, 0, 0, 153);
-	GX_TexCoord2u8(0, 0);
-
-	GX_End();
+			box.x2 * 256 + pad, -pad + box.y1 * 256, box.z2 * 256 + pad,
+			box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad},
+		(uint8_t[]) {0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153,
+					 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153,
+					 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153,
+					 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153,
+					 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153,
+					 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153});
 
 	gfx_texture(true);
 	gfx_lighting(true);

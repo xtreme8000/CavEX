@@ -80,11 +80,15 @@ static void screen_ingame_render3D(struct screen* s, mat4 view) {
 	glm_scale_uni(model, 0.4F);
 	glm_translate(model, (vec3) {-0.5F, -0.5F, -0.5F});
 
+	gfx_depth_range(0.0F, 0.1F);
+
 	struct item_data item;
 	if(inventory_get_slot(&gstate.inventory,
 						  inventory_get_hotbar(&gstate.inventory), &item)
 	   && item_get(&item))
 		items[item.id]->renderItem(item_get(&item), &item, model, false);
+
+	gfx_depth_range(0.0F, 1.0F);
 }
 
 static void screen_ingame_update(struct screen* s, float dt) {
@@ -180,7 +184,7 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 			gstate.stats.dt_vsync * 1000.0F);
 	gutil_text(4, 4 + 17 * 1, str, 16);
 
-	sprintf(str, "%i chunks", gstate.stats.chunks_rendered);
+	sprintf(str, "%zu chunks", gstate.stats.chunks_rendered);
 	gutil_text(4, 4 + 17 * 2, str, 16);
 
 	sprintf(str, "(%0.1f, %0.1f, %0.1f) (%0.1f, %0.1f)", gstate.camera.x,
@@ -244,7 +248,10 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 				model,
 				(vec3) {(width - 182 * 2) / 2 + 3 * 2 + 20 * 2 * k,
 						height - 32 * 8 / 5 - 19 * 2, 0});
+
+			gfx_depth_range(0.0F, 0.1F);
 			items[item.id]->renderItem(item_get(&item), &item, model, true);
+			gfx_depth_range(0.0F, 1.0F);
 
 			if(item.count > 1) {
 				char count[4];

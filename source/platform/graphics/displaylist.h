@@ -29,17 +29,18 @@ struct displaylist {
 	size_t length;
 	size_t index;
 	bool finished;
+#ifdef PLATFORM_PC
+	int vbo;
+#endif
 };
 
 void displaylist_init(struct displaylist* l, size_t vertices,
 					  size_t vertex_size);
 void displaylist_destroy(struct displaylist* l);
 void displaylist_reset(struct displaylist* l);
-void displaylist_finalize(struct displaylist* l, uint8_t primitve,
-						  uint8_t vtxfmt, uint16_t vtxcnt);
+void displaylist_finalize(struct displaylist* l, uint16_t vtxcnt);
 void displaylist_render(struct displaylist* l);
-void displaylist_render_immediate(struct displaylist* l, uint8_t primitve,
-								  uint8_t vtxfmt, uint16_t vtxcnt);
+void displaylist_render_immediate(struct displaylist* l, uint16_t vtxcnt);
 
 void displaylist_pos(struct displaylist* l, int16_t x, int16_t y, int16_t z);
 void displaylist_color(struct displaylist* l, uint8_t index);

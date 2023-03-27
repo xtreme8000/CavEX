@@ -19,12 +19,15 @@
 
 #include "client_interface.h"
 #include "../game/game_state.h"
+#include "../platform/thread.h"
 #include "server_interface.h"
 
 #define RPC_INBOX_SIZE 16
 static struct client_rpc rpc_msg[RPC_INBOX_SIZE];
-mqbox_t clin_inbox;
-mqbox_t clin_empty_msg;
+static struct thread_channel clin_inbox;
+static struct thread_channel clin_empty_msg;
+
+static ptime_t last_pos_update;
 
 void clin_chunk(w_coord_t x, w_coord_t y, w_coord_t z, w_coord_t sx,
 				w_coord_t sy, w_coord_t sz, uint8_t* ids, uint8_t* metadata,
@@ -126,20 +129,20 @@ void clin_process(struct client_rpc* call) {
 }
 
 void clin_init() {
-	MQ_Init(&clin_inbox, RPC_INBOX_SIZE);
-	MQ_Init(&clin_empty_msg, RPC_INBOX_SIZE);
+	tchannel_init(&clin_inbox, RPC_INBOX_SIZE);
+	tchannel_init(&clin_empty_msg, RPC_INBOX_SIZE);
 
 	for(int k = 0; k < RPC_INBOX_SIZE; k++)
-		MQ_Send(clin_empty_msg, rpc_msg + k, MQ_MSG_BLOCK);
+		tchannel_send(&clin_empty_msg, rpc_msg + k, true);
+
+	last_pos_update = time_get();
 }
 
-static ptime_t last_pos_update = 0;
-
 void clin_update() {
-	mqmsg_t call;
-	while(MQ_Receive(clin_inbox, &call, MQ_MSG_NOBLOCK)) {
+	void* call;
+	while(tchannel_receive(&clin_inbox, &call, false)) {
 		clin_process(call);
-		MQ_Send(clin_empty_msg, call, MQ_MSG_BLOCK);
+		tchannel_send(&clin_empty_msg, call, true);
 	}
 
 	if(gstate.world_loaded && time_diff_ms(last_pos_update, time_get()) >= 50) {
@@ -157,7 +160,7 @@ void clin_update() {
 
 void clin_rpc_send(struct client_rpc* call) {
 	struct client_rpc* empty;
-	MQ_Receive(clin_empty_msg, (mqmsg_t*)&empty, MQ_MSG_BLOCK);
+	tchannel_receive(&clin_empty_msg, (void**)&empty, true);
 	*empty = *call;
-	MQ_Send(clin_inbox, empty, MQ_MSG_BLOCK);
+	tchannel_send(&clin_inbox, empty, true);
 }

@@ -1,5 +1,5 @@
 /*
-	Copyright (c) 2022 ByteBit/xtreme8000
+	Copyright (c) 2023 ByteBit/xtreme8000
 
 	This file is part of CavEX.
 
@@ -17,34 +17,22 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef TIME_H
+#define TIME_H
 
-#include <stdbool.h>
+#include <stdint.h>
 
-enum input_button {
-	IB_FORWARD,
-	IB_BACKWARD,
-	IB_LEFT,
-	IB_RIGHT,
-	IB_ACTION1,
-	IB_ACTION2,
-	IB_JUMP,
-	IB_INVENTORY,
-	IB_HOME,
-	IB_SCROLL_LEFT,
-	IB_SCROLL_RIGHT,
-	IB_MAX,
-};
+#ifdef PLATFORM_WII
+typedef uint64_t ptime_t;
+#endif
 
-void input_init(void);
-void input_poll(void);
+#ifdef PLATFORM_PC
+typedef struct timespec ptime_t;
+#endif
 
-void input_set_status(enum input_button b, bool pressed);
-void input_set_joystick(float x, float y);
-bool input_pressed(enum input_button b);
-bool input_released(enum input_button b);
-bool input_held(enum input_button b);
-bool input_joystick(float dt, float* x, float* y);
+void time_reset(void);
+ptime_t time_get(void);
+int32_t time_diff_ms(ptime_t f, ptime_t s);
+float time_diff_s(ptime_t f, ptime_t s);
 
 #endif

@@ -237,8 +237,7 @@ void world_set_block(struct world* w, w_coord_t x, w_coord_t y, w_coord_t z,
 		w_coord_t cz = WCOORD_CHUNK_OFFSET(z);
 		struct world_section* s
 			= dict_wsection_get(w->sections, SECTION_TO_ID(cx, cz));
-
-		struct chunk* c = world_find_chunk(w, x, y, z);
+		struct chunk* c = world_chunk_from_section(w, s, y);
 
 		if(!c) {
 			c = malloc(sizeof(struct chunk));

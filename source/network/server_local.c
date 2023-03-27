@@ -24,6 +24,7 @@
 #include "../cglm/cglm.h"
 
 #include "../item/inventory.h"
+#include "../platform/thread.h"
 #include "client_interface.h"
 #include "server_interface.h"
 #include "server_local.h"
@@ -219,7 +220,7 @@ static void server_local_update(struct server_local* s) {
 static void* server_local_thread(void* user) {
 	while(1) {
 		server_local_update(user);
-		usleep(50 * 1000);
+		thread_msleep(50);
 	}
 
 	return NULL;
@@ -233,6 +234,6 @@ void server_local_create(struct server_local* s) {
 	s->player.finished_loading = false;
 	string_init(s->level_name);
 
-	lwp_t thread;
-	LWP_CreateThread(&thread, server_local_thread, s, NULL, 0, 8);
+	struct thread t;
+	thread_create(&t, server_local_thread, s, 8);
 }

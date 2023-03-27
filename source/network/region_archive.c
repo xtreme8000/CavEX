@@ -27,6 +27,30 @@
 
 #define CHUNK_EXISTS(offset, sectors) ((offset) >= 2 && (sectors) >= 1)
 
+static uint32_t conv_u32_native(uint8_t* data) {
+	return (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+}
+
+static void conv_native_u32(uint32_t in, uint8_t* data) {
+	data[0] = in >> 24;
+	data[1] = (in >> 16) & 0xFF;
+	data[2] = (in >> 8) & 0xFF;
+	data[3] = in & 0xFF;
+}
+
+static size_t fread_u32(uint32_t* out, FILE* f) {
+	size_t res = fread(out, sizeof(uint32_t), 1, f);
+	*out = conv_u32_native((uint8_t*)out);
+	return res;
+}
+
+static size_t fwrite_u32(uint32_t in, FILE* f) {
+	uint8_t tmp[sizeof(uint32_t)];
+	conv_native_u32(in, tmp);
+
+	return fwrite(tmp, sizeof(uint32_t), 1, f);
+}
+
 static int sort_region_chunks(const void* a, const void* b) {
 	uint32_t offset_a = (*(const uint32_t*)a) >> 8;
 	uint32_t offset_b = (*(const uint32_t*)b) >> 8;
@@ -136,6 +160,10 @@ bool region_archive_create(struct region_archive* ra, string_t world_name,
 		return false;
 	}
 
+	// convert from big endian to native endian
+	for(size_t k = 0; k < REGION_SIZE * REGION_SIZE; k++)
+		ra->offsets[k] = conv_u32_native((uint8_t*)(ra->offsets + k));
+
 	fclose(f);
 
 	ilist_regions_init_field(ra);
@@ -202,7 +230,7 @@ bool region_archive_get_blocks(struct region_archive* ra, w_coord_t x,
 	}
 
 	uint32_t length;
-	if(!fread(&length, sizeof(uint32_t), 1, f)
+	if(!fread_u32(&length, f)
 	   || length + sizeof(uint32_t) > sectors * REGION_SECTOR_SIZE) {
 		fclose(f);
 		return false;
@@ -294,7 +322,7 @@ static bool file_overwrite_index(FILE* f, size_t index, uint32_t data) {
 		return false;
 	}
 
-	if(fwrite(&data, sizeof(uint32_t), 1, f) != 1) {
+	if(fwrite_u32(data, f) != 1) {
 		fclose(f);
 		return false;
 	}
@@ -311,7 +339,7 @@ static bool file_overwrite_chunk(FILE* f, size_t offset, void* data,
 		return false;
 	}
 
-	if(fwrite((uint32_t[]) {length + 1}, sizeof(uint32_t), 1, f) != 1) {
+	if(fwrite_u32(length + 1, f) != 1) {
 		fclose(f);
 		return false;
 	}

@@ -62,10 +62,15 @@ void gfx_fog(bool enable);
 void gfx_blending(enum gfx_blend mode);
 void gfx_alpha_test(bool enable);
 void gfx_write_buffers(bool color, bool depth, bool depth_test);
+void gfx_depth_range(float near, float far);
 void gfx_texture(bool enable);
 void gfx_lighting(bool enable);
 void gfx_culling(bool enable);
 void gfx_scissor(bool enable, uint32_t x, uint32_t y, uint32_t width,
 				 uint32_t height);
+void gfx_draw_lines(size_t vertex_count, const int16_t* vertices,
+					const uint8_t* colors);
+void gfx_draw_quads(size_t vertex_count, const int16_t* vertices,
+					const uint8_t* colors, const uint16_t* texcoords);
 
 #endif

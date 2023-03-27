@@ -208,8 +208,7 @@ void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
 		gfx_matrix_modelview(model);
 		gfx_lighting(true);
 		gfx_write_buffers(true, true, true);
-		displaylist_render_immediate(&dl, GX_QUADS, GX_VTXFMT0,
-									 (2 + 16 * 4) * 4);
+		displaylist_render_immediate(&dl, (2 + 16 * 4) * 4);
 		gfx_write_buffers(true, false, false);
 		gfx_lighting(false);
 	}
@@ -278,7 +277,7 @@ void render_item_block(struct item* item, struct item_data* stack, mat4 model,
 
 	if(inventory) {
 		mat4 view;
-		glm_translate_make(view, (vec3) {3 * 2, 3 * 2, -128});
+		glm_translate_make(view, (vec3) {3 * 2, 3 * 2, -16});
 		glm_scale(view, (vec3) {20, 20, -20});
 		glm_translate(view, (vec3) {0.5F, 0.5F, 0.5F});
 		glm_rotate_z(view, glm_rad(180.0F), view);
@@ -302,7 +301,7 @@ void render_item_block(struct item* item, struct item_data* stack, mat4 model,
 	gfx_bind_texture(b->transparent ? TEXTURE_ANIM : TEXTURE_TERRAIN);
 	gfx_lighting(true);
 	gfx_write_buffers(true, true, true);
-	displaylist_render_immediate(&dl, GX_QUADS, GX_VTXFMT0, vertices * 4);
+	displaylist_render_immediate(&dl, vertices * 4);
 	gfx_matrix_modelview(GLM_MAT4_IDENTITY);
 	gfx_write_buffers(true, false, false);
 	gfx_lighting(false);

@@ -17,7 +17,6 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <gccore.h>
 #include <stdint.h>
 
 #include "../../block/blocks.h"

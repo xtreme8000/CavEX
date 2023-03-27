@@ -20,7 +20,6 @@
 #ifndef RENDER_BLOCK_H
 #define RENDER_BLOCK_H
 
-#include <gccore.h>
 #include <stdbool.h>
 #include <stddef.h>
 

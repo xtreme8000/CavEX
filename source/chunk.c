@@ -18,7 +18,6 @@
 */
 
 #include <assert.h>
-#include <gccore.h>
 #include <malloc.h>
 #include <math.h>
 #include <stddef.h>

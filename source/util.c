@@ -19,24 +19,26 @@
 
 #include <assert.h>
 #include <math.h>
-#include <ogc/lwp_watchdog.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "util.h"
 
-void time_reset() {
-	settime(0);
-}
+void* file_read(const char* name) {
+	FILE* f = fopen(name, "rb");
 
-ptime_t time_get() {
-	return gettime();
-}
+	if(!f)
+		return NULL;
 
-int32_t time_diff_ms(ptime_t f, ptime_t s) {
-	return (s - f) / TB_TIMER_CLOCK;
-}
+	fseek(f, 0, SEEK_END);
+	size_t length = ftell(f);
+	fseek(f, 0, SEEK_SET);
+	char* res = malloc(length + 1);
+	res[length] = 0;
+	fread(res, length, 1, f);
+	fclose(f);
 
-float time_diff_s(ptime_t f, ptime_t s) {
-	return (float)(s - f) / (float)(1000UL * TB_TIMER_CLOCK);
+	return res;
 }
 
 uint32_t hash_u32(uint32_t x) {
