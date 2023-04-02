@@ -129,6 +129,7 @@ extern struct block block_ironore;
 extern struct block block_goldore;
 extern struct block block_diamondore;
 extern struct block block_redstoneore;
+extern struct block block_redstoneore_lit;
 extern struct block block_lapisore;
 extern struct block block_wooden_stairs;
 extern struct block block_stone_stairs;

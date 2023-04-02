@@ -101,7 +101,7 @@ void blocks_init() {
 	blocks[71] = &block_iron_door;
 	blocks[72] = &block_wooden_pressure_plate;
 	blocks[73] = &block_redstoneore;
-	blocks[74] = &block_redstoneore;
+	blocks[74] = &block_redstoneore_lit;
 	blocks[75] = &block_redstone_torch;
 	blocks[76] = &block_redstone_torch_lit;
 	// button

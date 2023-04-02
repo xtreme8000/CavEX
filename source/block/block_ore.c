@@ -162,6 +162,28 @@ struct block block_redstoneore = {
 	},
 };
 
+struct block block_redstoneore_lit = {
+	.name = "Redstone ore",
+	.getSideMask = getSideMask,
+	.getBoundingBox = getBoundingBox,
+	.getMaterial = getMaterial,
+	.getTextureIndex = getTextureIndex,
+	.transparent = false,
+	.renderBlock = render_block_full,
+	.renderBlockAlways = NULL,
+	.luminance = 9,
+	.double_sided = false,
+	.can_see_through = false,
+	.ignore_lighting = false,
+	.flammable = false,
+	.block_item = {
+		.has_damage = false,
+		.max_stack = 64,
+		.renderItem = render_item_block,
+		.render_data.block.has_default = false,
+	},
+};
+
 struct block block_lapisore = {
 	.name = "Lapis lazuli ore",
 	.getSideMask = getSideMask,
