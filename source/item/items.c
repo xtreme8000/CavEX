@@ -20,7 +20,7 @@
 #include <assert.h>
 
 #include "../block/blocks.h"
-#include "../platform/graphics/render_item.h"
+#include "../graphics/render_item.h"
 #include "items_object.h"
 
 struct item* items[ITEMS_MAX];

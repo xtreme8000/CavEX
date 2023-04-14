@@ -24,7 +24,7 @@
 #include <ogc/tpl.h>
 #include <string.h>
 
-#include "../../../util.h"
+#include "../../util.h"
 #include "../gfx.h"
 
 #include "textures.h"

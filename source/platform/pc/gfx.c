@@ -24,11 +24,11 @@
 #include <math.h>
 #include <string.h>
 
-#include "../../../game/game_state.h"
-#include "../../../lodepng/lodepng.h"
-#include "../../../util.h"
-#include "../../input.h"
+#include "../../game/game_state.h"
+#include "../../lodepng/lodepng.h"
+#include "../../util.h"
 #include "../gfx.h"
+#include "../input.h"
 
 static GLuint textures[8];
 

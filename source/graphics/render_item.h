@@ -17,15 +17,18 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef GFX_UTIL_H
-#define GFX_UTIL_H
+#ifndef RENDER_ITEM_H
+#define RENDER_ITEM_H
 
-#include "../../cglm/cglm.h"
+#include "../cglm/cglm.h"
 
-#include "../../world.h"
+#include "../item/items.h"
 
-void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
-				   vec3 color_bottom);
-void gutil_block_selection(mat4 view_matrix, struct block_info* this);
+void render_item_init(void);
+void render_item_update_light(uint8_t light);
+void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
+					  bool inventory);
+void render_item_block(struct item* item, struct item_data* stack, mat4 model,
+					   bool inventory);
 
 #endif

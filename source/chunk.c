@@ -26,7 +26,7 @@
 #include "block/blocks.h"
 #include "chunk.h"
 #include "game/game_state.h"
-#include "platform/graphics/gfx.h"
+#include "platform/gfx.h"
 #include "stack.h"
 
 #define CHUNK_INDEX(x, y, z) ((x) + ((z) + (y)*CHUNK_SIZE) * CHUNK_SIZE)

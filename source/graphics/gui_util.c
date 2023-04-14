@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-#include "gfx.h"
+#include "../platform/gfx.h"
 #include "gui_util.h"
 
 int gutil_control_icon(int x, enum gutil_control_icon icon, char* str) {

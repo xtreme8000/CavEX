@@ -98,12 +98,13 @@ add_executable(cavex
 				source/network/server_local.c
 				source/network/server_world.c
 
-				source/platform/graphics/displaylist.c
-				source/platform/graphics/gfx_util.c
-				source/platform/graphics/gfx.c
-				source/platform/graphics/gui_util.c
-				source/platform/graphics/render_block.c
-				source/platform/graphics/render_item.c
+				source/graphics/gfx_util.c
+				source/graphics/gui_util.c
+				source/graphics/render_block.c
+				source/graphics/render_item.c
+
+				source/platform/displaylist.c
+				source/platform/gfx.c
 				source/platform/input.c
 				source/platform/thread.c
 				source/platform/time.c

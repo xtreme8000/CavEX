@@ -24,7 +24,7 @@
 #include <stdint.h>
 
 #include "../item/items.h"
-#include "../platform/graphics/displaylist.h"
+#include "../platform/displaylist.h"
 
 #define TEXTURE_INDEX(x, y) (((y)*14) + (x))
 #define TEXTURE_X(idx) ((idx) % 14)
@@ -186,8 +186,8 @@ extern struct block block_iron_door;
 
 extern struct block* blocks[256];
 
-#include "../platform/graphics/render_block.h"
-#include "../platform/graphics/render_item.h"
+#include "../graphics/render_block.h"
+#include "../graphics/render_item.h"
 
 void blocks_init(void);
 enum side blocks_side_opposite(enum side s);

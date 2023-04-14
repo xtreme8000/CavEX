@@ -17,9 +17,9 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../../graphics/gui_util.h"
 #include "../../network/server_local.h"
-#include "../../platform/graphics/gfx.h"
-#include "../../platform/graphics/gui_util.h"
+#include "../../platform/gfx.h"
 #include "../game_state.h"
 
 static void screen_lworld_update(struct screen* s, float dt) {

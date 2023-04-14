@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "../../cglm/cglm.h"
+#include "../cglm/cglm.h"
 
 enum gfx_blend {
 	MODE_BLEND,

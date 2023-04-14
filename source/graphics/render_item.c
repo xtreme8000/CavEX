@@ -19,9 +19,9 @@
 
 #include <string.h>
 
-#include "../../block/blocks.h"
-#include "displaylist.h"
-#include "gfx.h"
+#include "../block/blocks.h"
+#include "../platform/displaylist.h"
+#include "../platform/gfx.h"
 #include "gui_util.h"
 #include "render_item.h"
 

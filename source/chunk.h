@@ -29,7 +29,7 @@
 
 #include "block/blocks.h"
 #include "chunk_mesher.h"
-#include "platform/graphics/displaylist.h"
+#include "platform/displaylist.h"
 #include "world.h"
 
 #define CHUNK_SIZE_BITS 0xF

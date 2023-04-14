@@ -19,8 +19,8 @@
 
 #include <assert.h>
 
-#include "../../game/game_state.h"
-#include "gfx.h"
+#include "../game/game_state.h"
+#include "../platform/gfx.h"
 #include "gfx_util.h"
 
 void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,

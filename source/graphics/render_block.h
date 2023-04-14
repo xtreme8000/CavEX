@@ -23,11 +23,11 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "../../cglm/cglm.h"
+#include "../cglm/cglm.h"
 
-#include "../../block/blocks.h"
-#include "../../world.h"
-#include "displaylist.h"
+#include "../block/blocks.h"
+#include "../platform/displaylist.h"
+#include "../world.h"
 
 #define TEX_OFFSET(x) ((x)*18 + 3)
 

@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 #include "chunk_mesher.h"
-#include "platform/graphics/displaylist.h"
+#include "platform/displaylist.h"
 #include "platform/thread.h"
 #include "stack.h"
 #include "world.h"

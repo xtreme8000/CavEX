@@ -20,10 +20,10 @@
 #include <stddef.h>
 
 #include "../../block/blocks.h"
+#include "../../graphics/gfx_util.h"
+#include "../../graphics/gui_util.h"
 #include "../../network/server_interface.h"
-#include "../../platform/graphics/gfx.h"
-#include "../../platform/graphics/gfx_util.h"
-#include "../../platform/graphics/gui_util.h"
+#include "../../platform/gfx.h"
 #include "../../platform/input.h"
 #include "../game_state.h"
 

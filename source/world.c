@@ -21,7 +21,7 @@
 
 #include "game/game_state.h"
 #include "lighting.h"
-#include "platform/graphics/gfx.h"
+#include "platform/gfx.h"
 #include "world.h"
 
 // params depend on fog texture

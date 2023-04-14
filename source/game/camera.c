@@ -19,7 +19,7 @@
 
 #include <assert.h>
 
-#include "../platform/graphics/gfx.h"
+#include "../platform/gfx.h"
 #include "../platform/input.h"
 #include "camera.h"
 #include "game_state.h"

@@ -19,10 +19,10 @@
 
 #include <stdint.h>
 
-#include "../../block/blocks.h"
-#include "../../chunk.h"
-#include "../../util.h"
-#include "gfx.h"
+#include "../block/blocks.h"
+#include "../chunk.h"
+#include "../platform/gfx.h"
+#include "../util.h"
 #include "render_block.h"
 
 #define BLK_LEN 256
