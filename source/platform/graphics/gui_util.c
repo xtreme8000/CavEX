@@ -89,58 +89,106 @@ static const uint8_t font_char_width[256] = {
 int gutil_font_width(char* str, int scale) {
 	int x = 0;
 
+	int skip = 0;
+
 	while(*str) {
-		x += (font_char_width[(int)*str] + 1) * scale / 8;
+		if(*str == '\247')
+			skip = 2;
+
+		if(skip > 0) {
+			skip--;
+		} else {
+			x += (font_char_width[(int)*str] + 1) * scale / 8;
+		}
+
 		str++;
 	}
 
 	return x;
 }
 
+static const uint8_t chat_colors[16][3] = {
+	{0x00, 0x00, 0x00}, {0x00, 0x00, 0xAA}, {0x00, 0xAA, 0x00},
+	{0x00, 0xAA, 0xAA}, {0xAA, 0x00, 0x00}, {0xAA, 0x00, 0xAA},
+	{0xFF, 0xAA, 0x00}, {0xAA, 0xAA, 0xAA}, {0x55, 0x55, 0x55},
+	{0x55, 0x55, 0xFF}, {0x55, 0xFF, 0x55}, {0x55, 0xFF, 0xFF},
+	{0xFF, 0x55, 0x55}, {0xFF, 0x55, 0xFF}, {0xFF, 0xFF, 0x55},
+	{0xFF, 0xFF, 0xFF},
+};
+
 void gutil_text(int x, int y, char* str, int scale) {
 	gfx_bind_texture(TEXTURE_FONT);
 
+	int skip = 0;
+	int col = 15;
+
 	while(*str) {
-		uint8_t tex_x = *str % 16 * 16;
-		uint8_t tex_y = *str / 16 * 16;
-		uint8_t width = (font_char_width[(int)*str] + 1) * scale / 8;
+		if(*str == '\247')
+			skip = 2;
 
-		gfx_draw_quads(
-			8,
-			(int16_t[]) {x + scale / 8,
-						 y + scale / 8,
-						 -2,
-						 x + scale + scale / 8,
-						 y + scale / 8,
-						 -2,
-						 x + scale + scale / 8,
-						 y + scale + scale / 8,
-						 -2,
-						 x + scale / 8,
-						 y + scale + scale / 8,
-						 -2,
-						 x,
-						 y,
-						 -1,
-						 x + scale,
-						 y,
-						 -1,
-						 x + scale,
-						 y + scale,
-						 -1,
-						 x,
-						 y + scale,
-						 -1},
-			(uint8_t[]) {0x80, 0x80, 0x80, 0xFF, 0x80, 0x80, 0x80, 0xFF,
-						 0x80, 0x80, 0x80, 0xFF, 0x80, 0x80, 0x80, 0xFF,
-						 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-						 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
-			(uint16_t[]) {tex_x, tex_y, tex_x + 16, tex_y, tex_x + 16,
-						  tex_y + 16, tex_x, tex_y + 16, tex_x, tex_y,
-						  tex_x + 16, tex_y, tex_x + 16, tex_y + 16, tex_x,
-						  tex_y + 16});
+		if(skip > 0) {
+			skip--;
 
-		x += width;
+			if(*str >= '0' && *str <= '9')
+				col = *str - '0';
+
+			if(*str >= 'a' && *str <= 'f')
+				col = *str - 'a' + 10;
+		} else {
+			uint8_t tex_x = *str % 16 * 16;
+			uint8_t tex_y = *str / 16 * 16;
+			uint8_t width = (font_char_width[(int)*str] + 1) * scale / 8;
+
+			gfx_draw_quads(
+				8,
+				(int16_t[]) {x + scale / 8,
+							 y + scale / 8,
+							 -2,
+							 x + scale + scale / 8,
+							 y + scale / 8,
+							 -2,
+							 x + scale + scale / 8,
+							 y + scale + scale / 8,
+							 -2,
+							 x + scale / 8,
+							 y + scale + scale / 8,
+							 -2,
+							 x,
+							 y,
+							 -1,
+							 x + scale,
+							 y,
+							 -1,
+							 x + scale,
+							 y + scale,
+							 -1,
+							 x,
+							 y + scale,
+							 -1},
+				(uint8_t[]) {chat_colors[col][0] / 2, chat_colors[col][1] / 2,
+							 chat_colors[col][2] / 2, 0xFF,
+							 chat_colors[col][0] / 2, chat_colors[col][1] / 2,
+							 chat_colors[col][2] / 2, 0xFF,
+							 chat_colors[col][0] / 2, chat_colors[col][1] / 2,
+							 chat_colors[col][2] / 2, 0xFF,
+							 chat_colors[col][0] / 2, chat_colors[col][1] / 2,
+							 chat_colors[col][2] / 2, 0xFF,
+							 chat_colors[col][0],	  chat_colors[col][1],
+							 chat_colors[col][2],	  0xFF,
+							 chat_colors[col][0],	  chat_colors[col][1],
+							 chat_colors[col][2],	  0xFF,
+							 chat_colors[col][0],	  chat_colors[col][1],
+							 chat_colors[col][2],	  0xFF,
+							 chat_colors[col][0],	  chat_colors[col][1],
+							 chat_colors[col][2],	  0xFF},
+				(uint16_t[]) {tex_x, tex_y, tex_x + 16, tex_y, tex_x + 16,
+							  tex_y + 16, tex_x, tex_y + 16, tex_x, tex_y,
+							  tex_x + 16, tex_y, tex_x + 16, tex_y + 16, tex_x,
+							  tex_y + 16});
+
+			x += width;
+		}
+
 		str++;
 	}
 }

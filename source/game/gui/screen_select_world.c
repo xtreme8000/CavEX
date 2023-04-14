@@ -184,7 +184,7 @@ static void screen_sworld_render2D(struct screen* s, int width, int height) {
 				 gmtime(&opt.last_access));
 
 		char tmp[128];
-		snprintf(tmp, sizeof(tmp), "%s (%s, %0.2fMB)",
+		snprintf(tmp, sizeof(tmp), "\2477%s (%s, %0.2fMB)",
 				 string_get_cstr(opt.directory), tmp_time,
 				 opt.byte_size / 1000.0F / 1000.0F);
 
