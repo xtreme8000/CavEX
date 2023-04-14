@@ -43,6 +43,8 @@ static uint8_t colors[256 * 3] ATTRIBUTE_ALIGN(32);
 static bool gfx_matrix_texture_prev = false;
 static bool gfx_fog_prev = false;
 
+static int gfx_screen_width = 802;
+
 /*static void* thread_vsync(void* user) {
 	void* current_frame = NULL;
 
@@ -124,7 +126,7 @@ static void gfx_load_textures() {
 }
 
 int gfx_width() {
-	return 802;
+	return gfx_screen_width;
 }
 
 int gfx_height() {
@@ -147,8 +149,10 @@ void gfx_setup() {
 
 	if(CONF_GetAspectRatio() == CONF_ASPECT_16_9) {
 		screenMode->viWidth = 678;
+		gfx_screen_width = 802;
 	} else {
 		screenMode->viWidth = 672;
+		gfx_screen_width = 640;
 	}
 
 	if(VIDEO_GetCurrentTvMode() == VI_PAL) {
