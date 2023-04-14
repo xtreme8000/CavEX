@@ -47,31 +47,40 @@ static void screen_ingame_render3D(struct screen* s, mat4 view) {
 
 	gfx_blending(MODE_OFF);
 
-	float dig_lerp = 0.0F;
 	float place_lerp = 0.0F;
+	size_t slot = inventory_get_hotbar(&gstate.inventory);
 
-	if(!gstate.held_item_animation.finished) {
-		dig_lerp
-			= time_diff_s(gstate.held_item_animation.start, time_get()) / 0.4F;
+	float dig_lerp
+		= time_diff_s(gstate.held_item_animation.punch.start, time_get())
+		/ 0.4F;
 
-		if(gstate.held_item_animation.type)
-			place_lerp = 1.0F - glm_clamp(dig_lerp * 4.0F, 0, 1);
+	if(gstate.held_item_animation.punch.place)
+		place_lerp = 1.0F - glm_clamp(dig_lerp * 4.0F, 0, 1);
 
-		if(dig_lerp > 1.0F)
-			gstate.held_item_animation.finished = true;
-	}
+	if(dig_lerp >= 1.0F)
+		dig_lerp = 0.0F;
+
+	float swing_lerp
+		= time_diff_s(gstate.held_item_animation.switch_item.start, time_get())
+		/ 0.3F;
+
+	if(swing_lerp < 0.5F)
+		slot = gstate.held_item_animation.switch_item.old_slot;
+
+	if(swing_lerp >= 1.0F)
+		swing_lerp = 0.0F;
 
 	float sinHalfCircle = sinf(dig_lerp * GLM_PI);
 	float sqrtLerpPI = sqrtf(dig_lerp) * GLM_PI;
 	float sinHalfCircleWeird = sinf(glm_pow2(dig_lerp) * GLM_PI);
 
 	mat4 model;
-	glm_translate_make(
-		model,
-		(vec3) {0.56F - sinf(sqrtLerpPI) * 0.4F,
-				-0.52F - 0 * 0.6F + sinf(sqrtLerpPI * 2.0F) * 0.2F
-					- 0.6F * place_lerp /*- 0.4F * sinf(swing_lerp * GLM_PI)*/,
-				-0.72F - sinHalfCircle * 0.2F});
+	glm_translate_make(model,
+					   (vec3) {0.56F - sinf(sqrtLerpPI) * 0.4F,
+							   -0.52F + sinf(sqrtLerpPI * 2.0F) * 0.2F
+								   - 0.6F * place_lerp
+								   - 0.4F * sinf(swing_lerp * GLM_PI),
+							   -0.72F - sinHalfCircle * 0.2F});
 	glm_rotate_y(model, glm_rad(45.0F), model);
 	glm_rotate_y(model, glm_rad(-sinHalfCircleWeird * 20.0F), model);
 	glm_rotate_z(model, glm_rad(-sinf(sqrtLerpPI) * 20.0F), model);
@@ -83,9 +92,7 @@ static void screen_ingame_render3D(struct screen* s, mat4 view) {
 	gfx_depth_range(0.0F, 0.1F);
 
 	struct item_data item;
-	if(inventory_get_slot(&gstate.inventory,
-						  inventory_get_hotbar(&gstate.inventory), &item)
-	   && item_get(&item))
+	if(inventory_get_slot(&gstate.inventory, slot, &item) && item_get(&item))
 		items[item.id]->renderItem(item_get(&item), &item, model, false);
 
 	gfx_depth_range(0.0F, 1.0F);
@@ -133,21 +140,18 @@ static void screen_ingame_update(struct screen* s, float dt) {
 					});
 				}
 
-				gstate.held_item_animation = (struct held_anim) {
-					.start = time_get(),
-					.type = true,
-					.finished = false,
-				};
+				gstate.held_item_animation.punch.start = time_get();
+				gstate.held_item_animation.punch.place = true;
 			}
 		}
 	}
 
-	if(input_pressed(IB_ACTION1))
-		gstate.held_item_animation = (struct held_anim) {
-			.start = time_get(),
-			.type = false,
-			.finished = false,
-		};
+	if(input_held(IB_ACTION1)
+	   && time_diff_s(gstate.held_item_animation.punch.start, time_get())
+		   >= 0.2F) {
+		gstate.held_item_animation.punch.start = time_get();
+		gstate.held_item_animation.punch.place = false;
+	}
 
 	size_t slot = inventory_get_hotbar(&gstate.inventory);
 
@@ -155,12 +159,22 @@ static void screen_ingame_update(struct screen* s, float dt) {
 		inventory_set_hotbar(&gstate.inventory,
 							 (slot == 0) ? INVENTORY_SIZE_HOTBAR - 1 :
 										   slot - 1);
+		if(time_diff_s(gstate.held_item_animation.switch_item.start, time_get())
+		   >= 0.15F) {
+			gstate.held_item_animation.switch_item.start = time_get();
+			gstate.held_item_animation.switch_item.old_slot = slot;
+		}
 	}
 
 	if(input_pressed(IB_SCROLL_RIGHT)) {
 		inventory_set_hotbar(&gstate.inventory,
 							 (slot == INVENTORY_SIZE_HOTBAR - 1) ? 0 :
 																   slot + 1);
+		if(time_diff_s(gstate.held_item_animation.switch_item.start, time_get())
+		   >= 0.15F) {
+			gstate.held_item_animation.switch_item.start = time_get();
+			gstate.held_item_animation.switch_item.old_slot = slot;
+		}
 	}
 
 	if(input_pressed(IB_HOME)) {

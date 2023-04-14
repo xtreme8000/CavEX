@@ -24,6 +24,7 @@
 #include <stddef.h>
 
 #include "../item/inventory.h"
+#include "../platform/time.h"
 #include "../world.h"
 #include "camera.h"
 #include "gui/screen.h"
@@ -52,9 +53,14 @@ struct game_state {
 	ptime_t world_time_start;
 	struct inventory inventory;
 	struct held_anim {
-		ptime_t start;
-		bool type;
-		bool finished;
+		struct {
+			ptime_t start;
+			bool place;
+		} punch;
+		struct {
+			ptime_t start;
+			size_t old_slot;
+		} switch_item;
 	} held_item_animation;
 	bool world_loaded;
 };

@@ -50,7 +50,8 @@ int main(void) {
 	gstate.config.render_distance = 192.0F;
 	gstate.config.fog_distance = 5 * 16.0F;
 	gstate.world_loaded = false;
-	gstate.held_item_animation.finished = true;
+	gstate.held_item_animation.punch.start = time_get();
+	gstate.held_item_animation.switch_item.start = time_get();
 
 #ifdef PLATFORM_WII
 	fatInitDefault();
