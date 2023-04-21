@@ -34,29 +34,55 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 	return face_occlusion_full();
 }
 
-static uint8_t getTextureIndex(struct block_info* this, enum side side) {
+static uint8_t getTextureIndex1(struct block_info* this, enum side side) {
 	switch(side) {
 		case SIDE_FRONT:
 			if(this->block->metadata == 2)
-				return TEXTURE_INDEX(7, 7);
+				return tex_atlas_lookup(TEXAT_PUMPKIN_FRONT);
 			else
-				return TEXTURE_INDEX(6, 7);
+				return tex_atlas_lookup(TEXAT_PUMPKIN_SIDE);
 		case SIDE_BACK:
 			if(this->block->metadata == 0)
-				return TEXTURE_INDEX(7, 7);
+				return tex_atlas_lookup(TEXAT_PUMPKIN_FRONT);
 			else
-				return TEXTURE_INDEX(6, 7);
+				return tex_atlas_lookup(TEXAT_PUMPKIN_SIDE);
 		case SIDE_RIGHT:
 			if(this->block->metadata == 3)
-				return TEXTURE_INDEX(7, 7);
+				return tex_atlas_lookup(TEXAT_PUMPKIN_FRONT);
 			else
-				return TEXTURE_INDEX(6, 7);
+				return tex_atlas_lookup(TEXAT_PUMPKIN_SIDE);
 		case SIDE_LEFT:
 			if(this->block->metadata == 1)
-				return TEXTURE_INDEX(7, 7);
+				return tex_atlas_lookup(TEXAT_PUMPKIN_FRONT);
 			else
-				return TEXTURE_INDEX(6, 7);
-		default: return TEXTURE_INDEX(6, 6);
+				return tex_atlas_lookup(TEXAT_PUMPKIN_SIDE);
+		default: return tex_atlas_lookup(TEXAT_PUMPKIN_TOP);
+	}
+}
+
+static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
+	switch(side) {
+		case SIDE_FRONT:
+			if(this->block->metadata == 2)
+				return tex_atlas_lookup(TEXAT_PUMPKIN_FRONT_LIT);
+			else
+				return tex_atlas_lookup(TEXAT_PUMPKIN_SIDE);
+		case SIDE_BACK:
+			if(this->block->metadata == 0)
+				return tex_atlas_lookup(TEXAT_PUMPKIN_FRONT_LIT);
+			else
+				return tex_atlas_lookup(TEXAT_PUMPKIN_SIDE);
+		case SIDE_RIGHT:
+			if(this->block->metadata == 3)
+				return tex_atlas_lookup(TEXAT_PUMPKIN_FRONT_LIT);
+			else
+				return tex_atlas_lookup(TEXAT_PUMPKIN_SIDE);
+		case SIDE_LEFT:
+			if(this->block->metadata == 1)
+				return tex_atlas_lookup(TEXAT_PUMPKIN_FRONT_LIT);
+			else
+				return tex_atlas_lookup(TEXAT_PUMPKIN_SIDE);
+		default: return tex_atlas_lookup(TEXAT_PUMPKIN_TOP);
 	}
 }
 
@@ -65,7 +91,7 @@ struct block block_pumpkin = {
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
-	.getTextureIndex = getTextureIndex,
+	.getTextureIndex = getTextureIndex1,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
@@ -89,7 +115,7 @@ struct block block_pumpkin_lit = {
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
-	.getTextureIndex = getTextureIndex,
+	.getTextureIndex = getTextureIndex2,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

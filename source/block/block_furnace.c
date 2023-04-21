@@ -34,29 +34,55 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 	return face_occlusion_full();
 }
 
-static uint8_t getTextureIndex(struct block_info* this, enum side side) {
+static uint8_t getTextureIndex1(struct block_info* this, enum side side) {
 	switch(side) {
 		case SIDE_FRONT:
 			if(this->block->metadata == 2)
-				return TEXTURE_INDEX(12, 2);
+				return tex_atlas_lookup(TEXAT_FURNACE_FRONT);
 			else
-				return TEXTURE_INDEX(13, 2);
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
 		case SIDE_BACK:
 			if(this->block->metadata == 3)
-				return TEXTURE_INDEX(12, 2);
+				return tex_atlas_lookup(TEXAT_FURNACE_FRONT);
 			else
-				return TEXTURE_INDEX(13, 2);
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
 		case SIDE_RIGHT:
 			if(this->block->metadata == 5)
-				return TEXTURE_INDEX(12, 2);
+				return tex_atlas_lookup(TEXAT_FURNACE_FRONT);
 			else
-				return TEXTURE_INDEX(13, 2);
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
 		case SIDE_LEFT:
 			if(this->block->metadata == 4)
-				return TEXTURE_INDEX(12, 2);
+				return tex_atlas_lookup(TEXAT_FURNACE_FRONT);
 			else
-				return TEXTURE_INDEX(13, 2);
-		default: return TEXTURE_INDEX(13, 4);
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
+		default: return tex_atlas_lookup(TEXAT_FURNACE_TOP);
+	}
+}
+
+static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
+	switch(side) {
+		case SIDE_FRONT:
+			if(this->block->metadata == 2)
+				return tex_atlas_lookup(TEXAT_FURNACE_FRONT_LIT);
+			else
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
+		case SIDE_BACK:
+			if(this->block->metadata == 3)
+				return tex_atlas_lookup(TEXAT_FURNACE_FRONT_LIT);
+			else
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
+		case SIDE_RIGHT:
+			if(this->block->metadata == 5)
+				return tex_atlas_lookup(TEXAT_FURNACE_FRONT_LIT);
+			else
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
+		case SIDE_LEFT:
+			if(this->block->metadata == 4)
+				return tex_atlas_lookup(TEXAT_FURNACE_FRONT_LIT);
+			else
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
+		default: return tex_atlas_lookup(TEXAT_FURNACE_TOP);
 	}
 }
 
@@ -65,7 +91,7 @@ struct block block_furnaceoff = {
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
-	.getTextureIndex = getTextureIndex,
+	.getTextureIndex = getTextureIndex1,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
@@ -89,7 +115,7 @@ struct block block_furnaceon = {
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
-	.getTextureIndex = getTextureIndex,
+	.getTextureIndex = getTextureIndex2,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

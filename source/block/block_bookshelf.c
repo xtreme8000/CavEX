@@ -37,8 +37,8 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	switch(side) {
 		case SIDE_TOP:
-		case SIDE_BOTTOM: return TEXTURE_INDEX(4, 0);
-		default: return TEXTURE_INDEX(3, 2);
+		case SIDE_BOTTOM: return tex_atlas_lookup(TEXAT_PLANKS);
+		default: return tex_atlas_lookup(TEXAT_BOOKSHELF);
 	}
 }
 

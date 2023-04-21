@@ -21,6 +21,8 @@
 
 #include "../platform/gfx.h"
 #include "gui_util.h"
+#include "render_block.h"
+#include "texture_atlas.h"
 
 int gutil_control_icon(int x, enum gutil_control_icon icon, char* str) {
 	gfx_bind_texture(TEXTURE_GUI);
@@ -69,9 +71,14 @@ void gutil_bg() {
 	int cx = (gfx_width() + scale - 1) / scale;
 	int cy = (gfx_height() + scale - 1) / scale;
 
+	uint8_t tex = tex_atlas_lookup(TEXAT_DIRT);
+
+	uint8_t s = TEX_OFFSET(TEXTURE_X(tex));
+	uint8_t t = TEX_OFFSET(TEXTURE_Y(tex));
+
 	for(int y = 0; y < cy; y++) {
 		for(int x = 0; x < cx; x++) {
-			gutil_texquad_col(x * scale, y * scale, 39, 3, 16, 16, scale, scale,
+			gutil_texquad_col(x * scale, y * scale, s, t, 16, 16, scale, scale,
 							  0x40, 0x40, 0x40, 0xFF);
 		}
 	}

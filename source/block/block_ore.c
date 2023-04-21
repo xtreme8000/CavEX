@@ -37,18 +37,18 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	switch(this->block->type) {
 		case 14: // gold
-			return TEXTURE_INDEX(0, 2);
+			return tex_atlas_lookup(TEXAT_ORE_GOLD);
 		case 15: // iron
-			return TEXTURE_INDEX(1, 2);
+			return tex_atlas_lookup(TEXAT_ORE_IRON);
 		case 16: // coal
-			return TEXTURE_INDEX(2, 2);
+			return tex_atlas_lookup(TEXAT_ORE_COAL);
 		case 21: // lapis
-			return TEXTURE_INDEX(0, 10);
+			return tex_atlas_lookup(TEXAT_ORE_LAPIS);
 		case 56: // diamond
-			return TEXTURE_INDEX(2, 3);
+			return tex_atlas_lookup(TEXAT_ORE_DIAMOND);
 		case 73: // redstone
-		case 74: return TEXTURE_INDEX(3, 3);
-		default: return TEXTURE_INDEX(1, 0);
+		case 74: return tex_atlas_lookup(TEXAT_ORE_REDSTONE);
+		default: return tex_atlas_lookup(TEXAT_STONE);
 	}
 }
 

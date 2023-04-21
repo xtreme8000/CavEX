@@ -38,13 +38,13 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	switch(side) {
 		case SIDE_TOP:
 			return (this->neighbours[SIDE_TOP].type == BLOCK_SNOW) ?
-				TEXTURE_INDEX(2, 4) :
-				TEXTURE_INDEX(5, 9);
-		case SIDE_BOTTOM: return TEXTURE_INDEX(2, 0);
+				tex_atlas_lookup(TEXAT_SNOW) :
+				tex_atlas_lookup(TEXAT_GRASS_TOP);
+		case SIDE_BOTTOM: return tex_atlas_lookup(TEXAT_DIRT);
 		default:
 			return (this->neighbours[SIDE_TOP].type == BLOCK_SNOW) ?
-				TEXTURE_INDEX(4, 4) :
-				TEXTURE_INDEX(5, 10);
+				tex_atlas_lookup(TEXAT_GRASS_SIDE_SNOW) :
+				tex_atlas_lookup(TEXAT_GRASS_SIDE);
 	}
 }
 

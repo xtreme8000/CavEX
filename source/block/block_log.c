@@ -35,29 +35,14 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 }
 
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
+	if(side == SIDE_TOP || side == SIDE_BOTTOM)
+		return tex_atlas_lookup(TEXAT_LOG_OAK_TOP);
+
 	switch(this->block->metadata) {
 		default:
-		case 0:
-			switch(side) {
-				case SIDE_TOP:
-				case SIDE_BOTTOM: return TEXTURE_INDEX(5, 1);
-				default: return TEXTURE_INDEX(4, 1);
-			}
-			break;
-		case 1:
-			switch(side) {
-				case SIDE_TOP:
-				case SIDE_BOTTOM: return TEXTURE_INDEX(5, 1);
-				default: return TEXTURE_INDEX(4, 7);
-			}
-			break;
-		case 2:
-			switch(side) {
-				case SIDE_TOP:
-				case SIDE_BOTTOM: return TEXTURE_INDEX(5, 1);
-				default: return TEXTURE_INDEX(5, 7);
-			}
-			break;
+		case 0: return tex_atlas_lookup(TEXAT_LOG_OAK_SIDE);
+		case 1: return tex_atlas_lookup(TEXAT_LOG_SPRUCE_SIDE);
+		case 2: return tex_atlas_lookup(TEXAT_LOG_BIRCH_SIDE);
 	}
 }
 

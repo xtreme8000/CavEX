@@ -24,11 +24,10 @@
 #include <ogc/tpl.h>
 #include <string.h>
 
+#include "../../graphics/texture_atlas.h"
 #include "../../util.h"
 #include "../gfx.h"
-
-#include "textures.h"
-#include "textures_tpl.h"
+#include "../texture.h"
 
 #define FIFO_SIZE (256 * 1024)
 
@@ -82,47 +81,44 @@ static void copy_buffers(u32 cnt) {
 	}
 }
 
+#define distance_2d(x1, y1, x2, y2)                                            \
+	(((x1) - (x2)) * ((x1) - (x2)) + ((y1) - (y2)) * ((y1) - (y2)))
+
+static void texture_fog(uint8_t* img, size_t size) {
+	for(size_t y = 0; y < size; y++) {
+		for(size_t x = 0; x < size; x++) {
+			float d = (sqrt(distance_2d(size / 2.0F, size / 2.0F, x + 0.5F,
+										y + 0.5F))
+					   - (size / 2.0F - 9.0F))
+				/ 8.0F;
+
+			uint8_t* pixel = img + (x + y * size) * 4;
+			pixel[0] = pixel[1] = pixel[2]
+				= roundf(glm_clamp(d * 255.0F, 0.0F, 255.0F));
+			pixel[3] = 255;
+		}
+	}
+}
+
 static void gfx_load_textures() {
-	GXTexObj terrain, font, anim, gui, gui2, items, fog;
-	TPLFile spriteTPL;
-	TPL_OpenTPLFromMemory(&spriteTPL, (void*)textures_tpl, textures_tpl_size);
-	TPL_GetTexture(&spriteTPL, texture_terrain, &terrain);
-	GX_InitTexObjFilterMode(&terrain, GX_NEAR, GX_NEAR);
-	GX_InitTexObjMaxAniso(&terrain, GX_ANISO_1);
-	GX_LoadTexObj(&terrain, GX_TEXMAP0);
+	size_t w, h;
+	void* output = tex_atlas_block("assets/terrain.png", &w, &h);
+	if(output) {
+		tex_gfx_load(output, w, h, TEX_FMT_RGBA16, GX_TEXMAP0, false);
+		free(output);
+	}
 
-	TPL_GetTexture(&spriteTPL, texture_font, &font);
-	GX_InitTexObjFilterMode(&font, GX_NEAR, GX_NEAR);
-	GX_InitTexObjMaxAniso(&font, GX_ANISO_1);
-	GX_LoadTexObj(&font, GX_TEXMAP1);
+	tex_gfx_load_file("assets/default.png", TEX_FMT_I8, GX_TEXMAP1, false);
+	tex_gfx_load_file("assets/anim.png", TEX_FMT_RGBA32, GX_TEXMAP2, false);
+	tex_gfx_load_file("assets/gui.png", TEX_FMT_IA4, GX_TEXMAP3, false);
+	tex_gfx_load_file("assets/gui_2.png", TEX_FMT_RGBA16, GX_TEXMAP4, false);
+	tex_gfx_load_file("assets/items.png", TEX_FMT_RGBA16, GX_TEXMAP5, false);
 
-	TPL_GetTexture(&spriteTPL, texture_anim, &anim);
-	GX_InitTexObjFilterMode(&anim, GX_NEAR, GX_NEAR);
-	GX_InitTexObjMaxAniso(&anim, GX_ANISO_1);
-	GX_LoadTexObj(&anim, GX_TEXMAP2);
-
-	TPL_GetTexture(&spriteTPL, texture_gui, &gui);
-	GX_InitTexObjFilterMode(&gui, GX_NEAR, GX_NEAR);
-	GX_InitTexObjMaxAniso(&gui, GX_ANISO_1);
-	GX_LoadTexObj(&gui, GX_TEXMAP3);
-
-	TPL_GetTexture(&spriteTPL, texture_gui2, &gui2);
-	GX_InitTexObjFilterMode(&gui2, GX_NEAR, GX_NEAR);
-	GX_InitTexObjMaxAniso(&gui2, GX_ANISO_1);
-	GX_LoadTexObj(&gui2, GX_TEXMAP4);
-
-	TPL_GetTexture(&spriteTPL, texture_items, &items);
-	GX_InitTexObjFilterMode(&items, GX_NEAR, GX_NEAR);
-	GX_InitTexObjMaxAniso(&items, GX_ANISO_1);
-	GX_LoadTexObj(&items, GX_TEXMAP5);
-
-	TPL_GetTexture(&spriteTPL, texture_fog, &fog);
-	GX_InitTexObjFilterMode(&fog, GX_LINEAR, GX_LINEAR);
-	GX_InitTexObjMaxAniso(&fog, GX_ANISO_1);
-	GX_InitTexObjWrapMode(&fog, GX_CLAMP, GX_CLAMP);
-	GX_LoadTexObj(&fog, GX_TEXMAP7);
-
-	TPL_CloseTPLFile(&spriteTPL);
+	size_t fog_size = 128;
+	uint8_t* fog = malloc(fog_size * fog_size * 4);
+	texture_fog(fog, fog_size);
+	tex_gfx_load(fog, fog_size, fog_size, TEX_FMT_I8, GX_TEXMAP6, true);
+	free(fog);
 }
 
 int gfx_width() {
@@ -389,7 +385,7 @@ void gfx_fog(bool enable) {
 
 		if(enable) {
 			GX_SetTevOp(GX_TEVSTAGE1, GX_DECAL);
-			GX_SetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP7, GX_COLOR0A0);
+			GX_SetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP6, GX_COLOR0A0);
 			GX_SetTevColorIn(GX_TEVSTAGE1, GX_CC_CPREV, GX_CC_C0, GX_CC_TEXA,
 							 GX_CC_ZERO);
 		}

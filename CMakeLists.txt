@@ -102,12 +102,14 @@ add_executable(cavex
 				source/graphics/gui_util.c
 				source/graphics/render_block.c
 				source/graphics/render_item.c
+				source/graphics/texture_atlas.c
 
 				source/platform/displaylist.c
 				source/platform/gfx.c
 				source/platform/input.c
 				source/platform/thread.c
 				source/platform/time.c
+				source/platform/texture.c
 
 				source/chunk_mesher.c
 				source/chunk.c

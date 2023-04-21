@@ -35,7 +35,17 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 }
 
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
-	return TEXTURE_INDEX(this->block->metadata + 6, 5);
+	switch(this->block->metadata) {
+		case 0: return tex_atlas_lookup(TEXAT_CROPS_0);
+		case 1: return tex_atlas_lookup(TEXAT_CROPS_1);
+		case 2: return tex_atlas_lookup(TEXAT_CROPS_2);
+		case 3: return tex_atlas_lookup(TEXAT_CROPS_3);
+		case 4: return tex_atlas_lookup(TEXAT_CROPS_4);
+		case 5: return tex_atlas_lookup(TEXAT_CROPS_5);
+		case 6: return tex_atlas_lookup(TEXAT_CROPS_6);
+		default:
+		case 7: return tex_atlas_lookup(TEXAT_CROPS_7);
+	}
 }
 
 struct block block_crops = {

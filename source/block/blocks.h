@@ -23,12 +23,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../graphics/texture_atlas.h"
 #include "../item/items.h"
 #include "../platform/displaylist.h"
-
-#define TEXTURE_INDEX(x, y) (((y)*14) + (x))
-#define TEXTURE_X(idx) ((idx) % 14)
-#define TEXTURE_Y(idx) ((idx) / 14)
 
 enum block_material {
 	MATERIAL_WOOD,

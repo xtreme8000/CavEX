@@ -43,15 +43,16 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 		default:
 		case 0:
 			return (side == SIDE_TOP || side == SIDE_BOTTOM) ?
-				TEXTURE_INDEX(6, 0) :
-				TEXTURE_INDEX(5, 0);
+				tex_atlas_lookup(TEXAT_SLAB_STONE_TOP) :
+				tex_atlas_lookup(TEXAT_SLAB_STONE_SIDE);
 		case 1:
 			return (side == SIDE_TOP) ?
-				TEXTURE_INDEX(0, 11) :
-				((side == SIDE_BOTTOM) ? TEXTURE_INDEX(0, 13) :
-										 TEXTURE_INDEX(0, 12));
-		case 2: return TEXTURE_INDEX(4, 0);
-		case 3: return TEXTURE_INDEX(0, 1);
+				tex_atlas_lookup(TEXAT_SANDSTONE_TOP) :
+				((side == SIDE_BOTTOM) ?
+					 tex_atlas_lookup(TEXAT_SANDSTONE_BOTTOM) :
+					 tex_atlas_lookup(TEXAT_SANDSTONE_SIDE));
+		case 2: return tex_atlas_lookup(TEXAT_PLANKS);
+		case 3: return tex_atlas_lookup(TEXAT_COBBLESTONE);
 	}
 }
 

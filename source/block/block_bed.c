@@ -47,29 +47,33 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	if(this->block->metadata & 0x8) {
 		switch(side) {
-			case SIDE_TOP: return TEXTURE_INDEX(7, 8);
+			case SIDE_TOP: return tex_atlas_lookup(TEXAT_BED_TOP_2);
 			case SIDE_LEFT:
 			case SIDE_RIGHT:
-				return (this->block->metadata & 0x1) ? TEXTURE_INDEX(11, 8) :
-													   TEXTURE_INDEX(10, 8);
+				return (this->block->metadata & 0x1) ?
+					tex_atlas_lookup(TEXAT_BED_FRONT) :
+					tex_atlas_lookup(TEXAT_BED_SIDE_2);
 			case SIDE_FRONT:
 			case SIDE_BACK:
-				return (this->block->metadata & 0x1) ? TEXTURE_INDEX(10, 8) :
-													   TEXTURE_INDEX(11, 8);
-			default: return TEXTURE_INDEX(4, 0);
+				return (this->block->metadata & 0x1) ?
+					tex_atlas_lookup(TEXAT_BED_SIDE_2) :
+					tex_atlas_lookup(TEXAT_BED_FRONT);
+			default: return tex_atlas_lookup(TEXAT_PLANKS);
 		}
 	} else {
 		switch(side) {
-			case SIDE_TOP: return TEXTURE_INDEX(6, 8);
+			case SIDE_TOP: return tex_atlas_lookup(TEXAT_BED_TOP_1);
 			case SIDE_LEFT:
 			case SIDE_RIGHT:
-				return (this->block->metadata & 0x1) ? TEXTURE_INDEX(8, 8) :
-													   TEXTURE_INDEX(9, 8);
+				return (this->block->metadata & 0x1) ?
+					tex_atlas_lookup(TEXAT_BED_BACK) :
+					tex_atlas_lookup(TEXAT_BED_SIDE_1);
 			case SIDE_FRONT:
 			case SIDE_BACK:
-				return (this->block->metadata & 0x1) ? TEXTURE_INDEX(9, 8) :
-													   TEXTURE_INDEX(8, 8);
-			default: return TEXTURE_INDEX(4, 0);
+				return (this->block->metadata & 0x1) ?
+					tex_atlas_lookup(TEXAT_BED_SIDE_1) :
+					tex_atlas_lookup(TEXAT_BED_BACK);
+			default: return tex_atlas_lookup(TEXAT_PLANKS);
 		}
 	}
 }

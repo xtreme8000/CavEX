@@ -25,61 +25,45 @@
 #include <string.h>
 
 #include "../../game/game_state.h"
+#include "../../graphics/texture_atlas.h"
 #include "../../lodepng/lodepng.h"
 #include "../../util.h"
 #include "../gfx.h"
 #include "../input.h"
+#include "../texture.h"
 
 static GLuint textures[8];
 
-static GLuint load_tex(const char* filename, bool nearest) {
-	unsigned width, height;
-	unsigned char* img;
-	if(lodepng_decode32_file(&img, &width, &height, filename))
-		printf("error loading texture %s\n", filename);
-
-	GLuint tex;
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-				 GL_UNSIGNED_BYTE, img);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-					nearest ? GL_NEAREST : GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-					nearest ? GL_NEAREST : GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	free(img);
-
-	return tex;
-}
-
 static void gfx_load_textures() {
-	textures[0] = load_tex("terrain.png", true);
-	textures[1] = load_tex("default.png", true);
-	textures[2] = load_tex("anim.png", true);
-	textures[3] = load_tex("gui.png", true);
-	textures[4] = load_tex("gui_2.png", true);
-	textures[5] = load_tex("items.png", true);
+	glGenTextures(6, textures);
+
+	size_t w, h;
+	void* output = tex_atlas_block("assets/terrain.png", &w, &h);
+	if(output) {
+		tex_gfx_load(output, w, h, TEX_FMT_RGBA16, textures[0], false);
+		free(output);
+	}
+
+	tex_gfx_load_file("assets/default.png", TEX_FMT_I8, textures[1], false);
+	tex_gfx_load_file("assets/anim.png", TEX_FMT_RGBA32, textures[2], false);
+	tex_gfx_load_file("assets/gui.png", TEX_FMT_IA4, textures[3], false);
+	tex_gfx_load_file("assets/gui_2.png", TEX_FMT_RGBA16, textures[4], false);
+	tex_gfx_load_file("assets/items.png", TEX_FMT_RGBA16, textures[5], false);
 }
 
-static void testtest(GLuint shader) {
-	GLint isCompiled = 0;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
-	if(isCompiled == GL_FALSE) {
-		GLint maxLength = 0;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+static void shader_error(GLuint shader) {
+	GLint is_compiled = 0;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &is_compiled);
 
-		// The maxLength includes the NULL character
-		char log[maxLength];
-		glGetShaderInfoLog(shader, maxLength, &maxLength, log);
+	if(!is_compiled) {
+		GLint length = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+
+		char log[length];
+		glGetShaderInfoLog(shader, length, &length, log);
 		printf("%s\n", log);
 
-		// Provide the infolog in whatever manor you deem best.
-		// Exit with failure.
-		glDeleteShader(shader); // Don't leak the shader.
+		glDeleteShader(shader);
 	}
 }
 
@@ -87,12 +71,12 @@ static GLuint create_shader(const char* vertex, const char* fragment) {
 	GLuint v = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(v, 1, (const GLchar* const*)&vertex, NULL);
 	glCompileShader(v);
-	testtest(v);
+	shader_error(v);
 
 	GLuint f = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(f, 1, (const GLchar* const*)&fragment, NULL);
 	glCompileShader(f);
-	testtest(f);
+	shader_error(f);
 
 	GLuint program = glCreateProgram();
 	glAttachShader(program, v);
@@ -208,9 +192,9 @@ void gfx_setup() {
 	printf("Renderer: %s\n", glGetString(GL_RENDERER));
 	printf("Version: %s\n", glGetString(GL_VERSION));
 
-	void* vertex = file_read("vertex.shader");
+	void* vertex = file_read("assets/vertex.shader");
 	assert(vertex);
-	void* fragment = file_read("fragment.shader");
+	void* fragment = file_read("assets/fragment.shader");
 	assert(fragment);
 
 	shader_prog = create_shader(vertex, fragment);

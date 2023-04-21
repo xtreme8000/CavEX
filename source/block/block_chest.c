@@ -45,59 +45,62 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	if(right->type == this->block->type) {
 		switch(side) {
 			case SIDE_TOP:
-			case SIDE_BOTTOM: return TEXTURE_INDEX(9, 1);
-			case SIDE_BACK: return TEXTURE_INDEX(9, 2);
-			case SIDE_FRONT: return TEXTURE_INDEX(10, 3);
-			default: return TEXTURE_INDEX(10, 1);
+			case SIDE_BOTTOM: return tex_atlas_lookup(TEXAT_CHEST_TOP);
+			case SIDE_BACK: return tex_atlas_lookup(TEXAT_CHEST_FRONT_1);
+			case SIDE_FRONT: return tex_atlas_lookup(TEXAT_CHEST_BACK_2);
+			default: return tex_atlas_lookup(TEXAT_CHEST_SIDE);
 		}
 	}
 
 	if(left->type == this->block->type) {
 		switch(side) {
 			case SIDE_TOP:
-			case SIDE_BOTTOM: return TEXTURE_INDEX(9, 1);
-			case SIDE_BACK: return TEXTURE_INDEX(10, 2);
-			case SIDE_FRONT: return TEXTURE_INDEX(9, 3);
-			default: return TEXTURE_INDEX(10, 1);
+			case SIDE_BOTTOM: return tex_atlas_lookup(TEXAT_CHEST_TOP);
+			case SIDE_BACK: return tex_atlas_lookup(TEXAT_CHEST_FRONT_2);
+			case SIDE_FRONT: return tex_atlas_lookup(TEXAT_CHEST_BACK_1);
+			default: return tex_atlas_lookup(TEXAT_CHEST_SIDE);
 		}
 	}
 
 	if(back->type == this->block->type) {
 		switch(side) {
 			case SIDE_TOP:
-			case SIDE_BOTTOM: return TEXTURE_INDEX(9, 1);
-			case SIDE_RIGHT: return TEXTURE_INDEX(10, 2);
-			case SIDE_LEFT: return TEXTURE_INDEX(9, 3);
-			default: return TEXTURE_INDEX(10, 1);
+			case SIDE_BOTTOM: return tex_atlas_lookup(TEXAT_CHEST_TOP);
+			case SIDE_RIGHT: return tex_atlas_lookup(TEXAT_CHEST_FRONT_2);
+			case SIDE_LEFT: return tex_atlas_lookup(TEXAT_CHEST_BACK_1);
+			default: return tex_atlas_lookup(TEXAT_CHEST_SIDE);
 		}
 	}
 
 	if(front->type == this->block->type) {
 		switch(side) {
 			case SIDE_TOP:
-			case SIDE_BOTTOM: return TEXTURE_INDEX(9, 1);
-			case SIDE_RIGHT: return TEXTURE_INDEX(9, 2);
-			case SIDE_LEFT: return TEXTURE_INDEX(10, 3);
-			default: return TEXTURE_INDEX(10, 1);
+			case SIDE_BOTTOM: return tex_atlas_lookup(TEXAT_CHEST_TOP);
+			case SIDE_RIGHT: return tex_atlas_lookup(TEXAT_CHEST_FRONT_1);
+			case SIDE_LEFT: return tex_atlas_lookup(TEXAT_CHEST_BACK_2);
+			default: return tex_atlas_lookup(TEXAT_CHEST_SIDE);
 		}
 	}
 
 	uint8_t tex[SIDE_MAX] = {
-		[SIDE_TOP] = TEXTURE_INDEX(9, 1),	[SIDE_BOTTOM] = TEXTURE_INDEX(9, 1),
-		[SIDE_BACK] = TEXTURE_INDEX(10, 1), [SIDE_FRONT] = TEXTURE_INDEX(10, 1),
-		[SIDE_LEFT] = TEXTURE_INDEX(10, 1), [SIDE_RIGHT] = TEXTURE_INDEX(10, 1),
+		[SIDE_TOP] = tex_atlas_lookup(TEXAT_CHEST_TOP),
+		[SIDE_BOTTOM] = tex_atlas_lookup(TEXAT_CHEST_TOP),
+		[SIDE_BACK] = tex_atlas_lookup(TEXAT_CHEST_SIDE),
+		[SIDE_FRONT] = tex_atlas_lookup(TEXAT_CHEST_SIDE),
+		[SIDE_LEFT] = tex_atlas_lookup(TEXAT_CHEST_SIDE),
+		[SIDE_RIGHT] = tex_atlas_lookup(TEXAT_CHEST_SIDE),
 	};
 
 	if(left->type && !right->type)
-		tex[SIDE_RIGHT] = TEXTURE_INDEX(11, 1);
+		tex[SIDE_RIGHT] = tex_atlas_lookup(TEXAT_CHEST_FRONT_SINGLE);
 	else if(right->type && !left->type)
-		tex[SIDE_LEFT] = TEXTURE_INDEX(11, 1);
+		tex[SIDE_LEFT] = tex_atlas_lookup(TEXAT_CHEST_FRONT_SINGLE);
 	else if(front->type && !back->type)
-		tex[SIDE_BACK] = TEXTURE_INDEX(11, 1);
+		tex[SIDE_BACK] = tex_atlas_lookup(TEXAT_CHEST_FRONT_SINGLE);
 	else if(back->type && !front->type)
-		tex[SIDE_FRONT] = TEXTURE_INDEX(11, 1);
+		tex[SIDE_FRONT] = tex_atlas_lookup(TEXAT_CHEST_FRONT_SINGLE);
 	else
-		tex[SIDE_BACK] = TEXTURE_INDEX(11, 1);
+		tex[SIDE_BACK] = tex_atlas_lookup(TEXAT_CHEST_FRONT_SINGLE);
 
 	return tex[side];
 }

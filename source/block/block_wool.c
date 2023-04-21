@@ -35,16 +35,24 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 }
 
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
-	if(this->block->metadata >= 9)
-		return TEXTURE_INDEX(1, 13 + 9 - this->block->metadata);
-
-	if(this->block->metadata == 8)
-		return TEXTURE_INDEX(3, 13);
-
-	if(this->block->metadata >= 1)
-		return TEXTURE_INDEX(2, 13 + 1 - this->block->metadata);
-
-	return TEXTURE_INDEX(0, 4);
+	switch(this->block->metadata) {
+		case 0: return tex_atlas_lookup(TEXAT_WOOL_0);
+		case 1: return tex_atlas_lookup(TEXAT_WOOL_1);
+		case 2: return tex_atlas_lookup(TEXAT_WOOL_2);
+		case 3: return tex_atlas_lookup(TEXAT_WOOL_3);
+		case 4: return tex_atlas_lookup(TEXAT_WOOL_4);
+		case 5: return tex_atlas_lookup(TEXAT_WOOL_5);
+		case 6: return tex_atlas_lookup(TEXAT_WOOL_6);
+		case 7: return tex_atlas_lookup(TEXAT_WOOL_7);
+		case 8: return tex_atlas_lookup(TEXAT_WOOL_8);
+		case 9: return tex_atlas_lookup(TEXAT_WOOL_9);
+		case 10: return tex_atlas_lookup(TEXAT_WOOL_10);
+		case 11: return tex_atlas_lookup(TEXAT_WOOL_11);
+		case 12: return tex_atlas_lookup(TEXAT_WOOL_12);
+		case 13: return tex_atlas_lookup(TEXAT_WOOL_13);
+		case 14: return tex_atlas_lookup(TEXAT_WOOL_14);
+		case 15: return tex_atlas_lookup(TEXAT_WOOL_15);
+	}
 }
 
 struct block block_wool = {

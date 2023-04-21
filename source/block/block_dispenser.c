@@ -38,25 +38,25 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	switch(side) {
 		case SIDE_FRONT:
 			if(this->block->metadata == 2)
-				return TEXTURE_INDEX(12, 4);
+				return tex_atlas_lookup(TEXAT_DISPENSER_FRONT);
 			else
-				return TEXTURE_INDEX(13, 2);
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
 		case SIDE_BACK:
 			if(this->block->metadata == 3)
-				return TEXTURE_INDEX(12, 4);
+				return tex_atlas_lookup(TEXAT_DISPENSER_FRONT);
 			else
-				return TEXTURE_INDEX(13, 2);
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
 		case SIDE_RIGHT:
 			if(this->block->metadata == 5)
-				return TEXTURE_INDEX(12, 4);
+				return tex_atlas_lookup(TEXAT_DISPENSER_FRONT);
 			else
-				return TEXTURE_INDEX(13, 2);
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
 		case SIDE_LEFT:
 			if(this->block->metadata == 4)
-				return TEXTURE_INDEX(12, 4);
+				return tex_atlas_lookup(TEXAT_DISPENSER_FRONT);
 			else
-				return TEXTURE_INDEX(13, 2);
-		default: return TEXTURE_INDEX(13, 4);
+				return tex_atlas_lookup(TEXAT_FURNACE_SIDE);
+		default: return tex_atlas_lookup(TEXAT_FURNACE_TOP);
 	}
 }
 
