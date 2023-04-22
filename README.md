@@ -40,7 +40,8 @@ You need to download these libraries yourself and place their source files to th
 | --- | --- | --- |
 | [LodePNG](https://github.com/lvandeve/lodepng) | `lodepng.h` and `lodepng.c` | `source/lodepng/` |
 | [cglm](https://github.com/recp/cglm) | `include/cglm/` | `source/cglm/` |
-| [cNBT](https://github.com/chmod222/cNBT) | any `*.h` and `*.c` | `source/cNBT/` |
+| [cNBT](https://github.com/chmod222/cNBT) | `buffer.c`, `buffer.h`, `list.h`, `nbt_loading.c`, `nbt_parsing.c`, `nbt_treeops.c`, `nbt_util.c` and `nbt.h` | `source/cNBT/` |
+| [M*LIB](https://github.com/P-p-H-d/mlib) | any root `*.h` | compiler include path |
 
 ### Wii
 
