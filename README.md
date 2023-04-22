@@ -1,4 +1,4 @@
-## CavEX
+# CavEX
 
 *Cave Explorer* is a Wii homebrew game with the goal to recreate most of the core survival aspects up until Beta 1.7.3. Any features beyond *will not* be added.
 
@@ -27,12 +27,12 @@
 * real texture pack support
 * Beta 1.7.3 multiplayer support
 
-### Screenshot
+## Screenshot
 
 ![ingame0](docs/ingame0.png)
 *(from the PC version)*
 
-### Build instructions
+## Build instructions
 
 You need to download these libraries yourself and place their source files to the following directories. They are required for any platform.
 
@@ -42,7 +42,7 @@ You need to download these libraries yourself and place their source files to th
 | [cglm](https://github.com/recp/cglm) | `include/cglm/` | `source/cglm/` |
 | [cNBT](https://github.com/chmod222/cNBT) | any `*.h` and `*.c` | `source/cNBT/` |
 
-#### Wii
+### Wii
 
 For the Wii platform you need to install the [devkitPro](https://devkitpro.org/wiki/Getting_Started) Wii/Gamecube environment. Additionally install zlib using pacman of devkitPro.
 
@@ -75,7 +75,7 @@ cavex
 └── meta.xml
 ```
 
-#### GNU/Linux
+### GNU/Linux
 
 The game can also run on any PC with support for OpenGL 2.0 and played with keyboard and mouse.
 
