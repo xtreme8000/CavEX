@@ -54,9 +54,11 @@ struct block block_reed = {
 	.render_block_data.cross_random_displacement = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
+		.onItemPlace = block_place_default,
 	},
 };

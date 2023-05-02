@@ -21,16 +21,33 @@
 
 #include "inventory.h"
 
-#define NO_ITEM (-1)
+#define NO_ITEM ((int)-1)
 
 void inventory_clear(struct inventory* inv) {
 	assert(inv);
 
-	for(size_t k = 0; k < INVENTORY_SIZE; k++)
+	for(size_t k = 0; k < INVENTORY_SIZE; k++) {
 		inv->items[k].id = 0;
+		inv->items[k].durability = 0;
+		inv->items[k].count = 0;
+	}
 
 	inv->picked_item = NO_ITEM;
 	inv->hotbar_slot = 0;
+}
+
+void inventory_consume(struct inventory* inv, size_t slot) {
+	assert(inv && slot < INVENTORY_SIZE_HOTBAR);
+
+	if(inv->items[slot].count > 0) {
+		inv->items[slot].count--;
+
+		if(inv->items[slot].count == 0) {
+			inv->items[slot].id = 0;
+			inv->items[slot].durability = 0;
+			inv->items[slot].count = 0;
+		}
+	}
 }
 
 size_t inventory_get_hotbar(struct inventory* inv) {

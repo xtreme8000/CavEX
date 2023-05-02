@@ -17,6 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 static enum block_material getMaterial(struct block_info* this) {
@@ -72,6 +73,33 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	return tex_atlas_lookup(TEXAT_TRAPDOOR);
 }
 
+static bool onItemPlace(struct server_local* s, struct item_data* it,
+						struct block_info* where, struct block_info* on,
+						enum side on_side) {
+	if(!blocks[on->block->type]
+	   || (blocks[on->block->type]->can_see_through
+		   && blocks[on->block->type]->opacity < 15))
+		return false;
+
+	int metadata = 0;
+	switch(on_side) {
+		case SIDE_LEFT: metadata = 2; break;
+		case SIDE_RIGHT: metadata = 3; break;
+		case SIDE_FRONT: metadata = 0; break;
+		case SIDE_BACK: metadata = 1; break;
+		default: return false;
+	}
+
+	server_world_set_block(&s->world, where->x, where->y, where->z,
+						   (struct block_data) {
+							   .type = it->id,
+							   .metadata = metadata,
+							   .sky_light = 0,
+							   .torch_light = 0,
+						   });
+	return true;
+}
+
 struct block block_trapdoor = {
 	.name = "Trapdoor",
 	.getSideMask = getSideMask,
@@ -87,10 +115,12 @@ struct block block_trapdoor = {
 	.opacity = 1,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
+		.onItemPlace = onItemPlace,
 		.render_data.block.has_default = false,
 	},
 };

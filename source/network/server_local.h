@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "../item/inventory.h"
 #include "../world.h"
 #include "level_archive.h"
 #include "server_world.h"
@@ -39,6 +40,7 @@ struct server_local {
 		enum world_dim dimension;
 		bool has_pos;
 		bool finished_loading;
+		struct inventory inventory;
 	} player;
 	struct server_world world;
 	uint64_t world_time;

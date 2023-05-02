@@ -32,7 +32,7 @@ struct ray {
 	float dx, dy, dz;
 };
 
-#include "blocks.h"
+#include "blocks_data.h"
 
 void aabb_setsize(struct AABB* a, float sx, float sy, float sz);
 void aabb_setsize_centered(struct AABB* a, float sx, float sy, float sz);

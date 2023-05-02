@@ -19,57 +19,17 @@
 
 #ifndef BLOCKS_H
 #define BLOCKS_H
-#include "face_occlusion.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
 #include "../graphics/texture_atlas.h"
 #include "../item/items.h"
 #include "../platform/displaylist.h"
-
-enum block_material {
-	MATERIAL_WOOD,
-	MATERIAL_STONE,
-	MATERIAL_WOOL,
-	MATERIAL_ORGANIC,
-	MATERIAL_SAND,
-	MATERIAL_GLASS,
-};
-
-enum side {
-	SIDE_TOP = 0,
-	SIDE_BOTTOM = 1,
-	SIDE_LEFT = 2,
-	SIDE_RIGHT = 3,
-	SIDE_FRONT = 4,
-	SIDE_BACK = 5,
-	SIDE_MAX
-};
-
-enum block_type {
-	BLOCK_AIR = 0,
-	BLOCK_STONE = 1,
-	BLOCK_GRASS = 2,
-	BLOCK_DIRT = 3,
-	BLOCK_COBBLESTONE = 4,
-	BLOCK_WATER_FLOW = 8,
-	BLOCK_WATER_STILL = 9,
-	BLOCK_LAVA_FLOW = 10,
-	BLOCK_LAVA_STILL = 11,
-	BLOCK_SAND = 12,
-	BLOCK_GRAVEL = 13,
-	BLOCK_LOG = 17,
-	BLOCK_LEAVES = 18,
-	BLOCK_TALL_GRASS = 31,
-	BLOCK_MOSSY_COBBLE = 48,
-	BLOCK_OBSIDIAN = 49,
-	BLOCK_SNOW = 78,
-	BLOCK_ICE = 79,
-	BLOCK_PORTAL = 90,
-};
-
 #include "../world.h"
 #include "aabb.h"
+#include "blocks_data.h"
+#include "face_occlusion.h"
 
 struct block {
 	char name[32];
@@ -89,6 +49,7 @@ struct block {
 	bool can_see_through;
 	bool ignore_lighting;
 	bool flammable;
+	bool place_ignore;
 	union {
 		bool cross_random_displacement;
 		bool rail_curved_possible;
@@ -190,5 +151,8 @@ void blocks_init(void);
 enum side blocks_side_opposite(enum side s);
 void blocks_side_offset(enum side s, int* x, int* y, int* z);
 const char* block_side_name(enum side s);
+bool block_place_default(struct server_local* s, struct item_data* it,
+						 struct block_info* where, struct block_info* on,
+						 enum side on_side);
 
 #endif

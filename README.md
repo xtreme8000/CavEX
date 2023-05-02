@@ -21,7 +21,7 @@
 * biome colors
 * player physics
 * inventory management
-* block placement and destruction logic
+* ~~block placement~~ and destruction logic
 * (random) block updates
 * item actions
 * real texture pack support

@@ -17,6 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 static enum block_material getMaterial1(struct block_info* this) {
@@ -105,6 +106,29 @@ static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
 	return tex_atlas_lookup(TEXAT_COBBLESTONE);
 }
 
+static bool onItemPlace(struct server_local* s, struct item_data* it,
+						struct block_info* where, struct block_info* on,
+						enum side on_side) {
+	int metadata = 0;
+	double dx = s->player.x - (where->x + 0.5);
+	double dz = s->player.z - (where->z + 0.5);
+
+	if(fabs(dx) > fabs(dz)) {
+		metadata = (dx >= 0) ? 1 : 0;
+	} else {
+		metadata = (dz >= 0) ? 3 : 2;
+	}
+
+	server_world_set_block(&s->world, where->x, where->y, where->z,
+						   (struct block_data) {
+							   .type = it->id,
+							   .metadata = metadata,
+							   .sky_light = 0,
+							   .torch_light = 0,
+						   });
+	return true;
+}
+
 struct block block_wooden_stairs = {
 	.name = "Stairs",
 	.getSideMask = getSideMask,
@@ -120,10 +144,12 @@ struct block block_wooden_stairs = {
 	.opacity = 15,
 	.ignore_lighting = true,
 	.flammable = true,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
+		.onItemPlace = onItemPlace,
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 2,
 		.render_data.block.default_rotation = 0,
@@ -145,10 +171,12 @@ struct block block_stone_stairs = {
 	.opacity = 15,
 	.ignore_lighting = true,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
+		.onItemPlace = onItemPlace,
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 2,
 		.render_data.block.default_rotation = 0,

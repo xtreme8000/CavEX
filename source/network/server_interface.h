@@ -28,7 +28,9 @@ enum server_rpc_type {
 	SRPC_PLAYER_POS,
 	SRPC_LOAD_WORLD,
 	SRPC_UNLOAD_WORLD,
-	SRPC_SET_BLOCK,
+	SRPC_HOTBAR_SLOT,
+	SRPC_BLOCK_PLACE,
+	SRPC_BLOCK_DIG,
 };
 
 struct server_rpc {
@@ -43,8 +45,14 @@ struct server_rpc {
 		} load_world;
 		struct {
 			w_coord_t x, y, z;
-			struct block_data block;
-		} set_block;
+			enum side side;
+		} block_place;
+		struct {
+			w_coord_t x, y, z;
+		} block_dig;
+		struct {
+			size_t slot;
+		} hotbar_slot;
 	} payload;
 };
 

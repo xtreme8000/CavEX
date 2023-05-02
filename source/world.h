@@ -26,23 +26,14 @@
 
 #include "cglm/cglm.h"
 
+#include "block/blocks_data.h"
 #include "stack.h"
 
 #define WORLD_HEIGHT 128
 
-typedef int32_t w_coord_t;
-
-struct block_data {
-	uint8_t type;
-	uint8_t metadata : 4;
-	uint8_t sky_light : 4;
-	uint8_t torch_light : 4;
-};
-
-struct block_info {
-	struct block_data* block;
-	struct block_data* neighbours;
-	w_coord_t x, y, z;
+enum world_dim {
+	WORLD_DIM_NETHER = -1,
+	WORLD_DIM_OVERWORLD = 0,
 };
 
 #include "block/aabb.h"
@@ -61,11 +52,6 @@ struct world_section {
 
 DICT_DEF2(dict_wsection, int64_t, M_BASIC_OPLIST, struct world_section,
 		  M_POD_OPLIST)
-
-enum world_dim {
-	WORLD_DIM_NETHER = -1,
-	WORLD_DIM_OVERWORLD = 0,
-};
 
 struct world {
 	dict_wsection_t sections;

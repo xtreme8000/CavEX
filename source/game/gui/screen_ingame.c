@@ -101,18 +101,11 @@ static void screen_ingame_render3D(struct screen* s, mat4 view) {
 static void screen_ingame_update(struct screen* s, float dt) {
 	if(gstate.camera_hit.hit) {
 		if(input_pressed(IB_ACTION1)) {
-			struct block_data blk = (struct block_data) {
-				.type = BLOCK_AIR,
-				.metadata = 0,
-				.sky_light = 0,
-				.torch_light = 0,
-			};
 			svin_rpc_send(&(struct server_rpc) {
-				.type = SRPC_SET_BLOCK,
-				.payload.set_block.x = gstate.camera_hit.x,
-				.payload.set_block.y = gstate.camera_hit.y,
-				.payload.set_block.z = gstate.camera_hit.z,
-				.payload.set_block.block = blk,
+				.type = SRPC_BLOCK_DIG,
+				.payload.block_dig.x = gstate.camera_hit.x,
+				.payload.block_dig.y = gstate.camera_hit.y,
+				.payload.block_dig.z = gstate.camera_hit.z,
 			});
 		} else if(input_pressed(IB_ACTION2)) {
 			struct item_data item;
@@ -120,25 +113,19 @@ static void screen_ingame_update(struct screen* s, float dt) {
 								  inventory_get_hotbar(&gstate.inventory),
 								  &item)
 			   && item_is_block(&item)) {
-				int x, y, z;
-				blocks_side_offset(gstate.camera_hit.side, &x, &y, &z);
-
-				if(gstate.camera_hit.y + y >= 0
-				   && gstate.camera_hit.y + y < WORLD_HEIGHT) {
-					struct block_data blk = (struct block_data) {
-						.type = item.id,
-						.metadata = 0,
-						.sky_light = 0,
-						.torch_light = 0,
-					};
-					svin_rpc_send(&(struct server_rpc) {
-						.type = SRPC_SET_BLOCK,
-						.payload.set_block.x = gstate.camera_hit.x + x,
-						.payload.set_block.y = gstate.camera_hit.y + y,
-						.payload.set_block.z = gstate.camera_hit.z + z,
-						.payload.set_block.block = blk,
-					});
-				}
+				struct block_data blk = (struct block_data) {
+					.type = item.id,
+					.metadata = 0,
+					.sky_light = 0,
+					.torch_light = 0,
+				};
+				svin_rpc_send(&(struct server_rpc) {
+					.type = SRPC_BLOCK_PLACE,
+					.payload.block_place.x = gstate.camera_hit.x,
+					.payload.block_place.y = gstate.camera_hit.y,
+					.payload.block_place.z = gstate.camera_hit.z,
+					.payload.block_place.side = gstate.camera_hit.side,
+				});
 
 				gstate.held_item_animation.punch.start = time_get();
 				gstate.held_item_animation.punch.place = true;
@@ -156,25 +143,33 @@ static void screen_ingame_update(struct screen* s, float dt) {
 	size_t slot = inventory_get_hotbar(&gstate.inventory);
 
 	if(input_pressed(IB_SCROLL_LEFT)) {
-		inventory_set_hotbar(&gstate.inventory,
-							 (slot == 0) ? INVENTORY_SIZE_HOTBAR - 1 :
-										   slot - 1);
+		size_t next_slot = (slot == 0) ? INVENTORY_SIZE_HOTBAR - 1 : slot - 1;
+		inventory_set_hotbar(&gstate.inventory, next_slot);
 		if(time_diff_s(gstate.held_item_animation.switch_item.start, time_get())
 		   >= 0.15F) {
 			gstate.held_item_animation.switch_item.start = time_get();
 			gstate.held_item_animation.switch_item.old_slot = slot;
 		}
+
+		svin_rpc_send(&(struct server_rpc) {
+			.type = SRPC_HOTBAR_SLOT,
+			.payload.hotbar_slot.slot = next_slot,
+		});
 	}
 
 	if(input_pressed(IB_SCROLL_RIGHT)) {
-		inventory_set_hotbar(&gstate.inventory,
-							 (slot == INVENTORY_SIZE_HOTBAR - 1) ? 0 :
-																   slot + 1);
+		size_t next_slot = (slot == INVENTORY_SIZE_HOTBAR - 1) ? 0 : slot + 1;
+		inventory_set_hotbar(&gstate.inventory, next_slot);
 		if(time_diff_s(gstate.held_item_animation.switch_item.start, time_get())
 		   >= 0.15F) {
 			gstate.held_item_animation.switch_item.start = time_get();
 			gstate.held_item_animation.switch_item.old_slot = slot;
 		}
+
+		svin_rpc_send(&(struct server_rpc) {
+			.type = SRPC_HOTBAR_SLOT,
+			.payload.hotbar_slot.slot = next_slot,
+		});
 	}
 
 	if(input_pressed(IB_HOME)) {
@@ -211,13 +206,14 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	gutil_text(4, 4 + 17 * 3, str, 16);
 
 	if(gstate.camera_hit.hit) {
-		struct block* b
-			= blocks[world_get_block(&gstate.world, gstate.camera_hit.x,
-									 gstate.camera_hit.y, gstate.camera_hit.z)
-						 .type];
-		sprintf(str, "side: %s, (%i, %i, %i), %s",
+		struct block_data bd
+			= world_get_block(&gstate.world, gstate.camera_hit.x,
+							  gstate.camera_hit.y, gstate.camera_hit.z);
+		struct block* b = blocks[bd.type];
+		sprintf(str, "side: %s, (%i, %i, %i), %s, (%i:%i)",
 				block_side_name(gstate.camera_hit.side), gstate.camera_hit.x,
-				gstate.camera_hit.y, gstate.camera_hit.z, b ? b->name : NULL);
+				gstate.camera_hit.y, gstate.camera_hit.z, b ? b->name : NULL,
+				bd.type, bd.metadata);
 		gutil_text(4, 4 + 17 * 5, str, 16);
 	}
 

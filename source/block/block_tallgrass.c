@@ -17,6 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 static enum block_material getMaterial(struct block_info* this) {
@@ -46,6 +47,34 @@ static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
 	return tex_atlas_lookup(TEXAT_DEADBUSH); // deadbush
 }
 
+static bool onItemPlace1(struct server_local* s, struct item_data* it,
+						 struct block_info* where, struct block_info* on,
+						 enum side on_side) {
+	struct block_data blk;
+	if(!server_world_get_block(&s->world, where->x, where->y - 1, where->z,
+							   &blk))
+		return false;
+
+	if(blk.type != BLOCK_DIRT && blk.type != BLOCK_GRASS)
+		return false;
+
+	return block_place_default(s, it, where, on, on_side);
+}
+
+static bool onItemPlace2(struct server_local* s, struct item_data* it,
+						 struct block_info* where, struct block_info* on,
+						 enum side on_side) {
+	struct block_data blk;
+	if(!server_world_get_block(&s->world, where->x, where->y - 1, where->z,
+							   &blk))
+		return false;
+
+	if(!blocks[blk.type] || blocks[blk.type]->can_see_through)
+		return false;
+
+	return block_place_default(s, it, where, on, on_side);
+}
+
 struct block block_tallgrass = {
 	.name = "Tallgrass",
 	.getSideMask = getSideMask,
@@ -62,10 +91,12 @@ struct block block_tallgrass = {
 	.render_block_data.cross_random_displacement = true,
 	.ignore_lighting = false,
 	.flammable = true,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
+		.onItemPlace = onItemPlace1,
 	},
 };
 
@@ -85,9 +116,11 @@ struct block block_deadbush = {
 	.render_block_data.cross_random_displacement = false,
 	.ignore_lighting = false,
 	.flammable = true,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
+		.onItemPlace = onItemPlace2,
 	},
 };

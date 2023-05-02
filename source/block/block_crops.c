@@ -63,9 +63,11 @@ struct block block_crops = {
 	.opacity = 0,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
+		.onItemPlace = block_place_default,
 	},
 };

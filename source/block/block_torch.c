@@ -17,6 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 static enum block_material getMaterial(struct block_info* this) {
@@ -55,6 +56,32 @@ static uint8_t getTextureIndex3(struct block_info* this, enum side side) {
 	return tex_atlas_lookup(TEXAT_REDSTONE_TORCH_LIT);
 }
 
+static bool onItemPlace(struct server_local* s, struct item_data* it,
+						struct block_info* where, struct block_info* on,
+						enum side on_side) {
+	if(on_side == SIDE_BOTTOM || !blocks[on->block->type]
+	   || blocks[on->block->type]->can_see_through)
+		return false;
+
+	int metadata = 0;
+	switch(on_side) {
+		case SIDE_LEFT: metadata = 2; break;
+		case SIDE_RIGHT: metadata = 1; break;
+		case SIDE_FRONT: metadata = 4; break;
+		case SIDE_BACK: metadata = 3; break;
+		default: metadata = 5; break;
+	}
+
+	server_world_set_block(&s->world, where->x, where->y, where->z,
+						   (struct block_data) {
+							   .type = it->id,
+							   .metadata = metadata,
+							   .sky_light = 0,
+							   .torch_light = 0,
+						   });
+	return true;
+}
+
 struct block block_torch = {
 	.name = "Torch",
 	.getSideMask = getSideMask,
@@ -70,10 +97,12 @@ struct block block_torch = {
 	.opacity = 0,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
+		.onItemPlace = onItemPlace,
 	},
 };
 
@@ -92,10 +121,12 @@ struct block block_redstone_torch = {
 	.opacity = 0,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
+		.onItemPlace = onItemPlace,
 	},
 };
 
@@ -114,9 +145,11 @@ struct block block_redstone_torch_lit = {
 	.opacity = 0,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
+		.onItemPlace = onItemPlace,
 	},
 };

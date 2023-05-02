@@ -17,6 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 static enum block_material getMaterial(struct block_info* this) {
@@ -55,6 +56,31 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	return tex_atlas_lookup(TEXAT_LADDER);
 }
 
+static bool onItemPlace(struct server_local* s, struct item_data* it,
+						struct block_info* where, struct block_info* on,
+						enum side on_side) {
+	if(!blocks[on->block->type] || blocks[on->block->type]->can_see_through)
+		return false;
+
+	int metadata = 0;
+	switch(on_side) {
+		case SIDE_LEFT: metadata = 4; break;
+		case SIDE_RIGHT: metadata = 5; break;
+		case SIDE_FRONT: metadata = 2; break;
+		case SIDE_BACK: metadata = 3; break;
+		default: return false;
+	}
+
+	server_world_set_block(&s->world, where->x, where->y, where->z,
+						   (struct block_data) {
+							   .type = it->id,
+							   .metadata = metadata,
+							   .sky_light = 0,
+							   .torch_light = 0,
+						   });
+	return true;
+}
+
 struct block block_ladder = {
 	.name = "Ladder",
 	.getSideMask = getSideMask,
@@ -70,9 +96,11 @@ struct block block_ladder = {
 	.opacity = 0,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
+		.onItemPlace = onItemPlace,
 	},
 };

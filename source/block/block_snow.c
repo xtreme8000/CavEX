@@ -17,6 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 static enum block_material getMaterial(struct block_info* this) {
@@ -53,6 +54,20 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	return tex_atlas_lookup(TEXAT_SNOW);
 }
 
+static bool onItemPlace(struct server_local* s, struct item_data* it,
+						struct block_info* where, struct block_info* on,
+						enum side on_side) {
+	struct block_data blk;
+	if(!server_world_get_block(&s->world, where->x, where->y - 1, where->z,
+							   &blk))
+		return false;
+
+	if(!blocks[blk.type] || blocks[blk.type]->can_see_through)
+		return false;
+
+	return block_place_default(s, it, where, on, on_side);
+}
+
 struct block block_snow = {
 	.name = "Snow",
 	.getSideMask = getSideMask1,
@@ -68,10 +83,12 @@ struct block block_snow = {
 	.opacity = 0,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
+		.onItemPlace = onItemPlace,
 		.render_data.block.has_default = false,
 	},
 };
@@ -90,10 +107,12 @@ struct block block_snow_block = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
+		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
 	},
 };

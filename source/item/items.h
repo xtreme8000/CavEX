@@ -31,11 +31,16 @@ struct item_data {
 	uint8_t count;
 };
 
+#include "../block/blocks_data.h"
+struct server_local;
+
 struct item {
 	char name[32];
 	bool has_damage;
 	uint8_t max_stack;
 	void (*renderItem)(struct item*, struct item_data*, mat4, bool);
+	bool (*onItemPlace)(struct server_local*, struct item_data*,
+						struct block_info*, struct block_info*, enum side);
 	union {
 		struct {
 			uint8_t texture_x : 4;

@@ -21,6 +21,7 @@
 
 #include "../lighting.h"
 #include "../util.h"
+#include "client_interface.h"
 #include "server_world.h"
 
 #define CHUNK_DIST2(x1, x2, z1, z2)                                            \
@@ -127,9 +128,37 @@ static void server_world_light_set_light(void* user, w_coord_t x, w_coord_t y,
 	sc->modified = true;
 }
 
+bool server_world_get_block(struct server_world* w, w_coord_t x, w_coord_t y,
+							w_coord_t z, struct block_data* blk) {
+	assert(w && blk);
+
+	if(y < 0 || y >= WORLD_HEIGHT)
+		return false;
+
+	struct server_chunk* sc = dict_server_chunks_get(
+		w->chunks, S_CHUNK_ID(WCOORD_CHUNK_OFFSET(x), WCOORD_CHUNK_OFFSET(z)));
+
+	if(!sc)
+		return false;
+
+	size_t idx = S_CHUNK_IDX(W2C_COORD(x), y, W2C_COORD(z));
+
+	*blk = (struct block_data) {
+		.type = sc->ids[idx],
+		.metadata = nibble_read(sc->metadata, idx),
+		.sky_light = nibble_read(sc->lighting_sky, idx),
+		.torch_light = nibble_read(sc->lighting_torch, idx),
+	};
+
+	return true;
+}
+
 bool server_world_set_block(struct server_world* w, w_coord_t x, w_coord_t y,
 							w_coord_t z, struct block_data blk) {
-	assert(w && y >= 0 && y < WORLD_HEIGHT);
+	assert(w);
+
+	if(y < 0 || y >= WORLD_HEIGHT)
+		return false;
 
 	struct server_chunk* sc = dict_server_chunks_get(
 		w->chunks, S_CHUNK_ID(WCOORD_CHUNK_OFFSET(x), WCOORD_CHUNK_OFFSET(z)));
@@ -154,6 +183,14 @@ bool server_world_set_block(struct server_world* w, w_coord_t x, w_coord_t y,
 			},
 			w->dimension == WORLD_DIM_NETHER, server_world_light_get_block,
 			server_world_light_set_light, w);
+
+		clin_rpc_send(&(struct client_rpc) {
+			.type = CRPC_SET_BLOCK,
+			.payload.set_block.x = x,
+			.payload.set_block.y = y,
+			.payload.set_block.z = z,
+			.payload.set_block.block = blk,
+		});
 	}
 
 	return sc;

@@ -24,7 +24,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "../world.h"
 #include "region_archive.h"
 
 struct server_chunk {
@@ -58,6 +57,8 @@ void server_world_create(struct server_world* w, string_t level_name,
 						 enum world_dim dimension);
 void server_world_destroy(struct server_world* w);
 
+bool server_world_get_block(struct server_world* w, w_coord_t x, w_coord_t y,
+							w_coord_t z, struct block_data* blk);
 bool server_world_set_block(struct server_world* w, w_coord_t x, w_coord_t y,
 							w_coord_t z, struct block_data blk);
 

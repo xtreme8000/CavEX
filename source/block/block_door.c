@@ -87,10 +87,12 @@ struct block block_wooden_door = {
 	.opacity = 1,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 1,
 		.renderItem = render_item_flat,
+		.onItemPlace = block_place_default,
 	},
 };
 
@@ -109,9 +111,11 @@ struct block block_iron_door = {
 	.opacity = 1,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 1,
 		.renderItem = render_item_flat,
+		.onItemPlace = block_place_default,
 	},
 };

@@ -28,6 +28,7 @@
 #include "../cNBT/nbt.h"
 #include "../cglm/cglm.h"
 
+#include "../item/inventory.h"
 #include "../item/items.h"
 #include "../world.h"
 
@@ -83,7 +84,7 @@ bool level_archive_write_player(struct level_archive* la, vec3 position,
 								vec2 rotation, vec3 velocity,
 								enum world_dim dimension);
 bool level_archive_read_inventory(struct level_archive* la,
-								  struct item_data* inventory, size_t length);
+								  struct inventory* inventory);
 bool level_archive_read_player(struct level_archive* la, vec3 position,
 							   vec2 rotation, vec3 velocity,
 							   enum world_dim* dimension);

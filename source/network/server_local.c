@@ -48,20 +48,77 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				s->player.has_pos = true;
 			}
 			break;
-		case SRPC_SET_BLOCK:
-			if(s->player.has_pos && call->payload.set_block.y >= 0
-			   && call->payload.set_block.y < WORLD_HEIGHT) {
-				server_world_set_block(&s->world, call->payload.set_block.x,
-									   call->payload.set_block.y,
-									   call->payload.set_block.z,
-									   call->payload.set_block.block);
-				clin_rpc_send(&(struct client_rpc) {
-					.type = CRPC_SET_BLOCK,
-					.payload.set_block.x = call->payload.set_block.x,
-					.payload.set_block.y = call->payload.set_block.y,
-					.payload.set_block.z = call->payload.set_block.z,
-					.payload.set_block.block = call->payload.set_block.block,
-				});
+		case SRPC_HOTBAR_SLOT:
+			if(s->player.has_pos
+			   && call->payload.hotbar_slot.slot < INVENTORY_SIZE_HOTBAR)
+				inventory_set_hotbar(&s->player.inventory,
+									 call->payload.hotbar_slot.slot);
+			break;
+		case SRPC_BLOCK_DIG:
+			if(s->player.has_pos && call->payload.block_place.y >= 0
+			   && call->payload.block_place.y < WORLD_HEIGHT) {
+				server_world_set_block(&s->world, call->payload.block_dig.x,
+									   call->payload.block_dig.y,
+									   call->payload.block_dig.z,
+									   (struct block_data) {
+										   .type = BLOCK_AIR,
+										   .metadata = 0,
+									   });
+			}
+			break;
+		case SRPC_BLOCK_PLACE:
+			if(s->player.has_pos && call->payload.block_place.y >= 0
+			   && call->payload.block_place.y < WORLD_HEIGHT) {
+				int x, y, z;
+				blocks_side_offset(call->payload.block_place.side, &x, &y, &z);
+
+				size_t slot = inventory_get_hotbar(&s->player.inventory);
+
+				struct item_data it_data;
+				inventory_get_slot(&s->player.inventory, slot, &it_data);
+				struct item* it = item_get(&it_data);
+
+				if(it && it->onItemPlace) {
+					struct block_data blk_where, blk_on;
+					if(server_world_get_block(
+						   &s->world, call->payload.block_place.x + x,
+						   call->payload.block_place.y + y,
+						   call->payload.block_place.z + z, &blk_where)
+					   && server_world_get_block(
+						   &s->world, call->payload.block_place.x,
+						   call->payload.block_place.y,
+						   call->payload.block_place.z, &blk_on)) {
+						struct block_info where = (struct block_info) {
+							.block = &blk_where,
+							.neighbours = NULL,
+							.x = call->payload.block_place.x + x,
+							.y = call->payload.block_place.y + y,
+							.z = call->payload.block_place.z + z,
+						};
+
+						struct block_info on = (struct block_info) {
+							.block = &blk_on,
+							.neighbours = NULL,
+							.x = call->payload.block_place.x,
+							.y = call->payload.block_place.y,
+							.z = call->payload.block_place.z,
+						};
+
+						if((!blocks[blk_where.type]
+							|| blocks[blk_where.type]->place_ignore)
+						   && it->onItemPlace(s, &it_data, &where, &on,
+											  call->payload.block_place.side)) {
+							inventory_consume(&s->player.inventory, slot);
+
+							clin_rpc_send(&(struct client_rpc) {
+								.type = CRPC_INVENTORY_SLOT,
+								.payload.inventory_slot.slot = slot,
+								.payload.inventory_slot.item
+								= s->player.inventory.items[slot],
+							});
+						}
+					}
+				}
 			}
 			break;
 		case SRPC_UNLOAD_WORLD:
@@ -201,14 +258,14 @@ static void server_local_update(struct server_local* s) {
 			.payload.time_set = s->world_time,
 		});
 
-		struct item_data inventory[INVENTORY_SIZE];
-		if(level_archive_read_inventory(&s->level, inventory, INVENTORY_SIZE)) {
+		if(level_archive_read_inventory(&s->level, &s->player.inventory)) {
 			for(size_t k = 0; k < INVENTORY_SIZE; k++) {
-				if(inventory[k].id > 0) {
+				if(s->player.inventory.items[k].id > 0) {
 					clin_rpc_send(&(struct client_rpc) {
 						.type = CRPC_INVENTORY_SLOT,
 						.payload.inventory_slot.slot = k,
-						.payload.inventory_slot.item = inventory[k],
+						.payload.inventory_slot.item
+						= s->player.inventory.items[k],
 					});
 				}
 			}
@@ -234,6 +291,7 @@ void server_local_create(struct server_local* s) {
 	s->player.has_pos = false;
 	s->player.finished_loading = false;
 	string_init(s->level_name);
+	inventory_clear(&s->player.inventory);
 
 	struct thread t;
 	thread_create(&t, server_local_thread, s, 8);

@@ -107,17 +107,11 @@ bool level_archive_write(struct level_archive* la, struct level_archive_tag tag,
 }
 
 bool level_archive_read_inventory(struct level_archive* la,
-								  struct item_data* inventory, size_t length) {
+								  struct inventory* inventory) {
 	assert(la && inventory);
 	assert(la->data);
 
-	for(size_t k = 0; k < length; k++) {
-		inventory[k] = (struct item_data) {
-			.id = 0,
-			.durability = 0,
-			.count = 0,
-		};
-	}
+	inventory_clear(inventory);
 
 	nbt_node* inv;
 	if(!level_archive_read(la, LEVEL_PLAYER_INVENTORY, &inv, 0))
@@ -136,19 +130,20 @@ bool level_archive_read_inventory(struct level_archive* la,
 			if(slot >= 100 && slot < 104)
 				slot -= 100;
 
-			if(slot >= length)
+			if(slot >= INVENTORY_SIZE)
 				return false;
 
 			if(!level_archive_read_internal(obj, LEVEL_PLAYER_ITEM_ID,
-											&inventory[slot].id, 0))
+											&inventory->items[slot].id, 0))
 				return false;
 
 			if(!level_archive_read_internal(obj, LEVEL_PLAYER_ITEM_DURABILITY,
-											&inventory[slot].durability, 0))
+											&inventory->items[slot].durability,
+											0))
 				return false;
 
 			if(!level_archive_read_internal(obj, LEVEL_PLAYER_ITEM_COUNT,
-											&inventory[slot].count, 0))
+											&inventory->items[slot].count, 0))
 				return false;
 		} else {
 			return false;

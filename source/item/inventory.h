@@ -41,6 +41,7 @@ struct inventory {
 };
 
 void inventory_clear(struct inventory* inv);
+void inventory_consume(struct inventory* inv, size_t slot);
 size_t inventory_get_hotbar(struct inventory* inv);
 void inventory_set_hotbar(struct inventory* inv, size_t slot);
 void inventory_set_slot(struct inventory* inv, size_t slot,

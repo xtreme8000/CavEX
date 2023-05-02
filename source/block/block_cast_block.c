@@ -64,10 +64,12 @@ struct block block_iron = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
+		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
 	},
 };
@@ -86,10 +88,12 @@ struct block block_gold = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
+		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
 	},
 };
@@ -108,10 +112,12 @@ struct block block_diamond = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
+		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
 	},
 };
@@ -130,10 +136,12 @@ struct block block_lapis = {
 	.can_see_through = false,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
+		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
 	},
 };

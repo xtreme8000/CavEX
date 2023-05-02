@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 struct block* blocks[256];
@@ -133,6 +134,7 @@ void blocks_init() {
 			assert(blocks[k]->getBoundingBox);
 			assert(blocks[k]->renderBlock);
 			assert(blocks[k]->block_item.renderItem);
+			assert(blocks[k]->block_item.onItemPlace);
 		}
 	}
 }
@@ -197,4 +199,17 @@ void blocks_side_offset(enum side s, int* x, int* y, int* z) {
 			*z = -1;
 			break;
 	}
+}
+
+bool block_place_default(struct server_local* s, struct item_data* it,
+						 struct block_info* where, struct block_info* on,
+						 enum side on_side) {
+	server_world_set_block(&s->world, where->x, where->y, where->z,
+						   (struct block_data) {
+							   .type = it->id,
+							   .metadata = it->durability,
+							   .sky_light = 0,
+							   .torch_light = 0,
+						   });
+	return true;
 }

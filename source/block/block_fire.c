@@ -52,9 +52,11 @@ struct block block_fire = {
 	.opacity = 0,
 	.ignore_lighting = false,
 	.flammable = false,
+	.place_ignore = true,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
+		.onItemPlace = block_place_default,
 	},
 };

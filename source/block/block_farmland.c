@@ -63,10 +63,12 @@ struct block block_farmland = {
 	.opacity = 15,
 	.ignore_lighting = true,
 	.flammable = false,
+	.place_ignore = false,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
+		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
 	},
 };
