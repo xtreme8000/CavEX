@@ -92,11 +92,16 @@ struct block block_tallgrass = {
 	.ignore_lighting = false,
 	.flammable = true,
 	.place_ignore = false,
+	.digging.hardness = 50,
+	.digging.tool = TOOL_TYPE_ANY,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_ANY,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace1,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };
 
@@ -117,10 +122,15 @@ struct block block_deadbush = {
 	.ignore_lighting = false,
 	.flammable = true,
 	.place_ignore = false,
+	.digging.hardness = 50,
+	.digging.tool = TOOL_TYPE_ANY,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_ANY,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace2,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

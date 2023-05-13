@@ -48,6 +48,7 @@ struct server_rpc {
 			enum side side;
 		} block_place;
 		struct {
+			bool finished;
 			w_coord_t x, y, z;
 		} block_dig;
 		struct {

@@ -67,10 +67,15 @@ struct block block_lava = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = true,
+	.digging.hardness = 150000,
+	.digging.tool = TOOL_TYPE_ANY,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_ANY,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = block_place_default,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

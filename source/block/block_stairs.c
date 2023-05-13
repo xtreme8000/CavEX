@@ -145,6 +145,10 @@ struct block block_wooden_stairs = {
 	.ignore_lighting = true,
 	.flammable = true,
 	.place_ignore = false,
+	.digging.hardness = 3000,
+	.digging.tool = TOOL_TYPE_ANY,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_ANY,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
@@ -153,6 +157,7 @@ struct block block_wooden_stairs = {
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 2,
 		.render_data.block.default_rotation = 0,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };
 
@@ -172,6 +177,10 @@ struct block block_stone_stairs = {
 	.ignore_lighting = true,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 3000,
+	.digging.tool = TOOL_TYPE_PICKAXE,
+	.digging.min = TOOL_TIER_WOOD,
+	.digging.best = TOOL_TIER_WOOD,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
@@ -180,5 +189,6 @@ struct block block_stone_stairs = {
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 2,
 		.render_data.block.default_rotation = 0,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

@@ -84,12 +84,17 @@ struct block block_snow = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 150,
+	.digging.tool = TOOL_TYPE_SHOVEL,
+	.digging.min = TOOL_TIER_WOOD,
+	.digging.best = TOOL_TIER_MAX,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
 		.onItemPlace = onItemPlace,
 		.render_data.block.has_default = false,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };
 
@@ -108,11 +113,16 @@ struct block block_snow_block = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 300,
+	.digging.tool = TOOL_TYPE_SHOVEL,
+	.digging.min = TOOL_TIER_WOOD,
+	.digging.best = TOOL_TIER_MAX,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

@@ -28,8 +28,14 @@
 enum gfx_blend {
 	MODE_BLEND,
 	MODE_BLEND2,
+	MODE_BLEND3,
 	MODE_INVERT,
 	MODE_OFF,
+};
+
+enum depth_func {
+	MODE_LEQUAL,
+	MODE_EQUAL,
 };
 
 enum gfx_texture {
@@ -63,6 +69,7 @@ void gfx_blending(enum gfx_blend mode);
 void gfx_alpha_test(bool enable);
 void gfx_write_buffers(bool color, bool depth, bool depth_test);
 void gfx_depth_range(float near, float far);
+void gfx_depth_func(enum depth_func func);
 void gfx_texture(bool enable);
 void gfx_lighting(bool enable);
 void gfx_culling(bool enable);

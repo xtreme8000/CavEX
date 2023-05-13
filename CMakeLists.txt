@@ -90,6 +90,7 @@ add_executable(cavex
 
 				source/item/inventory.c
 				source/item/items.c
+				source/item/tool.c
 
 				source/network/client_interface.c
 				source/network/level_archive.c

@@ -30,12 +30,18 @@
 #include <malloc.h>
 
 static void screen_ingame_render3D(struct screen* s, mat4 view) {
-	gfx_blending(MODE_BLEND);
-
 	if(gstate.world_loaded && gstate.camera_hit.hit) {
 		struct block_data blk
 			= world_get_block(&gstate.world, gstate.camera_hit.x,
 							  gstate.camera_hit.y, gstate.camera_hit.z);
+
+		if(gstate.digging.active)
+			render_block_cracks(&blk, view, gstate.camera_hit.x,
+								gstate.camera_hit.y, gstate.camera_hit.z);
+
+		gfx_blending(MODE_BLEND);
+		gfx_alpha_test(false);
+
 		gutil_block_selection(view,
 							  &(struct block_info) {
 								  .block = &blk,
@@ -43,9 +49,10 @@ static void screen_ingame_render3D(struct screen* s, mat4 view) {
 								  .y = gstate.camera_hit.y,
 								  .z = gstate.camera_hit.z,
 							  });
-	}
 
-	gfx_blending(MODE_OFF);
+		gfx_blending(MODE_OFF);
+		gfx_alpha_test(true);
+	}
 
 	float place_lerp = 0.0F;
 	size_t slot = inventory_get_hotbar(&gstate.inventory);
@@ -99,37 +106,85 @@ static void screen_ingame_render3D(struct screen* s, mat4 view) {
 }
 
 static void screen_ingame_update(struct screen* s, float dt) {
-	if(gstate.camera_hit.hit) {
-		if(input_pressed(IB_ACTION1)) {
+	if(gstate.camera_hit.hit && input_pressed(IB_ACTION2)
+	   && !gstate.digging.active) {
+		struct item_data item;
+		if(inventory_get_slot(&gstate.inventory,
+							  inventory_get_hotbar(&gstate.inventory), &item)
+		   && item_is_block(&item)) {
+			svin_rpc_send(&(struct server_rpc) {
+				.type = SRPC_BLOCK_PLACE,
+				.payload.block_place.x = gstate.camera_hit.x,
+				.payload.block_place.y = gstate.camera_hit.y,
+				.payload.block_place.z = gstate.camera_hit.z,
+				.payload.block_place.side = gstate.camera_hit.side,
+			});
+
+			gstate.held_item_animation.punch.start = time_get();
+			gstate.held_item_animation.punch.place = true;
+		}
+	}
+
+	if(gstate.digging.active) {
+		struct block_data blk
+			= world_get_block(&gstate.world, gstate.digging.x, gstate.digging.y,
+							  gstate.digging.z);
+		struct item_data it;
+		inventory_get_slot(&gstate.inventory,
+						   inventory_get_hotbar(&gstate.inventory), &it);
+		int delay = blocks[blk.type] ?
+			tool_dig_delay_ms(blocks[blk.type], item_get(&it)) :
+			0;
+
+		if(!gstate.camera_hit.hit || gstate.digging.x != gstate.camera_hit.x
+		   || gstate.digging.y != gstate.camera_hit.y
+		   || gstate.digging.z != gstate.camera_hit.z) {
+			gstate.digging.start = time_get();
+			gstate.digging.x = gstate.camera_hit.x;
+			gstate.digging.y = gstate.camera_hit.y;
+			gstate.digging.z = gstate.camera_hit.z;
+
 			svin_rpc_send(&(struct server_rpc) {
 				.type = SRPC_BLOCK_DIG,
-				.payload.block_dig.x = gstate.camera_hit.x,
-				.payload.block_dig.y = gstate.camera_hit.y,
-				.payload.block_dig.z = gstate.camera_hit.z,
+				.payload.block_dig.x = gstate.digging.x,
+				.payload.block_dig.y = gstate.digging.y,
+				.payload.block_dig.z = gstate.digging.z,
+				.payload.block_dig.finished = false,
 			});
-		} else if(input_pressed(IB_ACTION2)) {
-			struct item_data item;
-			if(inventory_get_slot(&gstate.inventory,
-								  inventory_get_hotbar(&gstate.inventory),
-								  &item)
-			   && item_is_block(&item)) {
-				struct block_data blk = (struct block_data) {
-					.type = item.id,
-					.metadata = 0,
-					.sky_light = 0,
-					.torch_light = 0,
-				};
-				svin_rpc_send(&(struct server_rpc) {
-					.type = SRPC_BLOCK_PLACE,
-					.payload.block_place.x = gstate.camera_hit.x,
-					.payload.block_place.y = gstate.camera_hit.y,
-					.payload.block_place.z = gstate.camera_hit.z,
-					.payload.block_place.side = gstate.camera_hit.side,
-				});
+		}
 
-				gstate.held_item_animation.punch.start = time_get();
-				gstate.held_item_animation.punch.place = true;
-			}
+		if(delay > 0
+		   && time_diff_ms(gstate.digging.start, time_get()) >= delay) {
+			svin_rpc_send(&(struct server_rpc) {
+				.type = SRPC_BLOCK_DIG,
+				.payload.block_dig.x = gstate.digging.x,
+				.payload.block_dig.y = gstate.digging.y,
+				.payload.block_dig.z = gstate.digging.z,
+				.payload.block_dig.finished = true,
+			});
+
+			gstate.digging.cooldown = time_get();
+			gstate.digging.active = false;
+		}
+
+		if(input_released(IB_ACTION1))
+			gstate.digging.active = false;
+	} else {
+		if(gstate.camera_hit.hit && input_held(IB_ACTION1)
+		   && time_diff_ms(gstate.digging.cooldown, time_get()) >= 250) {
+			gstate.digging.active = true;
+			gstate.digging.start = time_get();
+			gstate.digging.x = gstate.camera_hit.x;
+			gstate.digging.y = gstate.camera_hit.y;
+			gstate.digging.z = gstate.camera_hit.z;
+
+			svin_rpc_send(&(struct server_rpc) {
+				.type = SRPC_BLOCK_DIG,
+				.payload.block_dig.x = gstate.digging.x,
+				.payload.block_dig.y = gstate.digging.y,
+				.payload.block_dig.z = gstate.digging.z,
+				.payload.block_dig.finished = false,
+			});
 		}
 	}
 
@@ -151,6 +206,9 @@ static void screen_ingame_update(struct screen* s, float dt) {
 			gstate.held_item_animation.switch_item.old_slot = slot;
 		}
 
+		if(gstate.digging.active)
+			gstate.digging.start = time_get();
+
 		svin_rpc_send(&(struct server_rpc) {
 			.type = SRPC_HOTBAR_SLOT,
 			.payload.hotbar_slot.slot = next_slot,
@@ -165,6 +223,9 @@ static void screen_ingame_update(struct screen* s, float dt) {
 			gstate.held_item_animation.switch_item.start = time_get();
 			gstate.held_item_animation.switch_item.old_slot = slot;
 		}
+
+		if(gstate.digging.active)
+			gstate.digging.start = time_get();
 
 		svin_rpc_send(&(struct server_rpc) {
 			.type = SRPC_HOTBAR_SLOT,
@@ -234,13 +295,12 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	}
 	icon_offset += gutil_control_icon(icon_offset, CONTROL_HOME, "Save & quit");
 
-	gfx_bind_texture(TEXTURE_GUI);
-
 	// draw inventory
-	/* gutil_texquad((width - 176 * 2) / 2, (height - 167 * 2) / 2, 176 / 2,
-	135, 176 / 2, 79, 176 * 2, 79 * 2); gutil_texquad_rt((width - 176 * 2) /
-	2, (height - 167 * 2) / 2 + 79 * 2, 352 / 2, 0, 88 / 2, 176, 176 * 2, 88
-	* 2); */
+	/*gfx_bind_texture(TEXTURE_GUI);
+	gutil_texquad((width - 176 * 2) / 2, (height - 167 * 2) / 2, 176 / 2, 138,
+				  176 / 2, 80, 176 * 2, 80 * 2);
+	gutil_texquad_rt((width - 176 * 2) / 2, (height - 167 * 2) / 2 + 80 * 2,
+					 352 / 2, 0, 85 / 2, 176, 176 * 2, 85 * 2);*/
 
 	gfx_bind_texture(TEXTURE_GUI2);
 

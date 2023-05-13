@@ -42,6 +42,10 @@ static uint8_t colors[256 * 3] ATTRIBUTE_ALIGN(32);
 static bool gfx_matrix_texture_prev = false;
 static bool gfx_fog_prev = false;
 
+static uint32_t gfx_depth_last = GX_TRUE;
+static uint32_t gfx_depth_test_last = GX_TRUE;
+static uint32_t gfx_depth_func_last = GX_LEQUAL;
+
 static int gfx_screen_width = 802;
 
 /*static void* thread_vsync(void* user) {
@@ -403,6 +407,10 @@ void gfx_blending(enum gfx_blend mode) {
 		case MODE_BLEND2:
 			GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
 			break;
+		case MODE_BLEND3:
+			GX_SetBlendMode(GX_BM_BLEND, GX_BL_DSTCLR, GX_BL_SRCCLR,
+							GX_LO_NOOP);
+			break;
 		case MODE_INVERT:
 			GX_SetBlendMode(GX_BM_LOGIC, GX_BL_ZERO, GX_BL_ZERO, GX_LO_INV);
 			break;
@@ -424,12 +432,25 @@ void gfx_alpha_test(bool enable) {
 
 void gfx_write_buffers(bool color, bool depth, bool depth_test) {
 	GX_SetColorUpdate(color ? GX_TRUE : GX_FALSE);
-	GX_SetZMode(depth_test ? GX_TRUE : GX_FALSE, GX_LEQUAL,
-				depth ? GX_TRUE : GX_FALSE);
+
+	gfx_depth_last = depth ? GX_TRUE : GX_FALSE;
+	gfx_depth_test_last = depth_test ? GX_TRUE : GX_FALSE;
+
+	GX_SetZMode(gfx_depth_test_last, gfx_depth_func_last, gfx_depth_last);
 }
 
 void gfx_depth_range(float near, float far) {
 	GX_SetViewport(0, 0, screenMode->fbWidth, screenMode->efbHeight, near, far);
+}
+
+void gfx_depth_func(enum depth_func func) {
+	switch(func) {
+		default:
+		case MODE_LEQUAL: gfx_depth_func_last = GX_LEQUAL; break;
+		case MODE_EQUAL: gfx_depth_func_last = GX_EQUAL; break;
+	}
+
+	GX_SetZMode(gfx_depth_test_last, gfx_depth_func_last, gfx_depth_last);
 }
 
 void gfx_texture(bool enable) {

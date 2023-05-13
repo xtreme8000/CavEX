@@ -21,7 +21,9 @@
 
 #include "../block/blocks.h"
 #include "../chunk.h"
+#include "../game/game_state.h"
 #include "../platform/gfx.h"
+#include "../platform/time.h"
 #include "../util.h"
 #include "render_block.h"
 
@@ -1470,4 +1472,102 @@ size_t render_block_full(struct displaylist* d, struct block_info* this,
 			blocks[this->block->type]->luminance, true, 0, false, 0, side,
 			vertex_light);
 	return 1;
+}
+
+static struct displaylist block_cracks_dl;
+static uint8_t block_cracks_light[24];
+
+void render_block_init() {
+	displaylist_init(&block_cracks_dl, 48, 3 * 2 + 2 * 1 + 1);
+	memset(block_cracks_light, 0xFF, sizeof(block_cracks_light));
+}
+
+static uint8_t block_cracks_texture(struct block_info* this, enum side side) {
+	struct item_data it;
+	inventory_get_slot(&gstate.inventory,
+					   inventory_get_hotbar(&gstate.inventory), &it);
+	int delay = tool_dig_delay_ms(blocks[this->block->type], item_get(&it));
+	int dt = time_diff_ms(gstate.digging.start, time_get()) / (delay / 10);
+
+	if(dt >= 9)
+		dt = 9;
+
+	return tex_atlas_lookup(TEXAT_BREAK_0 + dt);
+}
+
+void render_block_cracks(struct block_data* blk, mat4 view, w_coord_t x,
+						 w_coord_t y, w_coord_t z) {
+	assert(blk && view);
+	struct block* b = blocks[blk->type];
+
+	if(b && b->digging.hardness > 0) {
+		displaylist_reset(&block_cracks_dl);
+
+		struct block_data neighbours[6];
+		struct block_info neighbours_info[6];
+
+		for(int k = 0; k < SIDE_MAX; k++) {
+			int ox, oy, oz;
+			blocks_side_offset(k, &ox, &oy, &oz);
+
+			neighbours[k]
+				= world_get_block(&gstate.world, x + ox, y + oy, z + oz);
+
+			neighbours_info[k] = (struct block_info) {
+				.block = neighbours + k,
+				.neighbours = NULL,
+				.x = x + ox,
+				.y = y + oy,
+				.z = z + oz,
+			};
+		}
+
+		struct block_info local_info = (struct block_info) {
+			.block = blk,
+			.neighbours = neighbours,
+			.x = x,
+			.y = y,
+			.z = z,
+		};
+
+		uint8_t (*tmp)(struct block_info*, enum side) = b->getTextureIndex;
+		b->getTextureIndex = block_cracks_texture;
+
+		size_t vertices = 0;
+
+		for(int k = 0; k < SIDE_MAX; k++) {
+			vertices += b->renderBlock(&block_cracks_dl, &local_info, k,
+									   neighbours_info + k, block_cracks_light,
+									   false);
+			if(b->renderBlockAlways)
+				vertices += b->renderBlockAlways(&block_cracks_dl, &local_info,
+												 k, neighbours_info + k,
+												 block_cracks_light, false);
+		}
+
+		blocks[local_info.block->type]->getTextureIndex = tmp;
+
+		mat4 mv;
+		glm_translate_to(view,
+						 (vec3) {WCOORD_CHUNK_OFFSET(x) * CHUNK_SIZE,
+								 y / CHUNK_SIZE * CHUNK_SIZE,
+								 WCOORD_CHUNK_OFFSET(z) * CHUNK_SIZE},
+						 mv);
+		gfx_matrix_modelview(mv);
+
+		gfx_blending(MODE_BLEND3);
+		gfx_depth_func(MODE_EQUAL);
+
+		if(b->double_sided)
+			gfx_culling(false);
+
+		gfx_bind_texture(TEXTURE_TERRAIN);
+		displaylist_render_immediate(&block_cracks_dl, vertices * 4);
+
+		if(b->double_sided)
+			gfx_culling(true);
+
+		gfx_depth_func(MODE_LEQUAL);
+		gfx_blending(MODE_OFF);
+	}
 }

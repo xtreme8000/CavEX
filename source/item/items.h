@@ -32,6 +32,7 @@ struct item_data {
 };
 
 #include "../block/blocks_data.h"
+#include "../item/tool.h"
 struct server_local;
 
 struct item {
@@ -41,6 +42,10 @@ struct item {
 	void (*renderItem)(struct item*, struct item_data*, mat4, bool);
 	bool (*onItemPlace)(struct server_local*, struct item_data*,
 						struct block_info*, struct block_info*, enum side);
+	struct item_tool {
+		enum tool_type type;
+		enum tool_tier tier;
+	} tool;
 	union {
 		struct {
 			uint8_t texture_x : 4;

@@ -88,11 +88,16 @@ struct block block_wooden_door = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 4500,
+	.digging.tool = TOOL_TYPE_ANY,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_ANY,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 1,
 		.renderItem = render_item_flat,
 		.onItemPlace = block_place_default,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };
 
@@ -112,10 +117,15 @@ struct block block_iron_door = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 7500,
+	.digging.tool = TOOL_TYPE_PICKAXE,
+	.digging.min = TOOL_TIER_WOOD,
+	.digging.best = TOOL_TIER_WOOD,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 1,
 		.renderItem = render_item_flat,
 		.onItemPlace = block_place_default,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

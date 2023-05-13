@@ -55,8 +55,9 @@ static void server_local_process(struct server_rpc* call, void* user) {
 									 call->payload.hotbar_slot.slot);
 			break;
 		case SRPC_BLOCK_DIG:
-			if(s->player.has_pos && call->payload.block_place.y >= 0
-			   && call->payload.block_place.y < WORLD_HEIGHT) {
+			if(s->player.has_pos && call->payload.block_dig.y >= 0
+			   && call->payload.block_dig.y < WORLD_HEIGHT
+			   && call->payload.block_dig.finished) {
 				server_world_set_block(&s->world, call->payload.block_dig.x,
 									   call->payload.block_dig.y,
 									   call->payload.block_dig.z,

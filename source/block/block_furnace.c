@@ -125,6 +125,10 @@ struct block block_furnaceoff = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 5250,
+	.digging.tool = TOOL_TYPE_PICKAXE,
+	.digging.min = TOOL_TIER_WOOD,
+	.digging.best = TOOL_TIER_WOOD,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
@@ -133,6 +137,7 @@ struct block block_furnaceoff = {
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 2,
 		.render_data.block.default_rotation = 0,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };
 
@@ -151,6 +156,10 @@ struct block block_furnaceon = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 5250,
+	.digging.tool = TOOL_TYPE_PICKAXE,
+	.digging.min = TOOL_TIER_WOOD,
+	.digging.best = TOOL_TIER_WOOD,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
@@ -159,5 +168,6 @@ struct block block_furnaceon = {
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 2,
 		.render_data.block.default_rotation = 0,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

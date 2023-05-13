@@ -211,7 +211,7 @@ void gfx_setup() {
 	glFrontFace(GL_CW);
 	gfx_culling(true);
 
-	glDepthFunc(GL_LEQUAL);
+	gfx_depth_func(MODE_LEQUAL);
 
 	glViewport(0, 0, gfx_width(), gfx_height());
 
@@ -347,6 +347,11 @@ void gfx_blending(enum gfx_blend mode) {
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 			break;
+		case MODE_BLEND3:
+			glDisable(GL_COLOR_LOGIC_OP);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+			break;
 		case MODE_INVERT:
 			glDisable(GL_BLEND);
 			glEnable(GL_COLOR_LOGIC_OP);
@@ -376,6 +381,13 @@ void gfx_write_buffers(bool color, bool depth, bool depth_test) {
 
 void gfx_depth_range(float near, float far) {
 	glDepthRange(near, far);
+}
+
+void gfx_depth_func(enum depth_func func) {
+	switch(func) {
+		case MODE_LEQUAL: glDepthFunc(GL_LEQUAL); break;
+		case MODE_EQUAL: glDepthFunc(GL_EQUAL); break;
+	}
 }
 
 void gfx_texture(bool enable) {

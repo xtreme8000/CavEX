@@ -86,11 +86,16 @@ struct block block_rail = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 1050,
+	.digging.tool = TOOL_TYPE_ANY,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_ANY,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };
 
@@ -111,11 +116,16 @@ struct block block_powered_rail = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 1050,
+	.digging.tool = TOOL_TYPE_ANY,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_ANY,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };
 
@@ -136,10 +146,15 @@ struct block block_detector_rail = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 1050,
+	.digging.tool = TOOL_TYPE_ANY,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_ANY,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

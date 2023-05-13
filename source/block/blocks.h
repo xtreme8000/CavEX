@@ -50,7 +50,13 @@ struct block {
 	bool ignore_lighting;
 	bool flammable;
 	bool place_ignore;
-	union {
+	struct block_dig_data {
+		int hardness;
+		enum tool_type tool;
+		enum tool_tier min;
+		enum tool_tier best;
+	} digging;
+	union block_render_data {
 		bool cross_random_displacement;
 		bool rail_curved_possible;
 	} render_block_data;

@@ -52,6 +52,12 @@ struct game_state {
 	uint64_t world_time;
 	ptime_t world_time_start;
 	struct inventory inventory;
+	struct digging {
+		bool active;
+		ptime_t start;
+		ptime_t cooldown;
+		w_coord_t x, y, z;
+	} digging;
 	struct held_anim {
 		struct {
 			ptime_t start;

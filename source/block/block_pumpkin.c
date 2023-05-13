@@ -125,6 +125,10 @@ struct block block_pumpkin = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 1500,
+	.digging.tool = TOOL_TYPE_ANY,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_ANY,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
@@ -133,6 +137,7 @@ struct block block_pumpkin = {
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 2,
 		.render_data.block.default_rotation = 0,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };
 
@@ -151,6 +156,10 @@ struct block block_pumpkin_lit = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 1500,
+	.digging.tool = TOOL_TYPE_ANY,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_ANY,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
@@ -159,5 +168,6 @@ struct block block_pumpkin_lit = {
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 2,
 		.render_data.block.default_rotation = 0,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

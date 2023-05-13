@@ -61,6 +61,10 @@ struct block block_workbench = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 3750,
+	.digging.tool = TOOL_TYPE_AXE,
+	.digging.min = TOOL_TIER_ANY,
+	.digging.best = TOOL_TIER_MAX,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
@@ -69,5 +73,6 @@ struct block block_workbench = {
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 0,
 		.render_data.block.default_rotation = 2,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

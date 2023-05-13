@@ -53,10 +53,12 @@ struct block block_portal = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = -1,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = block_place_default,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

@@ -56,12 +56,17 @@ struct block block_cobblestone = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 3000,
+	.digging.tool = TOOL_TYPE_PICKAXE,
+	.digging.min = TOOL_TIER_WOOD,
+	.digging.best = TOOL_TIER_MAX,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };
 
@@ -80,11 +85,16 @@ struct block block_mossstone = {
 	.ignore_lighting = false,
 	.flammable = false,
 	.place_ignore = false,
+	.digging.hardness = 3000,
+	.digging.tool = TOOL_TYPE_PICKAXE,
+	.digging.min = TOOL_TIER_WOOD,
+	.digging.best = TOOL_TIER_MAX,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.tool.type = TOOL_TYPE_ANY,
 	},
 };

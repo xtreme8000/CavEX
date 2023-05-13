@@ -31,6 +31,10 @@
 
 #define TEX_OFFSET(x) ((x)*18 + 3)
 
+void render_block_init(void);
+void render_block_cracks(struct block_data* blk, mat4 view, w_coord_t x,
+						 w_coord_t y, w_coord_t z);
+
 size_t render_block_pressure_plate(struct displaylist* d,
 								   struct block_info* this, enum side side,
 								   struct block_info* it, uint8_t* vertex_light,

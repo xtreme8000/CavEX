@@ -311,6 +311,9 @@ void* tex_atlas_block(const char* filename, size_t* width, size_t* height) {
 	tex_atlas_reg_col(atlas, TEXAT_LEAVES_OAK, 4, 3, 75, 182, 15);
 	tex_atlas_reg_col(atlas, TEXAT_FERN, 8, 3, 110, 198, 63);
 
+	for(int k = 0; k < 10; k++)
+		tex_atlas_reg(atlas, TEXAT_BREAK_0 + k, k, 15);
+
 	memset(global_atlas, 0, sizeof(global_atlas));
 
 	uint8_t* image = tex_read(filename, width, height);

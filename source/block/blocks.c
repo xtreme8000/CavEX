@@ -29,6 +29,8 @@ void blocks_init() {
 	for(int k = 0; k < 256; k++)
 		blocks[k] = NULL;
 
+	render_block_init();
+
 	blocks[1] = &block_stone;
 	blocks[2] = &block_grass;
 	blocks[3] = &block_dirt;

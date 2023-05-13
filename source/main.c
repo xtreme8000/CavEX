@@ -52,6 +52,8 @@ int main(void) {
 	gstate.world_loaded = false;
 	gstate.held_item_animation.punch.start = time_get();
 	gstate.held_item_animation.switch_item.start = time_get();
+	gstate.digging.cooldown = time_get();
+	gstate.digging.active = false;
 
 #ifdef PLATFORM_WII
 	fatInitDefault();
@@ -101,9 +103,9 @@ int main(void) {
 
 			struct camera* c = &gstate.camera;
 			camera_ray_pick(&gstate.world, c->x, c->y, c->z,
-							c->x + sin(c->rx) * sin(c->ry) * 16.0F,
-							c->y + cos(c->ry) * 16.0F,
-							c->z + cos(c->rx) * sin(c->ry) * 16.0F,
+							c->x + sinf(c->rx) * sinf(c->ry) * 4.5F,
+							c->y + cosf(c->ry) * 4.5F,
+							c->z + cosf(c->rx) * sinf(c->ry) * 4.5F,
 							&gstate.camera_hit);
 		} else {
 			world_pre_render_clear(&gstate.world);
