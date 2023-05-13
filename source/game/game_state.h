@@ -20,6 +20,7 @@
 #ifndef GAME_STATE_H
 #define GAME_STATE_H
 
+#include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -35,6 +36,7 @@
 #define VERSION_PATCH 1
 
 struct game_state {
+	sig_atomic_t quit;
 	struct {
 		float dt, fps;
 		float dt_gpu, dt_vsync;

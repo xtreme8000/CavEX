@@ -44,6 +44,7 @@
 #include "cglm/cglm.h"
 
 int main(void) {
+	gstate.quit = false;
 	gstate.camera = (struct camera) {
 		.x = 0, .y = 0, .z = 0, .rx = 0, .ry = 0, .controller = {0, 0, 0}};
 	gstate.config.fov = 70.0F;
@@ -78,7 +79,7 @@ int main(void) {
 
 	ptime_t last_frame = time_get();
 
-	while(1) {
+	while(!gstate.quit) {
 		ptime_t this_frame = time_get();
 		gstate.stats.dt = time_diff_s(last_frame, this_frame);
 		gstate.stats.fps = 1.0F / gstate.stats.dt;
@@ -169,16 +170,6 @@ int main(void) {
 		if(gstate.current_screen->render2D)
 			gstate.current_screen->render2D(gstate.current_screen, gfx_width(),
 											gfx_height());
-
-		if(input_held(IB_SCROLL_LEFT)) {
-			daytime += 0.1F * gstate.stats.dt;
-		}
-
-		if(input_held(IB_SCROLL_RIGHT)) {
-			daytime -= 0.1F * gstate.stats.dt;
-		}
-
-		daytime = fmaxf(fminf(daytime, 1), 0);
 
 		input_poll();
 		gfx_finish(true);

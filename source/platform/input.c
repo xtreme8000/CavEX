@@ -91,8 +91,8 @@ static float input_dx, input_dy;
 
 void input_init() {
 	input_has_wpad = WPAD_Init() == WPAD_ERR_NONE;
-	input_has_pad = true;
-	PAD_Init(); // always returns 1?
+	input_has_pad = false;
+	// PAD_Init(); // always returns 1?
 	input_dx = input_dy = 0;
 	input_has_joystick = false;
 	WPAD_SetDataFormat(0, WPAD_FMT_BTNS_ACC_IR);

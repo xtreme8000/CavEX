@@ -24,6 +24,7 @@
 #include "../../platform/input.h"
 #include "../../stack.h"
 #include "../../util.h"
+#include "../game_state.h"
 #include "screen.h"
 
 #include <assert.h>
@@ -145,7 +146,7 @@ static void screen_sworld_update(struct screen* s, float dt) {
 	}
 
 	if(input_pressed(IB_HOME))
-		exit(0);
+		gstate.quit = true;
 }
 
 static void screen_sworld_render2D(struct screen* s, int width, int height) {
