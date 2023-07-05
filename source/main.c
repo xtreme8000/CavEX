@@ -60,6 +60,8 @@ int main(void) {
 	fatInitDefault();
 #endif
 
+	config_create(&gstate.config_user, "config.json");
+
 	time_reset();
 	input_init();
 	gfx_setup();
@@ -97,7 +99,7 @@ int main(void) {
 		bool render_world
 			= gstate.current_screen->render_world && gstate.world_loaded;
 
-		camera_update(&gstate.camera, gstate.stats.dt);
+		camera_update(&gstate.camera);
 
 		if(render_world) {
 			world_pre_render(&gstate.world, &gstate.camera, gstate.camera.view);
@@ -174,5 +176,6 @@ int main(void) {
 		input_poll();
 		gfx_finish(true);
 	}
+
 	return 0;
 }

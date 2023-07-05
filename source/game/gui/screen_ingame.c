@@ -29,7 +29,11 @@
 
 #include <malloc.h>
 
-static void screen_ingame_render3D(struct screen* s, mat4 view) {
+static void screen_ingame_reset(struct screen* s, int width, int height) {
+	input_joystick_absolute(false);
+}
+
+void screen_ingame_render3D(struct screen* s, mat4 view) {
 	if(gstate.world_loaded && gstate.camera_hit.hit) {
 		struct block_data blk
 			= world_get_block(&gstate.world, gstate.camera_hit.x,
@@ -106,6 +110,8 @@ static void screen_ingame_render3D(struct screen* s, mat4 view) {
 }
 
 static void screen_ingame_update(struct screen* s, float dt) {
+	camera_physics(&gstate.camera, dt);
+
 	if(gstate.camera_hit.hit && input_pressed(IB_ACTION2)
 	   && !gstate.digging.active) {
 		struct item_data item;
@@ -295,16 +301,8 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	}
 	icon_offset += gutil_control_icon(icon_offset, CONTROL_HOME, "Save & quit");
 
-	// draw inventory
-	/*gfx_bind_texture(TEXTURE_GUI);
-	gutil_texquad((width - 176 * 2) / 2, (height - 167 * 2) / 2, 176 / 2, 138,
-				  176 / 2, 80, 176 * 2, 80 * 2);
-	gutil_texquad_rt((width - 176 * 2) / 2, (height - 167 * 2) / 2 + 80 * 2,
-					 352 / 2, 0, 85 / 2, 176, 176 * 2, 85 * 2);*/
-
-	gfx_bind_texture(TEXTURE_GUI2);
-
 	// draw hotbar
+	gfx_bind_texture(TEXTURE_GUI2);
 	gutil_texquad((width - 182 * 2) / 2, height - 32 * 8 / 5 - 22 * 2, 0, 0,
 				  182, 22, 182 * 2, 22 * 2);
 
@@ -347,7 +345,7 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 }
 
 struct screen screen_ingame = {
-	.reset = NULL,
+	.reset = screen_ingame_reset,
 	.update = screen_ingame_update,
 	.render2D = screen_ingame_render2D,
 	.render3D = screen_ingame_render3D,

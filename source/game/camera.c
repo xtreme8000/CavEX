@@ -101,7 +101,7 @@ void camera_ray_pick(struct world* w, float gx0, float gy0, float gz0,
 	}
 }
 
-void camera_update(struct camera* c, float dt) {
+void camera_physics(struct camera* c, float dt) {
 	assert(c);
 
 	float jdx, jdy;
@@ -136,13 +136,11 @@ void camera_update(struct camera* c, float dt) {
 		acc_z -= cos(c->rx) * sin(c->ry) * speed_c;
 	}
 
-	if(input_held(IB_JUMP)) {
+	if(input_held(IB_JUMP))
 		acc_y += speed_c;
-	}
 
-	if(input_held(IB_INVENTORY)) {
+	if(input_held(IB_SNEAK))
 		acc_y -= speed_c;
-	}
 
 	c->controller.vx += acc_x * dt;
 	c->controller.vy += acc_y * dt;
@@ -179,14 +177,18 @@ void camera_update(struct camera* c, float dt) {
 	}
 
 	c->ry = glm_clamp(c->ry, glm_rad(0.5F), GLM_PI - glm_rad(0.5F));
+}
+
+void camera_update(struct camera* c) {
+	assert(c);
 
 	glm_perspective(glm_rad(gstate.config.fov),
 					(float)gfx_width() / (float)gfx_height(), 0.1F,
 					gstate.config.render_distance, c->projection);
 
 	glm_lookat((vec3) {c->x, c->y, c->z},
-			   (vec3) {c->x + sin(c->rx) * sin(c->ry), c->y + cos(c->ry),
-					   c->z + cos(c->rx) * sin(c->ry)},
+			   (vec3) {c->x + sinf(c->rx) * sinf(c->ry), c->y + cosf(c->ry),
+					   c->z + cosf(c->rx) * sinf(c->ry)},
 			   (vec3) {0, 1, 0}, c->view);
 
 	mat4 view_proj;

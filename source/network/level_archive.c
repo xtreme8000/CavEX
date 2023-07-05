@@ -26,7 +26,7 @@ bool level_archive_create(struct level_archive* la, string_t filename) {
 
 	la->modified = false;
 
-	string_init_printf(la->file_name, "saves/%s/level.dat",
+	string_init_printf(la->file_name, "%s/level.dat",
 					   string_get_cstr(filename));
 
 	la->data = nbt_parse_path(string_get_cstr(la->file_name));

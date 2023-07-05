@@ -41,6 +41,7 @@ You need to download these libraries yourself and place their source files to th
 | [LodePNG](https://github.com/lvandeve/lodepng) | `lodepng.h` and `lodepng.c` | `source/lodepng/` |
 | [cglm](https://github.com/recp/cglm) | `include/cglm/` | `source/cglm/` |
 | [cNBT](https://github.com/chmod222/cNBT) | `buffer.c`, `buffer.h`, `list.h`, `nbt_loading.c`, `nbt_parsing.c`, `nbt_treeops.c`, `nbt_util.c` and `nbt.h` | `source/cNBT/` |
+| [parson](https://github.com/kgabis/parson) | `parson.h` and `parson.c` | `source/parson/` |
 | [M*LIB](https://github.com/P-p-H-d/mlib) | any root `*.h` | compiler include path |
 
 ### Wii
@@ -72,6 +73,7 @@ cavex
 │   ├── world
 │   └── ...
 ├── boot.dol
+├── config.json
 ├── icon.png
 └── meta.xml
 ```
@@ -89,4 +91,4 @@ cmake ..
 make
 ```
 
-Please also copy the fragment and vertex shaders from `resources/` next to your `./cavex` executable.
+Please also copy the fragment and vertex shaders from `resources/` next to your `assets/` directory.

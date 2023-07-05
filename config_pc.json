@@ -1,0 +1,20 @@
+{
+	"paths": {
+		"texturepack": "assets",
+		"worlds": "saves"
+	},
+	"input": {
+		"player_forward": [87],
+		"player_backward": [83],
+		"player_left": [65],
+		"player_right": [68],
+		"player_jump": [32],
+		"player_sneak": [340],
+		"item_action_left": [1000],
+		"item_action_right": [1001],
+		"scroll_left": [],
+		"scroll_right": [],
+		"inventory": [69],
+		"open_menu": [257]
+	}
+}

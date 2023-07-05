@@ -47,17 +47,21 @@ static int side_padding = 4;
 struct world_option {
 	string_t name;
 	string_t directory;
+	string_t path;
 	int64_t last_access;
 	int64_t byte_size;
 };
 
 static void screen_sworld_reset(struct screen* s, int width, int height) {
+	input_joystick_absolute(true);
+
 	if(worlds) {
 		while(!stack_empty(worlds)) {
 			struct world_option opt;
 			stack_pop(worlds, &opt);
 			string_clear(opt.name);
 			string_clear(opt.directory);
+			string_clear(opt.path);
 		}
 
 		stack_destroy(worlds);
@@ -68,27 +72,27 @@ static void screen_sworld_reset(struct screen* s, int width, int height) {
 	worlds = malloc(sizeof(struct stack));
 	stack_create(worlds, 8, sizeof(struct world_option));
 
-	DIR* d = opendir("saves");
+	const char* saves_path
+		= config_read_string(&gstate.config_user, "paths.worlds", "saves");
+
+	DIR* d = opendir(saves_path);
 
 	if(d) {
 		struct dirent* dir;
 		while((dir = readdir(d))) {
 			if(dir->d_type & DT_DIR && *dir->d_name != '.') {
 				struct world_option opt;
-				string_init_set_str(opt.directory, dir->d_name);
+				string_init_printf(opt.path, "%s/%s", saves_path, dir->d_name);
 
 				struct level_archive la;
-				if(level_archive_create(&la, opt.directory)) {
-					struct world_option opt;
-					string_init(opt.name);
-					string_init_set_str(opt.directory, dir->d_name);
-
+				if(level_archive_create(&la, opt.path)) {
 					char name[64];
 
 					if(!level_archive_read(&la, LEVEL_NAME, name, sizeof(name)))
 						strcpy(name, "Missing name");
 
-					string_set_str(opt.name, name);
+					string_init_set_str(opt.name, name);
+					string_init_set_str(opt.directory, dir->d_name);
 
 					if(!level_archive_read(&la, LEVEL_DISK_SIZE, &opt.byte_size,
 										   0))
@@ -103,7 +107,7 @@ static void screen_sworld_reset(struct screen* s, int width, int height) {
 					level_archive_destroy(&la);
 					stack_push(worlds, &opt);
 				} else {
-					string_clear(opt.directory);
+					string_clear(opt.path);
 				}
 			}
 		}
@@ -139,7 +143,7 @@ static void screen_sworld_update(struct screen* s, float dt) {
 
 		struct server_rpc rpc;
 		rpc.type = SRPC_LOAD_WORLD;
-		string_init_set(rpc.payload.load_world.name, opt.directory);
+		string_init_set(rpc.payload.load_world.name, opt.path);
 		svin_rpc_send(&rpc);
 
 		screen_set(&screen_load_world);

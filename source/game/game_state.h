@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "../config.h"
 #include "../item/inventory.h"
 #include "../platform/time.h"
 #include "../world.h"
@@ -37,6 +38,7 @@
 
 struct game_state {
 	sig_atomic_t quit;
+	struct config config_user;
 	struct {
 		float dt, fps;
 		float dt_gpu, dt_vsync;

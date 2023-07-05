@@ -20,6 +20,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <assert.h>
+#include <m-lib/m-string.h>
 #include <malloc.h>
 #include <math.h>
 #include <string.h>
@@ -38,17 +39,17 @@ static void gfx_load_textures() {
 	glGenTextures(6, textures);
 
 	size_t w, h;
-	void* output = tex_atlas_block("assets/terrain.png", &w, &h);
+	void* output = tex_atlas_block("terrain.png", &w, &h);
 	if(output) {
 		tex_gfx_load(output, w, h, TEX_FMT_RGBA16, textures[0], false);
 		free(output);
 	}
 
-	tex_gfx_load_file("assets/default.png", TEX_FMT_I8, textures[1], false);
-	tex_gfx_load_file("assets/anim.png", TEX_FMT_RGBA32, textures[2], false);
-	tex_gfx_load_file("assets/gui.png", TEX_FMT_IA4, textures[3], false);
-	tex_gfx_load_file("assets/gui_2.png", TEX_FMT_RGBA16, textures[4], false);
-	tex_gfx_load_file("assets/items.png", TEX_FMT_RGBA16, textures[5], false);
+	tex_gfx_load_file("default.png", TEX_FMT_I8, textures[1], false);
+	tex_gfx_load_file("anim.png", TEX_FMT_RGBA32, textures[2], false);
+	tex_gfx_load_file("gui.png", TEX_FMT_IA4, textures[3], false);
+	tex_gfx_load_file("gui_2.png", TEX_FMT_RGBA16, textures[4], false);
+	tex_gfx_load_file("items.png", TEX_FMT_RGBA16, textures[5], false);
 }
 
 static void shader_error(GLuint shader) {
@@ -103,29 +104,6 @@ int gfx_height() {
 	return window_height;
 }
 
-static enum input_button glfw_key_translate(int key) {
-	switch(key) {
-		case GLFW_KEY_W: return IB_FORWARD;
-		case GLFW_KEY_S: return IB_BACKWARD;
-		case GLFW_KEY_A: return IB_LEFT;
-		case GLFW_KEY_D: return IB_RIGHT;
-		case GLFW_KEY_SPACE: return IB_JUMP;
-		case GLFW_KEY_LEFT_SHIFT: return IB_INVENTORY;
-		case GLFW_KEY_ENTER: return IB_HOME;
-		default: return IB_MAX;
-	}
-}
-
-static enum input_button glfw_button_translate(int key) {
-	switch(key) {
-		case GLFW_MOUSE_BUTTON_LEFT: return IB_ACTION1;
-		case GLFW_MOUSE_BUTTON_RIGHT: return IB_ACTION2;
-		default: return IB_MAX;
-	}
-}
-
-static double last_mouse_x = 0, last_mouse_y = 0;
-
 static void framebuffer_size_callback(GLFWwindow* window, int width,
 									  int height) {
 	window_width = width;
@@ -133,37 +111,16 @@ static void framebuffer_size_callback(GLFWwindow* window, int width,
 	glViewport(0, 0, gfx_width(), gfx_height());
 }
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action,
-						 int mods) {
-	if(glfw_key_translate(key) != IB_MAX)
-		input_set_status(glfw_key_translate(key), action != GLFW_RELEASE);
-
-	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		} else {
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		}
-	}
-}
-
 static void scroll_callback(GLFWwindow* window, double xoffset,
 							double yoffset) {
 	// TODO: buttons are not released
 	if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
 		if(yoffset > 0) {
-			input_set_status(IB_SCROLL_LEFT, GLFW_PRESS);
+			// input_set_status(IB_SCROLL_LEFT, GLFW_PRESS);
 		} else if(yoffset < 0) {
-			input_set_status(IB_SCROLL_RIGHT, GLFW_PRESS);
+			// input_set_status(IB_SCROLL_RIGHT, GLFW_PRESS);
 		}
 	}
-}
-
-static void mouse_button_callback(GLFWwindow* window, int button, int action,
-								  int mods) {
-	if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED
-	   && glfw_button_translate(button) != IB_MAX)
-		input_set_status(glfw_button_translate(button), action != GLFW_RELEASE);
 }
 
 static GLuint shader_prog;
@@ -178,12 +135,12 @@ void gfx_setup() {
 	glfwMakeContextCurrent(window);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetKeyCallback(window, key_callback);
-	glfwSetScrollCallback(window, scroll_callback);
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	// glfwSetScrollCallback(window, scroll_callback);
 
 	if(glfwRawMouseMotionSupported())
 		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
 	if(glewInit())
 		printf("Could not load extended OpenGL functions!\n");
@@ -192,10 +149,22 @@ void gfx_setup() {
 	printf("Renderer: %s\n", glGetString(GL_RENDERER));
 	printf("Version: %s\n", glGetString(GL_VERSION));
 
-	void* vertex = file_read("assets/vertex.shader");
+	string_t shader_file;
+	string_init(shader_file);
+
+	string_printf(
+		shader_file, "%s/vertex.shader",
+		config_read_string(&gstate.config_user, "paths.texturepack", "assets"));
+	void* vertex = file_read(string_get_cstr(shader_file));
 	assert(vertex);
-	void* fragment = file_read("assets/fragment.shader");
+
+	string_printf(
+		shader_file, "%s/fragment.shader",
+		config_read_string(&gstate.config_user, "paths.texturepack", "assets"));
+	void* fragment = file_read(string_get_cstr(shader_file));
 	assert(fragment);
+
+	string_clear(shader_file);
 
 	shader_prog = create_shader(vertex, fragment);
 	free(vertex);
@@ -245,20 +214,6 @@ void gfx_finish(bool vsync) {
 	gfx_write_buffers(true, true, true);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glfwPollEvents();
-
-	double xpos, ypos;
-	glfwGetCursorPos(window, &xpos, &ypos);
-
-	if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
-		input_set_joystick((xpos - last_mouse_x) * 0.001F,
-						   -(ypos - last_mouse_y) * 0.001F);
-
-	} else {
-		input_set_joystick(0, 0);
-	}
-
-	last_mouse_x = xpos;
-	last_mouse_y = ypos;
 }
 
 void gfx_flip_buffers(float* gpu_wait, float* vsync_wait) {

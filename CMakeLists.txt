@@ -120,8 +120,11 @@ add_executable(cavex
 				source/stack.c
 				source/util.c
 				source/world.c
+				source/config.c
 
 				source/lodepng/lodepng.c
+
+				source/parson/parson.c
 			)
 
 target_compile_definitions(cavex PRIVATE PLATFORM_PC CGLM_ALL_UNALIGNED)

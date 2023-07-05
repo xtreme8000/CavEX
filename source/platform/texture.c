@@ -18,18 +18,31 @@
 */
 
 #include <assert.h>
+#include <m-lib/m-string.h>
 #include <stdlib.h>
 
+#include "../config.h"
+#include "../game/game_state.h"
 #include "../lodepng/lodepng.h"
 #include "texture.h"
 
 uint8_t* tex_read(const char* filename, size_t* width, size_t* height) {
 	assert(filename && width && height);
 
+	string_t tmp;
+	string_init_printf(
+		tmp, "%s/%s",
+		config_read_string(&gstate.config_user, "paths.texturepack", "assets"),
+		filename);
+
 	uint8_t* img;
 	unsigned w, h;
-	if(lodepng_decode32_file(&img, &w, &h, filename))
+	if(lodepng_decode32_file(&img, &w, &h, string_get_cstr(tmp))) {
+		string_clear(tmp);
 		return NULL;
+	}
+
+	string_clear(tmp);
 
 	*width = w;
 	*height = h;

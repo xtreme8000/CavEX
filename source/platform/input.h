@@ -30,11 +30,17 @@ enum input_button {
 	IB_ACTION1,
 	IB_ACTION2,
 	IB_JUMP,
+	IB_SNEAK,
 	IB_INVENTORY,
 	IB_HOME,
 	IB_SCROLL_LEFT,
 	IB_SCROLL_RIGHT,
-	IB_MAX,
+};
+
+enum input_category {
+	INPUT_CAT_WIIMOTE,
+	INPUT_CAT_NUNCHUK,
+	INPUT_CAT_CLASSIC_CONTROLLER,
 };
 
 void input_init(void);
@@ -46,5 +52,6 @@ bool input_pressed(enum input_button b);
 bool input_released(enum input_button b);
 bool input_held(enum input_button b);
 bool input_joystick(float dt, float* x, float* y);
+void input_joystick_absolute(bool enable);
 
 #endif

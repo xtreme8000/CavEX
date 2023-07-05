@@ -20,7 +20,12 @@
 #include "../../graphics/gui_util.h"
 #include "../../network/server_local.h"
 #include "../../platform/gfx.h"
+#include "../../platform/input.h"
 #include "../game_state.h"
+
+static void screen_lworld_reset(struct screen* s, int width, int height) {
+	input_joystick_absolute(false);
+}
 
 static void screen_lworld_update(struct screen* s, float dt) {
 	if(gstate.world_loaded)
@@ -53,7 +58,7 @@ static void screen_lworld_render2D(struct screen* s, int width, int height) {
 }
 
 struct screen screen_load_world = {
-	.reset = NULL,
+	.reset = screen_lworld_reset,
 	.update = screen_lworld_update,
 	.render2D = screen_lworld_render2D,
 	.render3D = NULL,

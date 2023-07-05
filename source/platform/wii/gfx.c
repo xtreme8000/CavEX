@@ -106,17 +106,17 @@ static void texture_fog(uint8_t* img, size_t size) {
 
 static void gfx_load_textures() {
 	size_t w, h;
-	void* output = tex_atlas_block("assets/terrain.png", &w, &h);
+	void* output = tex_atlas_block("terrain.png", &w, &h);
 	if(output) {
 		tex_gfx_load(output, w, h, TEX_FMT_RGBA16, GX_TEXMAP0, false);
 		free(output);
 	}
 
-	tex_gfx_load_file("assets/default.png", TEX_FMT_I8, GX_TEXMAP1, false);
-	tex_gfx_load_file("assets/anim.png", TEX_FMT_RGBA32, GX_TEXMAP2, false);
-	tex_gfx_load_file("assets/gui.png", TEX_FMT_IA4, GX_TEXMAP3, false);
-	tex_gfx_load_file("assets/gui_2.png", TEX_FMT_RGBA16, GX_TEXMAP4, false);
-	tex_gfx_load_file("assets/items.png", TEX_FMT_RGBA16, GX_TEXMAP5, false);
+	tex_gfx_load_file("default.png", TEX_FMT_I8, GX_TEXMAP1, false);
+	tex_gfx_load_file("anim.png", TEX_FMT_RGBA32, GX_TEXMAP2, false);
+	tex_gfx_load_file("gui.png", TEX_FMT_IA4, GX_TEXMAP3, false);
+	tex_gfx_load_file("gui_2.png", TEX_FMT_RGBA16, GX_TEXMAP4, false);
+	tex_gfx_load_file("items.png", TEX_FMT_RGBA16, GX_TEXMAP5, false);
 
 	size_t fog_size = 128;
 	uint8_t* fog = malloc(fog_size * fog_size * 4);
