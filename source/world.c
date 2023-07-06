@@ -501,7 +501,7 @@ size_t world_render(struct world* w, struct camera* c, bool pass) {
 	gfx_lighting(true);
 
 	if(!pass) {
-		gfx_bind_texture(TEXTURE_TERRAIN);
+		gfx_bind_texture(&texture_terrain);
 		gfx_blending(MODE_OFF);
 		gfx_alpha_test(true);
 
@@ -524,7 +524,7 @@ size_t world_render(struct world* w, struct camera* c, bool pass) {
 			(vec3) {(anim / 14) * 0.4921875F, (anim % 14) * 0.0703125F, 0.0F});
 
 		gfx_matrix_texture(true, matrix_anim);
-		gfx_bind_texture(TEXTURE_ANIM);
+		gfx_bind_texture(&texture_anim);
 
 		for(int t_pass = 0; t_pass < 2; t_pass++) {
 			if(t_pass == 1)

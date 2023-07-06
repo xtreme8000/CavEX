@@ -145,9 +145,9 @@ static void* tex_conv_ia4(uint8_t* image, size_t width, size_t height) {
 	return output;
 }
 
-void tex_gfx_load(void* img, size_t width, size_t height, enum tex_format type,
-				  int slot, bool linear) {
-	assert(img && width > 0 && height > 0);
+void tex_gfx_load(struct tex_gfx* tex, void* img, size_t width, size_t height,
+				  enum tex_format type, bool linear) {
+	assert(tex && img && width > 0 && height > 0);
 
 	void* output = NULL;
 	uint8_t fmt;
@@ -173,15 +173,22 @@ void tex_gfx_load(void* img, size_t width, size_t height, enum tex_format type,
 	}
 
 	if(output) {
-		GXTexObj obj;
-		GX_InitTexObj(&obj, output, width, height, fmt, GX_CLAMP, GX_CLAMP,
-					  GX_FALSE);
-		GX_InitTexObjMaxAniso(&obj, GX_ANISO_1);
-		GX_InitTexObjFilterMode(&obj, linear ? GX_LINEAR : GX_NEAR,
-								linear ? GX_LINEAR : GX_NEAR);
-		GX_LoadTexObj(&obj, slot);
+		tex->fmt = type;
+		tex->data = output;
+		tex->width = width;
+		tex->height = height;
 
-		// TODO: data needed by gpu, must not free
-		// free(output);
+		GX_InitTexObj(&tex->obj, output, width, height, fmt, GX_CLAMP, GX_CLAMP,
+					  GX_FALSE);
+		GX_InitTexObjMaxAniso(&tex->obj, GX_ANISO_1);
+		GX_InitTexObjFilterMode(&tex->obj, linear ? GX_LINEAR : GX_NEAR,
+								linear ? GX_LINEAR : GX_NEAR);
 	}
+
+	free(img);
+}
+
+void tex_gfx_bind(struct tex_gfx* tex, int slot) {
+	assert(tex && slot >= GX_TEXMAP0 && slot < GX_MAX_TEXMAP);
+	GX_LoadTexObj(&tex->obj, slot);
 }

@@ -1561,7 +1561,7 @@ void render_block_cracks(struct block_data* blk, mat4 view, w_coord_t x,
 		if(b->double_sided)
 			gfx_culling(false);
 
-		gfx_bind_texture(TEXTURE_TERRAIN);
+		gfx_bind_texture(&texture_terrain);
 		displaylist_render_immediate(&block_cracks_dl, vertices * 4);
 
 		if(b->double_sided)

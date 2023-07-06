@@ -85,46 +85,6 @@ static void copy_buffers(u32 cnt) {
 	}
 }
 
-#define distance_2d(x1, y1, x2, y2)                                            \
-	(((x1) - (x2)) * ((x1) - (x2)) + ((y1) - (y2)) * ((y1) - (y2)))
-
-static void texture_fog(uint8_t* img, size_t size) {
-	for(size_t y = 0; y < size; y++) {
-		for(size_t x = 0; x < size; x++) {
-			float d = (sqrt(distance_2d(size / 2.0F, size / 2.0F, x + 0.5F,
-										y + 0.5F))
-					   - (size / 2.0F - 9.0F))
-				/ 8.0F;
-
-			uint8_t* pixel = img + (x + y * size) * 4;
-			pixel[0] = pixel[1] = pixel[2]
-				= roundf(glm_clamp(d * 255.0F, 0.0F, 255.0F));
-			pixel[3] = 255;
-		}
-	}
-}
-
-static void gfx_load_textures() {
-	size_t w, h;
-	void* output = tex_atlas_block("terrain.png", &w, &h);
-	if(output) {
-		tex_gfx_load(output, w, h, TEX_FMT_RGBA16, GX_TEXMAP0, false);
-		free(output);
-	}
-
-	tex_gfx_load_file("default.png", TEX_FMT_I8, GX_TEXMAP1, false);
-	tex_gfx_load_file("anim.png", TEX_FMT_RGBA32, GX_TEXMAP2, false);
-	tex_gfx_load_file("gui.png", TEX_FMT_IA4, GX_TEXMAP3, false);
-	tex_gfx_load_file("gui_2.png", TEX_FMT_RGBA16, GX_TEXMAP4, false);
-	tex_gfx_load_file("items.png", TEX_FMT_RGBA16, GX_TEXMAP5, false);
-
-	size_t fog_size = 128;
-	uint8_t* fog = malloc(fog_size * fog_size * 4);
-	texture_fog(fog, fog_size);
-	tex_gfx_load(fog, fog_size, fog_size, TEX_FMT_I8, GX_TEXMAP6, true);
-	free(fog);
-}
-
 int gfx_width() {
 	return gfx_screen_width;
 }
@@ -222,11 +182,12 @@ void gfx_setup() {
 	GX_SetNumChans(1);
 	GX_SetNumTexGens(1);
 	GX_SetNumTevStages(1);
-	gfx_bind_texture(TEXTURE_TERRAIN);
 	gfx_texture(true);
 	gfx_alpha_test(true);
 
-	gfx_load_textures();
+	tex_init();
+	gfx_bind_texture(&texture_terrain);
+	tex_gfx_bind(&texture_fog, GX_TEXMAP1);
 
 	GX_SetTexCoordGen(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_POS, GX_TEXMTX1);
 
@@ -287,26 +248,10 @@ void gfx_flip_buffers(float* gpu_wait, float* vsync_wait) {
 		*gpu_wait = time_diff_s(gpu_wait_start, gpu_wait_end);
 }
 
-void gfx_bind_texture(enum gfx_texture tex) {
-	switch(tex) {
-		case TEXTURE_TERRAIN:
-			GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
-			break;
-		case TEXTURE_FONT:
-			GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
-			break;
-		case TEXTURE_ANIM:
-			GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP2, GX_COLOR0A0);
-			break;
-		case TEXTURE_GUI:
-			GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP3, GX_COLOR0A0);
-			break;
-		case TEXTURE_GUI2:
-			GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP4, GX_COLOR0A0);
-			break;
-		case TEXTURE_ITEMS:
-			GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP5, GX_COLOR0A0);
-			break;
+void gfx_bind_texture(struct tex_gfx* tex) {
+	assert(tex);
+	tex_gfx_bind(tex, GX_TEXMAP0);
+}
 	}
 }
 
@@ -389,7 +334,7 @@ void gfx_fog(bool enable) {
 
 		if(enable) {
 			GX_SetTevOp(GX_TEVSTAGE1, GX_DECAL);
-			GX_SetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP6, GX_COLOR0A0);
+			GX_SetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR0A0);
 			GX_SetTevColorIn(GX_TEVSTAGE1, GX_CC_CPREV, GX_CC_C0, GX_CC_TEXA,
 							 GX_CC_ZERO);
 		}

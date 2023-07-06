@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include "../cglm/cglm.h"
+#include "texture.h"
 
 enum gfx_blend {
 	MODE_BLEND,
@@ -38,20 +39,11 @@ enum depth_func {
 	MODE_EQUAL,
 };
 
-enum gfx_texture {
-	TEXTURE_TERRAIN,
-	TEXTURE_FONT,
-	TEXTURE_ANIM,
-	TEXTURE_GUI,
-	TEXTURE_GUI2,
-	TEXTURE_ITEMS,
-};
-
 void gfx_setup(void);
 void gfx_update_light(float daytime, const float* light_lookup);
 void gfx_finish(bool vsync);
 void gfx_flip_buffers(float* gpu_wait, float* vsync_wait);
-void gfx_bind_texture(enum gfx_texture tex);
+void gfx_bind_texture(struct tex_gfx* tex);
 void gfx_clear_buffers(uint8_t r, uint8_t g, uint8_t b);
 int gfx_width(void);
 int gfx_height(void);

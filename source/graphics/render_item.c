@@ -82,12 +82,12 @@ void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
 		s = TEX_OFFSET(TEXTURE_X(tex));
 		t = TEX_OFFSET(TEXTURE_Y(tex));
 
-		gfx_bind_texture(b->transparent ? TEXTURE_ANIM : TEXTURE_TERRAIN);
+		gfx_bind_texture(b->transparent ? &texture_anim : &texture_terrain);
 	} else {
 		s = item->render_data.item.texture_x * 16;
 		t = item->render_data.item.texture_y * 16;
 
-		gfx_bind_texture(TEXTURE_ITEMS);
+		gfx_bind_texture(&texture_items);
 	}
 
 	if(inventory) {
@@ -298,7 +298,7 @@ void render_item_block(struct item* item, struct item_data* stack, mat4 model,
 		gfx_matrix_modelview(model);
 	}
 
-	gfx_bind_texture(b->transparent ? TEXTURE_ANIM : TEXTURE_TERRAIN);
+	gfx_bind_texture(b->transparent ? &texture_anim : &texture_terrain);
 	gfx_lighting(true);
 	gfx_write_buffers(true, true, true);
 	displaylist_render_immediate(&dl, vertices * 4);

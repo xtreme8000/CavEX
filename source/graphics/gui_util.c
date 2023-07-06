@@ -25,7 +25,7 @@
 #include "texture_atlas.h"
 
 int gutil_control_icon(int x, enum gutil_control_icon icon, char* str) {
-	gfx_bind_texture(TEXTURE_GUI);
+	gfx_bind_texture(&texture_gui);
 	int scale = 32;
 	int text_scale = 10;
 
@@ -65,7 +65,7 @@ void gutil_texquad_rt(int x, int y, int tx, int ty, int sx, int sy, int width,
 }
 
 void gutil_bg() {
-	gfx_bind_texture(TEXTURE_TERRAIN);
+	gfx_bind_texture(&texture_terrain);
 
 	int scale = 16 * 4;
 	int cx = (gfx_width() + scale - 1) / scale;
@@ -124,7 +124,7 @@ static const uint8_t chat_colors[16][3] = {
 };
 
 void gutil_text(int x, int y, char* str, int scale) {
-	gfx_bind_texture(TEXTURE_FONT);
+	gfx_bind_texture(&texture_font);
 
 	int skip = 0;
 	int col = 15;

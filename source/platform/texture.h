@@ -24,6 +24,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef PLATFORM_WII
+#include <gccore.h>
+#endif
+
+#ifdef PLATFORM_PC
+#include <GL/glew.h>
+#endif
+
 enum tex_format {
 	TEX_FMT_RGBA16,
 	TEX_FMT_RGBA32,
@@ -31,11 +39,35 @@ enum tex_format {
 	TEX_FMT_IA4,
 };
 
+struct tex_gfx {
+#ifdef PLATFORM_WII
+	GXTexObj obj;
+#endif
+#ifdef PLATFORM_PC
+	GLuint id;
+#endif
+	size_t width, height;
+	enum tex_format fmt;
+	uint8_t* data;
+};
+
+extern struct tex_gfx texture_fog;
+extern struct tex_gfx texture_terrain;
+extern struct tex_gfx texture_items;
+extern struct tex_gfx texture_font;
+extern struct tex_gfx texture_anim;
+extern struct tex_gfx texture_gui;
+extern struct tex_gfx texture_gui2;
+
+void tex_init(void);
+
 uint8_t* tex_read(const char* filename, size_t* width, size_t* height);
 
-void tex_gfx_load(void* img, size_t width, size_t height, enum tex_format type,
-				  int slot, bool linear);
-void tex_gfx_load_file(const char* filename, enum tex_format type, int slot,
-					   bool linear);
+
+void tex_gfx_load(struct tex_gfx* tex, void* img, size_t width, size_t height,
+				  enum tex_format type, bool linear);
+void tex_gfx_load_file(struct tex_gfx* tex, const char* filename,
+					   enum tex_format type, bool linear);
+void tex_gfx_bind(struct tex_gfx* tex, int slot);
 
 #endif

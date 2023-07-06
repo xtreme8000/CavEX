@@ -66,7 +66,7 @@ void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
 	gfx_fog(false);
 	gfx_texture(true);
 	gfx_blending(MODE_BLEND2);
-	gfx_bind_texture(TEXTURE_GUI2);
+	gfx_bind_texture(&texture_gui2);
 
 	mat4 tmp;
 	glm_translate_to(view_matrix,

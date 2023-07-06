@@ -33,25 +33,6 @@
 #include "../input.h"
 #include "../texture.h"
 
-static GLuint textures[8];
-
-static void gfx_load_textures() {
-	glGenTextures(6, textures);
-
-	size_t w, h;
-	void* output = tex_atlas_block("terrain.png", &w, &h);
-	if(output) {
-		tex_gfx_load(output, w, h, TEX_FMT_RGBA16, textures[0], false);
-		free(output);
-	}
-
-	tex_gfx_load_file("default.png", TEX_FMT_I8, textures[1], false);
-	tex_gfx_load_file("anim.png", TEX_FMT_RGBA32, textures[2], false);
-	tex_gfx_load_file("gui.png", TEX_FMT_IA4, textures[3], false);
-	tex_gfx_load_file("gui_2.png", TEX_FMT_RGBA16, textures[4], false);
-	tex_gfx_load_file("items.png", TEX_FMT_RGBA16, textures[5], false);
-}
-
 static void shader_error(GLuint shader) {
 	GLint is_compiled = 0;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &is_compiled);
@@ -172,7 +153,6 @@ void gfx_setup() {
 	glUseProgram(shader_prog);
 
 	gfx_clear_buffers(255, 255, 255);
-	gfx_bind_texture(TEXTURE_TERRAIN);
 	gfx_texture(true);
 	gfx_alpha_test(true);
 
@@ -184,7 +164,8 @@ void gfx_setup() {
 
 	glViewport(0, 0, gfx_width(), gfx_height());
 
-	gfx_load_textures();
+	tex_init();
+	gfx_bind_texture(&texture_terrain);
 
 	glUniform1i(glGetUniformLocation(shader_prog, "tex"), 0);
 }
@@ -221,15 +202,8 @@ void gfx_flip_buffers(float* gpu_wait, float* vsync_wait) {
 	*vsync_wait = 0;
 }
 
-void gfx_bind_texture(enum gfx_texture tex) {
-	switch(tex) {
-		case TEXTURE_TERRAIN: glBindTexture(GL_TEXTURE_2D, textures[0]); break;
-		case TEXTURE_FONT: glBindTexture(GL_TEXTURE_2D, textures[1]); break;
-		case TEXTURE_ANIM: glBindTexture(GL_TEXTURE_2D, textures[2]); break;
-		case TEXTURE_GUI: glBindTexture(GL_TEXTURE_2D, textures[3]); break;
-		case TEXTURE_GUI2: glBindTexture(GL_TEXTURE_2D, textures[4]); break;
-		case TEXTURE_ITEMS: glBindTexture(GL_TEXTURE_2D, textures[5]); break;
-	}
+void gfx_bind_texture(struct tex_gfx* tex) {
+	tex_gfx_bind(tex, 0);
 }
 
 void gfx_mode_world() {

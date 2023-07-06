@@ -64,9 +64,10 @@ int main(void) {
 
 	time_reset();
 	input_init();
-	gfx_setup();
 	blocks_init();
 	items_init();
+	gfx_setup();
+
 	screen_set(&screen_select_world);
 
 	world_create(&gstate.world);

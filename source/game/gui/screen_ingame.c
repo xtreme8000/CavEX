@@ -302,7 +302,7 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	icon_offset += gutil_control_icon(icon_offset, CONTROL_HOME, "Save & quit");
 
 	// draw hotbar
-	gfx_bind_texture(TEXTURE_GUI2);
+	gfx_bind_texture(&texture_gui2);
 	gutil_texquad((width - 182 * 2) / 2, height - 32 * 8 / 5 - 22 * 2, 0, 0,
 				  182, 22, 182 * 2, 22 * 2);
 
@@ -336,7 +336,7 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	}
 
 	gfx_blending(MODE_BLEND);
-	gfx_bind_texture(TEXTURE_GUI2);
+	gfx_bind_texture(&texture_gui2);
 	// draw hotbar selection
 	gutil_texquad((width - 182 * 2) / 2 - 2
 					  + 20 * 2 * inventory_get_hotbar(&gstate.inventory),

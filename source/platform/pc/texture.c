@@ -19,11 +19,20 @@
 
 #include <GL/glew.h>
 
-void tex_gfx_load(void* img, size_t width, size_t height, enum tex_format type,
-				  int slot, bool linear) {
-	assert(img && width > 0 && height > 0);
+#include "../texture.h"
 
-	glBindTexture(GL_TEXTURE_2D, slot);
+void tex_gfx_load(struct tex_gfx* tex, void* img, size_t width, size_t height,
+				  enum tex_format type, bool linear) {
+	assert(tex && img && width > 0 && height > 0);
+
+	tex->fmt = type;
+	tex->data = img;
+	tex->width = width;
+	tex->height = height;
+
+	glGenTextures(1, &tex->id);
+
+	glBindTexture(GL_TEXTURE_2D, tex->id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 				 GL_UNSIGNED_BYTE, img);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
@@ -33,4 +42,9 @@ void tex_gfx_load(void* img, size_t width, size_t height, enum tex_format type,
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void tex_gfx_bind(struct tex_gfx* tex, int slot) {
+	assert(tex);
+	glBindTexture(GL_TEXTURE_2D, tex->id);
 }
