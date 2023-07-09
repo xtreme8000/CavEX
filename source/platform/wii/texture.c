@@ -23,11 +23,13 @@
 
 #define rgba16(r, g, b, a)                                                     \
 	(((int)(a) << 12) | ((int)(r) << 8) | ((int)(g) << 4) | (int)(b))
-#define rgb16(r, g, b) (0x8000 | ((int)(r) << 10) | ((int)(g) << 5) | (int)(b))
+#define rgb16_2(r, g, b)                                                       \
+	(0x8000 | ((int)(r) << 10) | ((int)(g) << 5) | (int)(b))
+#define rgb16(r, g, b) (((int)(r) << 11) | ((int)(g) << 5) | (int)(b))
 #define xy16(x, y) (((int)(x) << 8) | (int)(y))
 #define ia8(i, a) (((int)(a) << 4) | (int)(i))
 
-static void* tex_conv_rgb32(uint8_t* image, size_t width, size_t height) {
+static void* tex_conv_rgba32(uint8_t* image, size_t width, size_t height) {
 	assert(image && (width % 4) == 0 && (height % 4) == 0);
 	uint16_t* output = memalign(32, width * height * sizeof(uint16_t) * 2);
 
@@ -59,7 +61,7 @@ static void* tex_conv_rgb32(uint8_t* image, size_t width, size_t height) {
 	return output;
 }
 
-static void* tex_conv_rgb16(uint8_t* image, size_t width, size_t height) {
+static void* tex_conv_rgba16(uint8_t* image, size_t width, size_t height) {
 	assert(image && (width % 4) == 0 && (height % 4) == 0);
 	uint16_t* output = memalign(32, width * height * sizeof(uint16_t));
 
@@ -80,8 +82,34 @@ static void* tex_conv_rgb16(uint8_t* image, size_t width, size_t height) {
 													  col[2] >> 4, alpha);
 					} else {
 						output[output_idx++]
-							= rgb16(col[0] >> 3, col[1] >> 3, col[2] >> 3);
+							= rgb16_2(col[0] >> 3, col[1] >> 3, col[2] >> 3);
 					}
+				}
+			}
+		}
+	}
+
+	DCFlushRange(output, width * height * sizeof(uint16_t));
+
+	return output;
+}
+
+static void* tex_conv_rgb16(uint8_t* image, size_t width, size_t height) {
+	assert(image && (width % 4) == 0 && (height % 4) == 0);
+	uint16_t* output = memalign(32, width * height * sizeof(uint16_t));
+
+	if(!output)
+		return NULL;
+
+	size_t output_idx = 0;
+
+	for(size_t y = 0; y < height; y += 4) {
+		for(size_t x = 0; x < width; x += 4) {
+			for(size_t by = 0; by < 4; by++) {
+				for(size_t bx = 0; bx < 4; bx++) {
+					uint8_t* col = image + (x + bx + (y + by) * width) * 4;
+					output[output_idx++]
+						= rgb16(col[0] >> 3, col[1] >> 2, col[2] >> 3);
 				}
 			}
 		}
@@ -154,12 +182,16 @@ void tex_gfx_load(struct tex_gfx* tex, void* img, size_t width, size_t height,
 
 	switch(type) {
 		case TEX_FMT_RGBA32:
-			output = tex_conv_rgb32(img, width, height);
+			output = tex_conv_rgba32(img, width, height);
 			fmt = GX_TF_RGBA8;
 			break;
 		case TEX_FMT_RGBA16:
-			output = tex_conv_rgb16(img, width, height);
+			output = tex_conv_rgba16(img, width, height);
 			fmt = GX_TF_RGB5A3;
+			break;
+		case TEX_FMT_RGB16:
+			output = tex_conv_rgb16(img, width, height);
+			fmt = GX_TF_RGB565;
 			break;
 		case TEX_FMT_I8:
 			output = tex_conv_i8(img, width, height);
@@ -183,6 +215,7 @@ void tex_gfx_load(struct tex_gfx* tex, void* img, size_t width, size_t height,
 		GX_InitTexObjMaxAniso(&tex->obj, GX_ANISO_1);
 		GX_InitTexObjFilterMode(&tex->obj, linear ? GX_LINEAR : GX_NEAR,
 								linear ? GX_LINEAR : GX_NEAR);
+		GX_InvalidateTexAll();
 	}
 
 	free(img);

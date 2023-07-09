@@ -30,7 +30,7 @@
 #include <malloc.h>
 
 static void screen_ingame_reset(struct screen* s, int width, int height) {
-	input_joystick_absolute(false);
+	input_pointer_enable(false);
 }
 
 void screen_ingame_render3D(struct screen* s, mat4 view) {
@@ -246,6 +246,9 @@ static void screen_ingame_update(struct screen* s, float dt) {
 		});
 	}
 
+	if(input_pressed(IB_INVENTORY))
+		screen_set(&screen_inventory);
+
 	struct block_data in_block
 		= world_get_block(&gstate.world, floorf(gstate.camera.x),
 						  floorf(gstate.camera.y), floorf(gstate.camera.z));
@@ -285,21 +288,22 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	}
 
 	int icon_offset = 32;
-	icon_offset += gutil_control_icon(icon_offset, CONTROL_A, "Inventory");
-	icon_offset += gutil_control_icon(icon_offset, CONTROL_B, "Jump");
+	icon_offset += gutil_control_icon(icon_offset, IB_INVENTORY, "Inventory");
+	icon_offset += gutil_control_icon(icon_offset, IB_JUMP, "Jump");
 	if(gstate.camera_hit.hit) {
 		struct item_data item;
 		if(inventory_get_slot(&gstate.inventory,
 							  inventory_get_hotbar(&gstate.inventory), &item)
 		   && item_get(&item)) {
-			icon_offset += gutil_control_icon(
-				icon_offset, CONTROL_C, item_is_block(&item) ? "Place" : "Use");
+			icon_offset
+				+= gutil_control_icon(icon_offset, IB_ACTION2,
+									  item_is_block(&item) ? "Place" : "Use");
 		}
-		icon_offset += gutil_control_icon(icon_offset, CONTROL_Z, "Mine");
+		icon_offset += gutil_control_icon(icon_offset, IB_ACTION1, "Mine");
 	} else {
-		icon_offset += gutil_control_icon(icon_offset, CONTROL_Z, "Punch");
+		icon_offset += gutil_control_icon(icon_offset, IB_ACTION1, "Punch");
 	}
-	icon_offset += gutil_control_icon(icon_offset, CONTROL_HOME, "Save & quit");
+	icon_offset += gutil_control_icon(icon_offset, IB_HOME, "Save & quit");
 
 	// draw hotbar
 	gfx_bind_texture(&texture_gui2);

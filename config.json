@@ -10,11 +10,17 @@
 		"player_right": [3, 203],
 		"player_jump": [5, 205],
 		"player_sneak": [204],
-		"item_action_left": [6, 100, 210],
-		"item_action_right": [7, 101, 211],
-		"scroll_left": [9, 208],
-		"scroll_right": [8, 209],
-		"inventory": [4, 206],
-		"open_menu": [10, 214]
+		"item_action_left": [100, 210],
+		"item_action_right": [101, 211],
+		"scroll_left": [9, 208, 213],
+		"scroll_right": [8, 209, 212],
+		"inventory": [6, 206],
+		"open_menu": [10, 214],
+		"gui_up": [0, 200],
+		"gui_down": [1, 201],
+		"gui_left": [2, 202],
+		"gui_right": [3, 203],
+		"gui_click": [4, 204],
+		"gui_click_alt": [5, 205]
 	}
 }

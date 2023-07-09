@@ -53,7 +53,7 @@ struct world_option {
 };
 
 static void screen_sworld_reset(struct screen* s, int width, int height) {
-	input_joystick_absolute(true);
+	input_pointer_enable(true);
 
 	if(worlds) {
 		while(!stack_empty(worlds)) {
@@ -123,10 +123,10 @@ static void screen_sworld_reset(struct screen* s, int width, int height) {
 }
 
 static void screen_sworld_update(struct screen* s, float dt) {
-	if(input_pressed(IB_FORWARD) && gui_selection > 0)
+	if(input_pressed(IB_GUI_UP) && gui_selection > 0)
 		gui_selection--;
 
-	if(input_pressed(IB_BACKWARD) && gui_selection < stack_size(worlds) - 1)
+	if(input_pressed(IB_GUI_DOWN) && gui_selection < stack_size(worlds) - 1)
 		gui_selection++;
 
 	if(scroll_offset + (int)gui_selection * entry_height < 4)
@@ -137,7 +137,7 @@ static void screen_sworld_update(struct screen* s, float dt) {
 		scroll_offset = height_visible - side_padding
 			- (int)(gui_selection + 1) * entry_height;
 
-	if(stack_size(worlds) > 0 && input_pressed(IB_INVENTORY)) {
+	if(stack_size(worlds) > 0 && input_pressed(IB_GUI_CLICK)) {
 		struct world_option opt;
 		stack_at(worlds, &opt, gui_selection);
 
@@ -201,10 +201,10 @@ static void screen_sworld_render2D(struct screen* s, int width, int height) {
 	gfx_scissor(false, 0, 0, 0, 0);
 
 	int icon_offset = 32;
-	icon_offset += gutil_control_icon(icon_offset, CONTROL_A, "Play world");
-	icon_offset += gutil_control_icon(icon_offset, CONTROL_HOME, "Quit");
 	icon_offset
-		+= gutil_control_icon(icon_offset, CONTROL_DPAD, "Change selection");
+		+= gutil_control_icon(icon_offset, IB_GUI_UP, "Change selection");
+	icon_offset += gutil_control_icon(icon_offset, IB_GUI_CLICK, "Play world");
+	icon_offset += gutil_control_icon(icon_offset, IB_HOME, "Quit");
 }
 
 struct screen screen_select_world = {

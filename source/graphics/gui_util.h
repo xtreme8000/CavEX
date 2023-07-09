@@ -23,22 +23,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-enum gutil_control_icon {
-	CONTROL_A = 0,
-	CONTROL_B = 1,
-	CONTROL_1 = 2,
-	CONTROL_2 = 3,
-	CONTROL_DPAD = 4,
-	CONTROL_MOTION = 5,
-	CONTROL_Z = 6,
-	CONTROL_C = 7,
-	CONTROL_JOYSTICK = 8,
-	CONTROL_HOME = 9,
-	CONTROL_PLUS = 10,
-	CONTROL_MINUS = 11,
-};
+#include "../platform/input.h"
 
-int gutil_control_icon(int x, enum gutil_control_icon icon, char* str);
+int gutil_control_icon(int x, enum input_button b, char* str);
 void gutil_texquad_col(int x, int y, int tx, int ty, int sx, int sy, int width,
 					   int height, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 void gutil_texquad(int x, int y, int tx, int ty, int sx, int sy, int width,

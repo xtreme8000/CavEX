@@ -14,10 +14,14 @@ Block and item textures from the [Isabella II](http://www.minecraftforum.net/top
 
 License: [Creative Commons Attribution 3.0 Unported License](https://creativecommons.org/licenses/by/3.0/)
 
-#### anim.png and gui2.png
+#### anim.png and gui_2.png
 
 also based on the [Isabella II](http://www.minecraftforum.net/topic/242175-Isabella/) texture pack, see above for more information.
 
 #### gui.png
 
-Inventory gui textures based on the [Isabella II](http://www.minecraftforum.net/topic/242175-Isabella/) texture pack. All input icons on the right of the texture are from the [WiiBrew wiki](https://wiibrew.org/wiki/Category:Controller_Buttons), and either created by users [Clorox](https://wiibrew.org/wiki/User:Clorox),  [Flark](https://wiibrew.org/wiki/User:Flark), [Hiker13526](https://wiibrew.org/wiki/User:Hiker13526) or [Crayon](https://wiibrew.org/wiki/User:Crayon). License seems to be [unknown](https://wiibrew.org/wiki/Category_talk:Controller_Buttons#License).
+Inventory gui textures based on the [Isabella II](http://www.minecraftforum.net/topic/242175-Isabella/) texture pack.
+
+#### controls.png
+
+All input icons are from the [WiiBrew wiki](https://wiibrew.org/wiki/Category:Controller_Buttons), and either created by users [Clorox](https://wiibrew.org/wiki/User:Clorox),  [Flark](https://wiibrew.org/wiki/User:Flark), [Hiker13526](https://wiibrew.org/wiki/User:Hiker13526) or [Crayon](https://wiibrew.org/wiki/User:Crayon). License seems to be [unknown](https://wiibrew.org/wiki/Category_talk:Controller_Buttons#License).

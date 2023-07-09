@@ -33,7 +33,7 @@ static bool input_pointer_enabled;
 static double input_old_pointer_x, input_old_pointer_y;
 static bool input_key_held[1024];
 
-void input_native_init() {
+void input_init() {
 	for(int k = 0; k < 1024; k++)
 		input_key_held[k] = false;
 
@@ -42,7 +42,7 @@ void input_native_init() {
 	input_old_pointer_y = 0;
 }
 
-void input_native_poll() { }
+void input_poll() { }
 
 void input_native_key_status(int key, bool* pressed, bool* released,
 							 bool* held) {
@@ -66,16 +66,20 @@ void input_native_key_status(int key, bool* pressed, bool* released,
 		input_key_held[key] = false;
 }
 
-bool input_native_key_symbol(int key, int* symbol,
-							 enum input_category* category) {
-	return false;
+bool input_native_key_symbol(int key, int* symbol, int* symbol_help,
+							 enum input_category* category, int* priority) {
+	*category = INPUT_CAT_NONE;
+	*symbol = 7;
+	*symbol_help = 7;
+	*priority = 1;
+	return true;
 }
 
 bool input_native_key_any(int* key) {
 	return false;
 }
 
-void input_native_pointer_state(bool enable) {
+void input_pointer_enable(bool enable) {
 	glfwSetInputMode(window, GLFW_CURSOR,
 					 enable ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 
@@ -88,12 +92,14 @@ void input_native_pointer_state(bool enable) {
 	input_pointer_enabled = enable;
 }
 
-bool input_native_pointer(float* x, float* y) {
+bool input_pointer(float* x, float* y, float* angle) {
 	double x2, y2;
 	glfwGetCursorPos(window, &x2, &y2);
 	*x = x2;
 	*y = y2;
-	return input_pointer_enabled;
+	*angle = 0.0F;
+	return input_pointer_enabled && x2 >= 0 && y2 >= 0 && x2 < gfx_width()
+		&& y2 < gfx_height();
 }
 
 void input_native_joystick(float dt, float* dx, float* dy) {
@@ -116,13 +122,13 @@ void input_native_joystick(float dt, float* dx, float* dy) {
 
 #include <wiiuse/wpad.h>
 
-void input_native_init() {
+void input_init() {
 	WPAD_Init();
 	WPAD_SetDataFormat(0, WPAD_FMT_BTNS_ACC_IR);
 	WPAD_SetVRes(WPAD_CHAN_ALL, gfx_width(), gfx_height());
 }
 
-void input_native_poll() {
+void input_poll() {
 	WPAD_ScanPads();
 }
 
@@ -196,22 +202,64 @@ void input_native_key_status(int key, bool* pressed, bool* released,
 		&& WPAD_ButtonsHeld(WPAD_CHAN_0) & input_wpad_translate(key);
 }
 
-bool input_native_key_symbol(int key, int* symbol,
-							 enum input_category* category) {
-	return false;
+bool input_native_key_symbol(int key, int* symbol, int* symbol_help,
+							 enum input_category* category, int* priority) {
+	if(key < 0 || key > 308)
+		return false;
+
+	int symbols[] = {
+		[0] = 25,	[1] = 26,	[2] = 27,	[3] = 28,	[4] = 0,	[5] = 1,
+		[6] = 2,	[7] = 3,	[8] = 5,	[9] = 6,	[10] = 4,	[100] = 8,
+		[101] = 9,	[200] = 25, [201] = 26, [202] = 27, [203] = 28, [204] = 10,
+		[205] = 11, [206] = 12, [207] = 13, [208] = 14, [209] = 15, [210] = 22,
+		[211] = 23, [212] = 5,	[213] = 6,	[214] = 4,	[300] = 7,	[301] = 7,
+		[302] = 7,	[303] = 7,	[304] = 7,	[305] = 5,	[306] = 6,	[307] = 7,
+		[308] = 7,
+	};
+
+	*category = INPUT_CAT_NONE;
+
+	if(key >= 0 && key <= 10)
+		*category = INPUT_CAT_WIIMOTE;
+
+	if(key >= 100 && key <= 101)
+		*category = INPUT_CAT_NUNCHUK;
+
+	if(key >= 200 && key <= 214)
+		*category = INPUT_CAT_CLASSIC_CONTROLLER;
+
+	*symbol = symbols[key];
+	*symbol_help = symbols[key];
+
+	if(*symbol_help >= 25 && *symbol_help <= 28)
+		*symbol_help = 24;
+
+	expansion_t e;
+	WPAD_Expansion(WPAD_CHAN_0, &e);
+
+	if((*category == INPUT_CAT_NUNCHUK && e.type == WPAD_EXP_NUNCHUK)
+	   || (*category == INPUT_CAT_CLASSIC_CONTROLLER
+		   && e.type == WPAD_EXP_CLASSIC)) {
+		*priority = 2;
+	} else {
+		*priority = 1;
+	}
+
+	return true;
 }
 
 bool input_native_key_any(int* key) {
 	return false;
 }
 
-void input_native_pointer_state(bool enable) { }
+void input_pointer_enable(bool enable) { }
 
-bool input_native_pointer(float* x, float* y) {
+bool input_pointer(float* x, float* y, float* angle) {
 	struct ir_t ir;
 	WPAD_IR(WPAD_CHAN_0, &ir);
 	*x = ir.x;
 	*y = ir.y;
+	*angle = ir.angle;
 	return ir.valid;
 }
 
@@ -235,18 +283,6 @@ void input_native_joystick(float dt, float* dx, float* dy) {
 
 #include "../game/game_state.h"
 
-void input_init() {
-	input_native_init();
-}
-
-void input_poll() {
-	input_native_poll();
-}
-
-void input_joystick_absolute(bool enable) {
-	input_native_pointer_state(enable);
-}
-
 static const char* input_config_translate(enum input_button key) {
 	switch(key) {
 		case IB_ACTION1: return "input.item_action_left";
@@ -261,8 +297,48 @@ static const char* input_config_translate(enum input_button key) {
 		case IB_HOME: return "input.open_menu";
 		case IB_SCROLL_LEFT: return "input.scroll_left";
 		case IB_SCROLL_RIGHT: return "input.scroll_right";
+		case IB_GUI_UP: return "input.gui_up";
+		case IB_GUI_DOWN: return "input.gui_down";
+		case IB_GUI_LEFT: return "input.gui_left";
+		case IB_GUI_RIGHT: return "input.gui_right";
+		case IB_GUI_CLICK: return "input.gui_click";
+		case IB_GUI_CLICK_ALT: return "input.gui_click_alt";
 		default: return NULL;
 	}
+}
+
+bool input_symbol(enum input_button b, int* symbol, int* symbol_help,
+				  enum input_category* category) {
+	const char* key = input_config_translate(b);
+
+	if(!key)
+		return false;
+
+	size_t length = 8;
+	int mapping[length];
+
+	if(!config_read_int_array(&gstate.config_user, input_config_translate(b),
+							  mapping, &length))
+		return false;
+
+	int priority = 0;
+	bool has_any = false;
+
+	for(size_t k = 0; k < length; k++) {
+		int symbol_tmp, symbol_help_tmp, priority_tmp;
+		enum input_category category_tmp;
+		if(input_native_key_symbol(mapping[k], &symbol_tmp, &symbol_help_tmp,
+								   &category_tmp, &priority_tmp)
+		   && priority_tmp > priority) {
+			priority = priority_tmp;
+			*symbol = symbol_tmp;
+			*symbol_help = symbol_help_tmp;
+			*category = category_tmp;
+			has_any = true;
+		}
+	}
+
+	return has_any;
 }
 
 bool input_pressed(enum input_button b) {

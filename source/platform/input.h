@@ -35,23 +35,31 @@ enum input_button {
 	IB_HOME,
 	IB_SCROLL_LEFT,
 	IB_SCROLL_RIGHT,
+	IB_GUI_UP,
+	IB_GUI_DOWN,
+	IB_GUI_LEFT,
+	IB_GUI_RIGHT,
+	IB_GUI_CLICK,
+	IB_GUI_CLICK_ALT,
 };
 
 enum input_category {
 	INPUT_CAT_WIIMOTE,
 	INPUT_CAT_NUNCHUK,
 	INPUT_CAT_CLASSIC_CONTROLLER,
+	INPUT_CAT_NONE,
 };
 
 void input_init(void);
 void input_poll(void);
 
-void input_set_status(enum input_button b, bool pressed);
-void input_set_joystick(float x, float y);
+bool input_symbol(enum input_button b, int* symbol, int* symbol_help,
+				  enum input_category* category);
 bool input_pressed(enum input_button b);
 bool input_released(enum input_button b);
 bool input_held(enum input_button b);
 bool input_joystick(float dt, float* x, float* y);
-void input_joystick_absolute(bool enable);
+void input_pointer_enable(bool enable);
+bool input_pointer(float* x, float* y, float* angle);
 
 #endif

@@ -24,7 +24,7 @@
 #include "../game_state.h"
 
 static void screen_lworld_reset(struct screen* s, int width, int height) {
-	input_joystick_absolute(false);
+	input_pointer_enable(false);
 }
 
 static void screen_lworld_update(struct screen* s, float dt) {

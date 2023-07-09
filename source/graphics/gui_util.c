@@ -24,13 +24,19 @@
 #include "render_block.h"
 #include "texture_atlas.h"
 
-int gutil_control_icon(int x, enum gutil_control_icon icon, char* str) {
-	gfx_bind_texture(&texture_gui);
+int gutil_control_icon(int x, enum input_button b, char* str) {
+	int symbol, symbol_help;
+	enum input_category category;
+
+	if(!input_symbol(b, &symbol, &symbol_help, &category))
+		return 0;
+
+	gfx_bind_texture(&texture_controls);
 	int scale = 32;
 	int text_scale = 10;
 
-	gutil_texquad(x, gfx_height() - scale * 8 / 5, (448 + (icon % 2) * 32) / 2,
-				  (icon / 2) * 32, 32 / 2, 32, scale, scale);
+	gutil_texquad(x, gfx_height() - scale * 8 / 5, (symbol_help % 8) * 32,
+				  (symbol_help / 8) * 32 * 2, 32, 32 * 2, scale, scale);
 	gutil_text(x + scale + text_scale / 2,
 			   gfx_height() - scale * 8 / 5 + (scale - text_scale) / 2, str,
 			   text_scale);

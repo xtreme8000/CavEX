@@ -33,6 +33,7 @@
 #endif
 
 enum tex_format {
+	TEX_FMT_RGB16,
 	TEX_FMT_RGBA16,
 	TEX_FMT_RGBA32,
 	TEX_FMT_I8,
@@ -58,6 +59,7 @@ extern struct tex_gfx texture_font;
 extern struct tex_gfx texture_anim;
 extern struct tex_gfx texture_gui;
 extern struct tex_gfx texture_gui2;
+extern struct tex_gfx texture_controls;
 
 void tex_init(void);
 

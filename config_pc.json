@@ -15,6 +15,12 @@
 		"scroll_left": [],
 		"scroll_right": [],
 		"inventory": [69],
-		"open_menu": [257]
+		"open_menu": [257],
+		"gui_up": [87],
+		"gui_down": [83],
+		"gui_left": [65],
+		"gui_right": [68],
+		"gui_click": [1000],
+		"gui_click_alt": [1001]
 	}
 }
