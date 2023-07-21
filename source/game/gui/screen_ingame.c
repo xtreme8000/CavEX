@@ -246,9 +246,6 @@ static void screen_ingame_update(struct screen* s, float dt) {
 		});
 	}
 
-	if(input_pressed(IB_INVENTORY))
-		screen_set(&screen_inventory);
-
 	struct block_data in_block
 		= world_get_block(&gstate.world, floorf(gstate.camera.x),
 						  floorf(gstate.camera.y), floorf(gstate.camera.z));
