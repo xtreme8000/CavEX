@@ -1,4 +1,4 @@
-<img src="https://github.com/bor-real/CavEX-MainMenu/blob/master/icon.png" width="256">
+<img src="https://github.com/xtreme8000/CavEX/blob/master/icon.png" width="256">
 
 *Cave Explorer* is a Wii homebrew game with the goal to recreate most of the core survival aspects up until Beta 1.7.3. Any features beyond *will not* be added.
 
