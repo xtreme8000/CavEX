@@ -380,8 +380,12 @@ bool region_archive_set_blocks(struct region_archive* ra, w_coord_t x,
 	if(!f)
 		return false;
 
-	struct nbt_list root_list_sentinel;
-	struct nbt_list level_list_sentinel;
+	struct nbt_list root_list_sentinel = (struct nbt_list) {
+		.data = NULL,
+	};
+	struct nbt_list level_list_sentinel = (struct nbt_list) {
+		.data = NULL,
+	};
 	struct nbt_list empty_list_sentinel = (struct nbt_list) {
 		.data = &(nbt_node) {.type = TAG_COMPOUND},
 	};

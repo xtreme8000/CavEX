@@ -25,7 +25,7 @@
 #include <stddef.h>
 
 #include "../config.h"
-#include "../item/inventory.h"
+#include "../item/window_container.h"
 #include "../platform/time.h"
 #include "../world.h"
 #include "camera.h"
@@ -55,7 +55,7 @@ struct game_state {
 	struct world world;
 	uint64_t world_time;
 	ptime_t world_time_start;
-	struct inventory inventory;
+	struct window_container* windows[256];
 	struct digging {
 		bool active;
 		ptime_t start;

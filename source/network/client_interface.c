@@ -103,18 +103,44 @@ void clin_process(struct client_rpc* call) {
 			break;
 		case CRPC_WORLD_RESET:
 			world_unload_all(&gstate.world);
-			inventory_clear(&gstate.inventory);
+
+			for(size_t k = 0; k < 256; k++) {
+				if(gstate.windows[k]) {
+					windowc_destroy(gstate.windows[k]);
+					free(gstate.windows[k]);
+					gstate.windows[k] = NULL;
+				}
+			}
+
+			gstate.windows[WINDOWC_INVENTORY]
+				= malloc(sizeof(struct window_container));
+			assert(gstate.windows[WINDOWC_INVENTORY]);
+			windowc_create(gstate.windows[WINDOWC_INVENTORY],
+						   WINDOW_TYPE_INVENTORY);
+
 			gstate.world_loaded = false;
 			gstate.world.dimension = call->payload.world_reset.dimension;
 
 			if(gstate.current_screen == &screen_ingame)
 				screen_set(&screen_load_world);
 			break;
-		case CRPC_INVENTORY_SLOT:
-			inventory_set_slot(&gstate.inventory,
-							   call->payload.inventory_slot.slot,
-							   call->payload.inventory_slot.item);
+		case CRPC_INVENTORY_SLOT: {
+			uint8_t window = call->payload.inventory_slot.window;
+			if(gstate.windows[window])
+				windowc_slot_change(gstate.windows[window],
+									call->payload.inventory_slot.slot,
+									call->payload.inventory_slot.item);
 			break;
+		}
+		case CRPC_WINDOW_TRANSACTION: {
+			uint8_t window = call->payload.window_transaction.window;
+			if(gstate.windows[window])
+				windowc_action_apply_result(
+					gstate.windows[window],
+					call->payload.window_transaction.action_id,
+					call->payload.window_transaction.accepted);
+			break;
+		}
 		case CRPC_TIME_SET:
 			gstate.world_time = call->payload.time_set;
 			gstate.world_time_start = time_get();

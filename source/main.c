@@ -44,6 +44,8 @@
 #include "cglm/cglm.h"
 
 int main(void) {
+	time_reset();
+
 	gstate.quit = false;
 	gstate.camera = (struct camera) {
 		.x = 0, .y = 0, .z = 0, .rx = 0, .ry = 0, .controller = {0, 0, 0}};
@@ -62,7 +64,6 @@ int main(void) {
 
 	config_create(&gstate.config_user, "config.json");
 
-	time_reset();
 	input_init();
 	blocks_init();
 	items_init();
@@ -71,7 +72,9 @@ int main(void) {
 	screen_set(&screen_select_world);
 
 	world_create(&gstate.world);
-	inventory_clear(&gstate.inventory);
+
+	for(size_t k = 0; k < 256; k++)
+		gstate.windows[k] = NULL;
 
 	clin_init();
 	svin_init();

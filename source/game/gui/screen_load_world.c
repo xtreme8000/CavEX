@@ -36,14 +36,14 @@ static void screen_lworld_render2D(struct screen* s, int width, int height) {
 	gutil_bg();
 
 	gutil_text((width - gutil_font_width("Generating level", 16)) / 2,
-			   height / 2 - 40, "Generating level", 16);
+			   height / 2 - 40, "Generating level", 16, true);
 
 	gutil_text((width - gutil_font_width("Building terrain", 16)) / 2,
-			   height / 2 + 8, "Building terrain", 16);
+			   height / 2 + 8, "Building terrain", 16, true);
 
-	gutil_text(4, height - 4 - 17 * 2, "Licensed under GPLv3", 16);
+	gutil_text(4, height - 4 - 17 * 2, "Licensed under GPLv3", 16, true);
 	gutil_text(4, height - 4 - 17 * 1, "Copyright (c) 2023 ByteBit/xtreme8000",
-			   16);
+			   16, true);
 
 	// just a rough estimate
 	float progress

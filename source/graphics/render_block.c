@@ -1484,8 +1484,8 @@ void render_block_init() {
 
 static uint8_t block_cracks_texture(struct block_info* this, enum side side) {
 	struct item_data it;
-	inventory_get_slot(&gstate.inventory,
-					   inventory_get_hotbar(&gstate.inventory), &it);
+	inventory_get_hotbar_item(
+		windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), &it);
 	int delay = tool_dig_delay_ms(blocks[this->block->type], item_get(&it));
 	int dt = time_diff_ms(gstate.digging.start, time_get()) / (delay / 10);
 

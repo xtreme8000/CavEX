@@ -33,6 +33,7 @@ enum client_rpc_type {
 	CRPC_TIME_SET,
 	CRPC_WORLD_RESET,
 	CRPC_SET_BLOCK,
+	CRPC_WINDOW_TRANSACTION,
 };
 
 struct client_rpc {
@@ -50,6 +51,7 @@ struct client_rpc {
 			w_coord_t x, z;
 		} unload_chunk;
 		struct {
+			uint8_t window;
 			uint8_t slot;
 			struct item_data item;
 		} inventory_slot;
@@ -65,6 +67,11 @@ struct client_rpc {
 			w_coord_t x, y, z;
 			struct block_data block;
 		} set_block;
+		struct {
+			uint8_t window;
+			uint16_t action_id;
+			bool accepted;
+		} window_transaction;
 	} payload;
 };
 

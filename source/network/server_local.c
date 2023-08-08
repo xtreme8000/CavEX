@@ -23,7 +23,7 @@
 
 #include "../cglm/cglm.h"
 
-#include "../item/inventory.h"
+#include "../item/window_container.h"
 #include "../platform/thread.h"
 #include "client_interface.h"
 #include "server_interface.h"
@@ -54,10 +54,101 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				inventory_set_hotbar(&s->player.inventory,
 									 call->payload.hotbar_slot.slot);
 			break;
+		case SRPC_WINDOW_CLICK: {
+			bool accept = false;
+			if(call->payload.window_click.window == WINDOWC_INVENTORY) {
+				if(!(inventory_get_picked_item(&s->player.inventory, NULL)
+					 && call->payload.window_click.slot
+						 == INVENTORY_SLOT_OUTPUT))
+					accept = inventory_action(
+						&s->player.inventory, call->payload.window_click.slot,
+						call->payload.window_click.right_click);
+			}
+
+			clin_rpc_send(&(struct client_rpc) {
+				.type = CRPC_WINDOW_TRANSACTION,
+				.payload.window_transaction.accepted = accept,
+				.payload.window_transaction.action_id
+				= call->payload.window_click.action_id,
+				.payload.window_transaction.window
+				= call->payload.window_click.window,
+			});
+			break;
+		}
+		case SRPC_WINDOW_CLOSE:
+			if(call->payload.window_click.window == WINDOWC_INVENTORY) {
+				bool slots_changed[INVENTORY_SIZE];
+				memset(slots_changed, false, sizeof(slots_changed));
+
+				inventory_clear_slot(&s->player.inventory,
+									 INVENTORY_SLOT_OUTPUT);
+				slots_changed[INVENTORY_SLOT_OUTPUT] = true;
+
+				for(size_t k = INVENTORY_SLOT_CRAFTING;
+					k < INVENTORY_SLOT_CRAFTING + INVENTORY_SIZE_CRAFTING;
+					k++) {
+					struct item_data item;
+					inventory_get_slot(&s->player.inventory, k, &item);
+
+					if(item.id != 0) {
+						inventory_clear_slot(&s->player.inventory, k);
+						inventory_collect(&s->player.inventory, &item,
+										  INVENTORY_SLOT_MAIN,
+										  INVENTORY_SIZE_MAIN, slots_changed);
+						slots_changed[k] = true;
+					}
+				}
+
+				for(size_t k = 0; k < INVENTORY_SIZE; k++) {
+					if(slots_changed[k])
+						clin_rpc_send(&(struct client_rpc) {
+							.type = CRPC_INVENTORY_SLOT,
+							.payload.inventory_slot.window = WINDOWC_INVENTORY,
+							.payload.inventory_slot.slot = k,
+							.payload.inventory_slot.item
+							= s->player.inventory.items[k],
+						});
+				}
+			}
+			break;
 		case SRPC_BLOCK_DIG:
 			if(s->player.has_pos && call->payload.block_dig.y >= 0
 			   && call->payload.block_dig.y < WORLD_HEIGHT
 			   && call->payload.block_dig.finished) {
+				struct block_data blk;
+				bool slots_changed[INVENTORY_SIZE];
+				memset(slots_changed, false, sizeof(slots_changed));
+
+				if(server_world_get_block(&s->world, call->payload.block_dig.x,
+										  call->payload.block_dig.y,
+										  call->payload.block_dig.z, &blk)) {
+					struct item_data drop = (struct item_data) {
+						.id = blk.type,
+						.durability = blk.metadata,
+						.count = 1,
+					};
+
+					// TODO: correct priority
+					inventory_collect(&s->player.inventory, &drop,
+									  INVENTORY_SLOT_HOTBAR,
+									  INVENTORY_SIZE_HOTBAR, slots_changed);
+					inventory_collect(&s->player.inventory, &drop,
+									  INVENTORY_SLOT_MAIN, INVENTORY_SIZE_MAIN,
+									  slots_changed);
+
+					for(size_t k = 0; k < INVENTORY_SIZE; k++) {
+						if(slots_changed[k])
+							clin_rpc_send(&(struct client_rpc) {
+								.type = CRPC_INVENTORY_SLOT,
+								.payload.inventory_slot.window
+								= WINDOWC_INVENTORY,
+								.payload.inventory_slot.slot = k,
+								.payload.inventory_slot.item
+								= s->player.inventory.items[k],
+							});
+					}
+				}
+
 				server_world_set_block(&s->world, call->payload.block_dig.x,
 									   call->payload.block_dig.y,
 									   call->payload.block_dig.z,
@@ -73,10 +164,8 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				int x, y, z;
 				blocks_side_offset(call->payload.block_place.side, &x, &y, &z);
 
-				size_t slot = inventory_get_hotbar(&s->player.inventory);
-
 				struct item_data it_data;
-				inventory_get_slot(&s->player.inventory, slot, &it_data);
+				inventory_get_hotbar_item(&s->player.inventory, &it_data);
 				struct item* it = item_get(&it_data);
 
 				if(it && it->onItemPlace) {
@@ -109,13 +198,20 @@ static void server_local_process(struct server_rpc* call, void* user) {
 							|| blocks[blk_where.type]->place_ignore)
 						   && it->onItemPlace(s, &it_data, &where, &on,
 											  call->payload.block_place.side)) {
-							inventory_consume(&s->player.inventory, slot);
+							size_t slot
+								= inventory_get_hotbar(&s->player.inventory);
+							inventory_consume(&s->player.inventory,
+											  slot + INVENTORY_SLOT_HOTBAR);
 
 							clin_rpc_send(&(struct client_rpc) {
 								.type = CRPC_INVENTORY_SLOT,
-								.payload.inventory_slot.slot = slot,
+								.payload.inventory_slot.window
+								= WINDOWC_INVENTORY,
+								.payload.inventory_slot.slot
+								= slot + INVENTORY_SLOT_HOTBAR,
 								.payload.inventory_slot.item
-								= s->player.inventory.items[slot],
+								= s->player.inventory
+									  .items[slot + INVENTORY_SLOT_HOTBAR],
 							});
 						}
 					}
@@ -132,6 +228,8 @@ static void server_local_process(struct server_rpc* call, void* user) {
 			level_archive_write_player(
 				&s->level, (vec3) {s->player.x, s->player.y, s->player.z},
 				(vec2) {s->player.rx, s->player.ry}, NULL, s->player.dimension);
+
+			level_archive_write_inventory(&s->level, &s->player.inventory);
 
 			server_world_destroy(&s->world);
 			level_archive_destroy(&s->level);
@@ -264,6 +362,7 @@ static void server_local_update(struct server_local* s) {
 				if(s->player.inventory.items[k].id > 0) {
 					clin_rpc_send(&(struct client_rpc) {
 						.type = CRPC_INVENTORY_SLOT,
+						.payload.inventory_slot.window = WINDOWC_INVENTORY,
 						.payload.inventory_slot.slot = k,
 						.payload.inventory_slot.item
 						= s->player.inventory.items[k],
@@ -292,7 +391,7 @@ void server_local_create(struct server_local* s) {
 	s->player.has_pos = false;
 	s->player.finished_loading = false;
 	string_init(s->level_name);
-	inventory_clear(&s->player.inventory);
+	inventory_create(&s->player.inventory, INVENTORY_SIZE);
 
 	struct thread t;
 	thread_create(&t, server_local_thread, s, 8);

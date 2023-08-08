@@ -31,9 +31,10 @@ struct tex_gfx texture_terrain;
 struct tex_gfx texture_items;
 struct tex_gfx texture_font;
 struct tex_gfx texture_anim;
-struct tex_gfx texture_gui;
+struct tex_gfx texture_gui_inventory;
 struct tex_gfx texture_gui2;
 struct tex_gfx texture_controls;
+struct tex_gfx texture_pointer;
 
 #define distance_2d(x1, y1, x2, y2)                                            \
 	(((x1) - (x2)) * ((x1) - (x2)) + ((y1) - (y2)) * ((y1) - (y2)))
@@ -62,10 +63,12 @@ void tex_init() {
 
 	tex_gfx_load_file(&texture_font, "default.png", TEX_FMT_I8, false);
 	tex_gfx_load_file(&texture_anim, "anim.png", TEX_FMT_RGBA32, false);
-	tex_gfx_load_file(&texture_gui, "gui.png", TEX_FMT_IA4, false);
+	tex_gfx_load_file(&texture_gui_inventory, "gui/inventory.png",
+					  TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_gui2, "gui_2.png", TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_items, "items.png", TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_controls, "controls.png", TEX_FMT_RGBA16, false);
+	tex_gfx_load_file(&texture_pointer, "pointer.png", TEX_FMT_RGBA16, false);
 
 	size_t fog_size = 128;
 	uint8_t* fog = malloc(fog_size * fog_size * 4);

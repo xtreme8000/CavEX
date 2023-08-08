@@ -59,7 +59,8 @@ void screen_ingame_render3D(struct screen* s, mat4 view) {
 	}
 
 	float place_lerp = 0.0F;
-	size_t slot = inventory_get_hotbar(&gstate.inventory);
+	size_t slot = inventory_get_hotbar(
+		windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]));
 
 	float dig_lerp
 		= time_diff_s(gstate.held_item_animation.punch.start, time_get())
@@ -103,7 +104,9 @@ void screen_ingame_render3D(struct screen* s, mat4 view) {
 	gfx_depth_range(0.0F, 0.1F);
 
 	struct item_data item;
-	if(inventory_get_slot(&gstate.inventory, slot, &item) && item_get(&item))
+	if(inventory_get_slot(windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]),
+						  slot + INVENTORY_SLOT_HOTBAR, &item)
+	   && item_get(&item))
 		items[item.id]->renderItem(item_get(&item), &item, model, false);
 
 	gfx_depth_range(0.0F, 1.0F);
@@ -115,8 +118,8 @@ static void screen_ingame_update(struct screen* s, float dt) {
 	if(gstate.camera_hit.hit && input_pressed(IB_ACTION2)
 	   && !gstate.digging.active) {
 		struct item_data item;
-		if(inventory_get_slot(&gstate.inventory,
-							  inventory_get_hotbar(&gstate.inventory), &item)
+		if(inventory_get_hotbar_item(
+			   windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), &item)
 		   && item_is_block(&item)) {
 			svin_rpc_send(&(struct server_rpc) {
 				.type = SRPC_BLOCK_PLACE,
@@ -136,8 +139,8 @@ static void screen_ingame_update(struct screen* s, float dt) {
 			= world_get_block(&gstate.world, gstate.digging.x, gstate.digging.y,
 							  gstate.digging.z);
 		struct item_data it;
-		inventory_get_slot(&gstate.inventory,
-						   inventory_get_hotbar(&gstate.inventory), &it);
+		inventory_get_hotbar_item(
+			windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), &it);
 		int delay = blocks[blk.type] ?
 			tool_dig_delay_ms(blocks[blk.type], item_get(&it)) :
 			0;
@@ -201,11 +204,13 @@ static void screen_ingame_update(struct screen* s, float dt) {
 		gstate.held_item_animation.punch.place = false;
 	}
 
-	size_t slot = inventory_get_hotbar(&gstate.inventory);
+	size_t slot = inventory_get_hotbar(
+		windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]));
 
 	if(input_pressed(IB_SCROLL_LEFT)) {
 		size_t next_slot = (slot == 0) ? INVENTORY_SIZE_HOTBAR - 1 : slot - 1;
-		inventory_set_hotbar(&gstate.inventory, next_slot);
+		inventory_set_hotbar(
+			windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), next_slot);
 		if(time_diff_s(gstate.held_item_animation.switch_item.start, time_get())
 		   >= 0.15F) {
 			gstate.held_item_animation.switch_item.start = time_get();
@@ -223,7 +228,8 @@ static void screen_ingame_update(struct screen* s, float dt) {
 
 	if(input_pressed(IB_SCROLL_RIGHT)) {
 		size_t next_slot = (slot == INVENTORY_SIZE_HOTBAR - 1) ? 0 : slot + 1;
-		inventory_set_hotbar(&gstate.inventory, next_slot);
+		inventory_set_hotbar(
+			windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), next_slot);
 		if(time_diff_s(gstate.held_item_animation.switch_item.start, time_get())
 		   >= 0.15F) {
 			gstate.held_item_animation.switch_item.start = time_get();
@@ -246,6 +252,9 @@ static void screen_ingame_update(struct screen* s, float dt) {
 		});
 	}
 
+	if(input_pressed(IB_INVENTORY))
+		screen_set(&screen_inventory);
+
 	struct block_data in_block
 		= world_get_block(&gstate.world, floorf(gstate.camera.x),
 						  floorf(gstate.camera.y), floorf(gstate.camera.z));
@@ -257,20 +266,20 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	char str[64];
 	sprintf(str, GAME_NAME " Alpha %i.%i.%i (impl. MC B1.7.3)", VERSION_MAJOR,
 			VERSION_MINOR, VERSION_PATCH);
-	gutil_text(4, 4 + 17 * 0, str, 16);
+	gutil_text(4, 4 + 17 * 0, str, 16, true);
 
 	sprintf(str, "%0.1f fps, wait: gpu %0.1fms, vsync %0.1fms",
 			gstate.stats.fps, gstate.stats.dt_gpu * 1000.0F,
 			gstate.stats.dt_vsync * 1000.0F);
-	gutil_text(4, 4 + 17 * 1, str, 16);
+	gutil_text(4, 4 + 17 * 1, str, 16, true);
 
 	sprintf(str, "%zu chunks", gstate.stats.chunks_rendered);
-	gutil_text(4, 4 + 17 * 2, str, 16);
+	gutil_text(4, 4 + 17 * 2, str, 16, true);
 
 	sprintf(str, "(%0.1f, %0.1f, %0.1f) (%0.1f, %0.1f)", gstate.camera.x,
 			gstate.camera.y, gstate.camera.z, glm_deg(gstate.camera.rx),
 			glm_deg(gstate.camera.ry));
-	gutil_text(4, 4 + 17 * 3, str, 16);
+	gutil_text(4, 4 + 17 * 3, str, 16, true);
 
 	if(gstate.camera_hit.hit) {
 		struct block_data bd
@@ -281,7 +290,7 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 				block_side_name(gstate.camera_hit.side), gstate.camera_hit.x,
 				gstate.camera_hit.y, gstate.camera_hit.z, b ? b->name : NULL,
 				bd.type, bd.metadata);
-		gutil_text(4, 4 + 17 * 5, str, 16);
+		gutil_text(4, 4 + 17 * 5, str, 16, true);
 	}
 
 	int icon_offset = 32;
@@ -289,8 +298,8 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	icon_offset += gutil_control_icon(icon_offset, IB_JUMP, "Jump");
 	if(gstate.camera_hit.hit) {
 		struct item_data item;
-		if(inventory_get_slot(&gstate.inventory,
-							  inventory_get_hotbar(&gstate.inventory), &item)
+		if(inventory_get_hotbar_item(
+			   windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), &item)
 		   && item_get(&item)) {
 			icon_offset
 				+= gutil_control_icon(icon_offset, IB_ACTION2,
@@ -315,32 +324,20 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 
 	for(int k = 0; k < INVENTORY_SIZE_HOTBAR; k++) {
 		struct item_data item;
-		if(inventory_get_slot(&gstate.inventory, k, &item) && item_get(&item)) {
-			mat4 model;
-			glm_translate_make(
-				model,
-				(vec3) {(width - 182 * 2) / 2 + 3 * 2 + 20 * 2 * k,
-						height - 32 * 8 / 5 - 19 * 2, 0});
-
-			gfx_depth_range(0.0F, 0.1F);
-			items[item.id]->renderItem(item_get(&item), &item, model, true);
-			gfx_depth_range(0.0F, 1.0F);
-
-			if(item.count > 1) {
-				char count[4];
-				snprintf(count, 4, "%u", item.count);
-				gutil_text((width - 182 * 2) / 2 + 20 * 2
-							   - gutil_font_width(count, 16) + 20 * 2 * k,
-						   height - 32 * 8 / 5 - 10 * 2, count, 16);
-			}
-		}
+		if(inventory_get_slot(
+			   windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]),
+			   k + INVENTORY_SLOT_HOTBAR, &item))
+			gutil_draw_item(&item, (width - 182 * 2) / 2 + 3 * 2 + 20 * 2 * k,
+							height - 32 * 8 / 5 - 19 * 2, 0);
 	}
 
 	gfx_blending(MODE_BLEND);
 	gfx_bind_texture(&texture_gui2);
 	// draw hotbar selection
 	gutil_texquad((width - 182 * 2) / 2 - 2
-					  + 20 * 2 * inventory_get_hotbar(&gstate.inventory),
+					  + 20 * 2
+						  * inventory_get_hotbar(windowc_get_latest(
+							  gstate.windows[WINDOWC_INVENTORY])),
 				  height - 32 * 8 / 5 - 23 * 2, 208, 0, 24, 24, 24 * 2, 24 * 2);
 	gfx_blending(MODE_OFF);
 }

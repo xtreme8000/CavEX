@@ -126,12 +126,19 @@ bool level_archive_read_inventory(struct level_archive* la,
 											0))
 				return false;
 
-			// for armour slots
-			if(slot >= 100 && slot < 104)
-				slot -= 100;
-
-			if(slot >= INVENTORY_SIZE)
+			if(slot >= 100 && slot < 104) {
+				// armor slots
+				slot = (3 - (slot - 100)) + INVENTORY_SLOT_ARMOR;
+			} else if(slot < INVENTORY_SIZE_HOTBAR) {
+				// hotbar slots
+				slot += INVENTORY_SLOT_HOTBAR;
+			} else if(slot < INVENTORY_SIZE_MAIN + INVENTORY_SIZE_HOTBAR) {
+				// main slots
+				slot += INVENTORY_SLOT_MAIN - INVENTORY_SIZE_HOTBAR;
+			} else {
+				// invalid slot number
 				return false;
+			}
 
 			if(!level_archive_read_internal(obj, LEVEL_PLAYER_ITEM_ID,
 											&inventory->items[slot].id, 0))
@@ -148,6 +155,115 @@ bool level_archive_read_inventory(struct level_archive* la,
 		} else {
 			return false;
 		}
+	}
+
+	return true;
+}
+
+bool level_archive_write_inventory(struct level_archive* la,
+								   struct inventory* inventory) {
+	assert(la && inventory);
+	assert(la->data);
+
+	nbt_node* inv;
+	if(!level_archive_read(la, LEVEL_PLAYER_INVENTORY, &inv, 0))
+		return false;
+
+	nbt_free_list(inv->payload.tag_list);
+
+	inv->payload.tag_list = malloc(sizeof(struct nbt_list));
+
+	if(!inv->payload.tag_list)
+		return false;
+
+	inv->payload.tag_list->data = malloc(sizeof(nbt_node));
+
+	if(!inv->payload.tag_list->data) {
+		free(inv->payload.tag_list);
+		return false;
+	}
+
+	inv->payload.tag_list->data->type = TAG_COMPOUND;
+
+	INIT_LIST_HEAD(&inv->payload.tag_list->entry);
+
+	la->modified = true;
+
+	for(int i = 0; i < (int)inventory->capacity; i++) {
+		if(inventory->items[i].id == 0)
+			continue;
+
+		int slot_translated;
+
+		if(i >= INVENTORY_SLOT_ARMOR
+		   && i < INVENTORY_SLOT_ARMOR + INVENTORY_SIZE_ARMOR) {
+			slot_translated = (3 - (i - INVENTORY_SLOT_ARMOR)) + 100;
+		} else if(i >= INVENTORY_SLOT_HOTBAR
+				  && i < INVENTORY_SLOT_HOTBAR + INVENTORY_SIZE_HOTBAR) {
+			slot_translated = i - INVENTORY_SLOT_HOTBAR;
+		} else if(i >= INVENTORY_SLOT_MAIN
+				  && i < INVENTORY_SLOT_MAIN + INVENTORY_SIZE_MAIN) {
+			slot_translated = i - INVENTORY_SLOT_MAIN + INVENTORY_SIZE_HOTBAR;
+		} else {
+			continue;
+		}
+
+		nbt_node item_list_nodes[] = {
+			{
+				.type = TAG_BYTE,
+				.name = "Slot",
+				.payload.tag_byte = slot_translated,
+			},
+			{
+				.type = TAG_SHORT,
+				.name = "id",
+				.payload.tag_short = inventory->items[i].id,
+			},
+			{
+				.type = TAG_BYTE,
+				.name = "Count",
+				.payload.tag_byte = inventory->items[i].count,
+			},
+			{
+				.type = TAG_SHORT,
+				.name = "Damage",
+				.payload.tag_short = inventory->items[i].durability,
+			},
+		};
+
+		struct nbt_list item_list_sentinel = (struct nbt_list) {
+			.data = NULL,
+		};
+
+		INIT_LIST_HEAD(&item_list_sentinel.entry);
+
+		struct nbt_list
+			item_list[sizeof(item_list_nodes) / sizeof(*item_list_nodes)];
+
+		for(size_t k = 0; k < sizeof(item_list) / sizeof(*item_list); k++) {
+			item_list[k].data = item_list_nodes + k;
+			list_add_tail(&item_list[k].entry, &item_list_sentinel.entry);
+		}
+
+		struct nbt_list* node = malloc(sizeof(struct nbt_list));
+
+		if(!node)
+			return false;
+
+		nbt_node* item = nbt_clone(&(nbt_node) {
+			.type = TAG_COMPOUND,
+			.name = NULL,
+			.payload.tag_compound = &item_list_sentinel,
+		});
+
+		if(!item) {
+			free(node);
+			return false;
+		}
+
+		node->data = item;
+
+		list_add_tail(&node->entry, &inv->payload.tag_list->entry);
 	}
 
 	return true;

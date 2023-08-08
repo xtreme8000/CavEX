@@ -84,10 +84,12 @@ add_executable(cavex
 				source/game/gui/screen_ingame.c
 				source/game/gui/screen_load_world.c
 				source/game/gui/screen_select_world.c
+				source/game/gui/screen_inventory.c
 				source/game/gui/screen.c
 				source/game/camera.c
 				source/game/game_state.c
 
+				source/item/window_container.c
 				source/item/inventory.c
 				source/item/items.c
 				source/item/tool.c

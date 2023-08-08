@@ -38,36 +38,66 @@ struct level_archive_tag {
 };
 
 #define LEVEL_NAME                                                             \
-	(struct level_archive_tag) { ".Data.LevelName", TAG_STRING }
+	(struct level_archive_tag) {                                               \
+		".Data.LevelName", TAG_STRING                                          \
+	}
 #define LEVEL_TIME                                                             \
-	(struct level_archive_tag) { ".Data.Time", TAG_LONG }
+	(struct level_archive_tag) {                                               \
+		".Data.Time", TAG_LONG                                                 \
+	}
 #define LEVEL_DISK_SIZE                                                        \
-	(struct level_archive_tag) { ".Data.SizeOnDisk", TAG_LONG }
+	(struct level_archive_tag) {                                               \
+		".Data.SizeOnDisk", TAG_LONG                                           \
+	}
 #define LEVEL_LAST_PLAYED                                                      \
-	(struct level_archive_tag) { ".Data.LastPlayed", TAG_LONG }
+	(struct level_archive_tag) {                                               \
+		".Data.LastPlayed", TAG_LONG                                           \
+	}
 #define LEVEL_RANDOM_SEED                                                      \
-	(struct level_archive_tag) { ".Data.RandomSeed", TAG_LONG }
+	(struct level_archive_tag) {                                               \
+		".Data.RandomSeed", TAG_LONG                                           \
+	}
 #define LEVEL_PLAYER_HEALTH                                                    \
-	(struct level_archive_tag) { ".Data.Player.Health", TAG_SHORT }
+	(struct level_archive_tag) {                                               \
+		".Data.Player.Health", TAG_SHORT                                       \
+	}
 #define LEVEL_PLAYER_POSITION                                                  \
-	(struct level_archive_tag) { ".Data.Player.Pos", TAG_LIST }
+	(struct level_archive_tag) {                                               \
+		".Data.Player.Pos", TAG_LIST                                           \
+	}
 #define LEVEL_PLAYER_ROTATION                                                  \
-	(struct level_archive_tag) { ".Data.Player.Rotation", TAG_LIST }
+	(struct level_archive_tag) {                                               \
+		".Data.Player.Rotation", TAG_LIST                                      \
+	}
 #define LEVEL_PLAYER_VELOCITY                                                  \
-	(struct level_archive_tag) { ".Data.Player.Motion", TAG_LIST }
+	(struct level_archive_tag) {                                               \
+		".Data.Player.Motion", TAG_LIST                                        \
+	}
 #define LEVEL_PLAYER_DIMENSION                                                 \
-	(struct level_archive_tag) { ".Data.Player.Dimension", TAG_INT }
+	(struct level_archive_tag) {                                               \
+		".Data.Player.Dimension", TAG_INT                                      \
+	}
 
 #define LEVEL_PLAYER_INVENTORY                                                 \
-	(struct level_archive_tag) { ".Data.Player.Inventory", TAG_LIST }
+	(struct level_archive_tag) {                                               \
+		".Data.Player.Inventory", TAG_LIST                                     \
+	}
 #define LEVEL_PLAYER_ITEM_ID                                                   \
-	(struct level_archive_tag) { ".id", TAG_SHORT }
+	(struct level_archive_tag) {                                               \
+		".id", TAG_SHORT                                                       \
+	}
 #define LEVEL_PLAYER_ITEM_COUNT                                                \
-	(struct level_archive_tag) { ".Count", TAG_BYTE }
+	(struct level_archive_tag) {                                               \
+		".Count", TAG_BYTE                                                     \
+	}
 #define LEVEL_PLAYER_ITEM_DURABILITY                                           \
-	(struct level_archive_tag) { ".Damage", TAG_SHORT }
+	(struct level_archive_tag) {                                               \
+		".Damage", TAG_SHORT                                                   \
+	}
 #define LEVEL_PLAYER_ITEM_SLOT                                                 \
-	(struct level_archive_tag) { ".Slot", TAG_BYTE }
+	(struct level_archive_tag) {                                               \
+		".Slot", TAG_BYTE                                                      \
+	}
 
 struct level_archive {
 	nbt_node* data;
@@ -83,6 +113,8 @@ bool level_archive_write(struct level_archive* la, struct level_archive_tag tag,
 bool level_archive_write_player(struct level_archive* la, vec3 position,
 								vec2 rotation, vec3 velocity,
 								enum world_dim dimension);
+bool level_archive_write_inventory(struct level_archive* la,
+								   struct inventory* inventory);
 bool level_archive_read_inventory(struct level_archive* la,
 								  struct inventory* inventory);
 bool level_archive_read_player(struct level_archive* la, vec3 position,

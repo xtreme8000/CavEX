@@ -94,17 +94,17 @@ void items_init() {
 	// iron chestplate
 	// iron leggings
 	// iron boots
-	// diamond helmet
-	// diamond chestplate
-	// diamond leggings
-	// diamond boots
+	items[310] = &item_diamond_helmet;
+	items[311] = &item_diamond_chestplate;
+	items[312] = &item_diamond_leggings;
+	items[313] = &item_diamond_boots;
 	// gold helmet
 	// gold chestplate
 	// gold leggings
 	// gold boots
 	// flint
-	// porkchop
-	// cooked porkchop
+	items[319] = &item_porkchop;
+	items[320] = &item_porkchop_cooked;
 	// painting
 	// golden apple
 	// sign

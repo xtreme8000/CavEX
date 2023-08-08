@@ -157,7 +157,7 @@ static void screen_sworld_render2D(struct screen* s, int width, int height) {
 	gutil_bg();
 
 	gutil_text((width - gutil_font_width("Select World", 16)) / 2,
-			   top_visible - 16 * 1.5F, "Select World", 16);
+			   top_visible - 16 * 1.5F, "Select World", 16, true);
 
 	gfx_texture(false);
 	gutil_texquad_col(0, top_visible, 0, 0, 0, 0, width, height_visible, 0, 0,
@@ -182,7 +182,7 @@ static void screen_sworld_render2D(struct screen* s, int width, int height) {
 		}
 
 		gutil_text((width - 436) / 2.0F + 6, top_visible + 6 + offset,
-				   (char*)string_get_cstr(opt.name), 16);
+				   (char*)string_get_cstr(opt.name), 16, true);
 
 		char tmp_time[32];
 		strftime(tmp_time, sizeof(tmp_time), "%D %I:%M %p",
@@ -193,8 +193,8 @@ static void screen_sworld_render2D(struct screen* s, int width, int height) {
 				 string_get_cstr(opt.directory), tmp_time,
 				 opt.byte_size / 1000.0F / 1000.0F);
 
-		gutil_text((width - 436) / 2.0F + 6, top_visible + 28 + offset, tmp,
-				   16);
+		gutil_text((width - 436) / 2.0F + 6, top_visible + 28 + offset, tmp, 16,
+				   true);
 		offset += entry_height;
 	}
 

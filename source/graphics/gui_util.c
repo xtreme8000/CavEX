@@ -39,7 +39,7 @@ int gutil_control_icon(int x, enum input_button b, char* str) {
 				  (symbol_help / 8) * 32 * 2, 32, 32 * 2, scale, scale);
 	gutil_text(x + scale + text_scale / 2,
 			   gfx_height() - scale * 8 / 5 + (scale - text_scale) / 2, str,
-			   text_scale);
+			   text_scale, true);
 	return scale + text_scale + gutil_font_width(str, text_scale);
 }
 
@@ -68,6 +68,23 @@ void gutil_texquad_rt(int x, int y, int tx, int ty, int sx, int sy, int width,
 		(uint8_t[]) {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 					 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
 		(uint16_t[]) {tx, ty + sy, tx, ty, tx + sx, ty, tx + sx, ty + sy});
+}
+
+void gutil_texquad_rt_any(int x, int y, float angle, int tx, int ty, int sx,
+						  int sy, float width, float height) {
+	width *= 0.707107F; // 1 / sqrt(2)
+	height *= 0.707107F;
+	angle -= glm_rad(45.0F);
+
+	gfx_draw_quads(
+		4,
+		(int16_t[]) {x + sinf(angle) * width, y - cosf(angle) * height, -2,
+					 x + cosf(angle) * width, y + sinf(angle) * height, -2,
+					 x - sinf(angle) * width, y + cosf(angle) * height, -2,
+					 x - cosf(angle) * width, y - sinf(angle) * height, -2},
+		(uint8_t[]) {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+					 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
+		(uint16_t[]) {tx, ty, tx + sx, ty, tx + sx, ty + sy, tx, ty + sy});
 }
 
 void gutil_bg() {
@@ -129,7 +146,7 @@ static const uint8_t chat_colors[16][3] = {
 	{0xFF, 0xFF, 0xFF},
 };
 
-void gutil_text(int x, int y, char* str, int scale) {
+void gutil_text(int x, int y, char* str, int scale, bool shadow) {
 	gfx_bind_texture(&texture_font);
 
 	int skip = 0;
@@ -152,56 +169,81 @@ void gutil_text(int x, int y, char* str, int scale) {
 			uint8_t tex_y = *str / 16 * 16;
 			uint8_t width = (font_char_width[(int)*str] + 1) * scale / 8;
 
+			if(shadow) {
+				gfx_draw_quads(
+					4,
+					(int16_t[]) {x + scale / 8, y + scale / 8, -2,
+								 x + scale + scale / 8, y + scale / 8, -2,
+								 x + scale + scale / 8, y + scale + scale / 8,
+								 -2, x + scale / 8, y + scale + scale / 8, -2},
+					(uint8_t[]) {
+						chat_colors[col][0] / 4, chat_colors[col][1] / 4,
+						chat_colors[col][2] / 4, 0xFF, chat_colors[col][0] / 4,
+						chat_colors[col][1] / 4, chat_colors[col][2] / 4, 0xFF,
+						chat_colors[col][0] / 4, chat_colors[col][1] / 4,
+						chat_colors[col][2] / 4, 0xFF, chat_colors[col][0] / 4,
+						chat_colors[col][1] / 4, chat_colors[col][2] / 4, 0xFF},
+					(uint16_t[]) {tex_x, tex_y, tex_x + 16, tex_y, tex_x + 16,
+								  tex_y + 16, tex_x, tex_y + 16});
+			}
+
 			gfx_draw_quads(
-				8,
-				(int16_t[]) {x + scale / 8,
-							 y + scale / 8,
-							 -2,
-							 x + scale + scale / 8,
-							 y + scale / 8,
-							 -2,
-							 x + scale + scale / 8,
-							 y + scale + scale / 8,
-							 -2,
-							 x + scale / 8,
-							 y + scale + scale / 8,
-							 -2,
-							 x,
-							 y,
-							 -1,
-							 x + scale,
-							 y,
-							 -1,
-							 x + scale,
-							 y + scale,
-							 -1,
-							 x,
-							 y + scale,
-							 -1},
-				(uint8_t[]) {chat_colors[col][0] / 2, chat_colors[col][1] / 2,
-							 chat_colors[col][2] / 2, 0xFF,
-							 chat_colors[col][0] / 2, chat_colors[col][1] / 2,
-							 chat_colors[col][2] / 2, 0xFF,
-							 chat_colors[col][0] / 2, chat_colors[col][1] / 2,
-							 chat_colors[col][2] / 2, 0xFF,
-							 chat_colors[col][0] / 2, chat_colors[col][1] / 2,
-							 chat_colors[col][2] / 2, 0xFF,
-							 chat_colors[col][0],	  chat_colors[col][1],
-							 chat_colors[col][2],	  0xFF,
-							 chat_colors[col][0],	  chat_colors[col][1],
-							 chat_colors[col][2],	  0xFF,
-							 chat_colors[col][0],	  chat_colors[col][1],
-							 chat_colors[col][2],	  0xFF,
-							 chat_colors[col][0],	  chat_colors[col][1],
-							 chat_colors[col][2],	  0xFF},
+				4,
+				(int16_t[]) {x, y, -1, x + scale, y, -1, x + scale, y + scale,
+							 -1, x, y + scale, -1},
+				(uint8_t[]) {chat_colors[col][0], chat_colors[col][1],
+							 chat_colors[col][2], 0xFF, chat_colors[col][0],
+							 chat_colors[col][1], chat_colors[col][2], 0xFF,
+							 chat_colors[col][0], chat_colors[col][1],
+							 chat_colors[col][2], 0xFF, chat_colors[col][0],
+							 chat_colors[col][1], chat_colors[col][2], 0xFF},
 				(uint16_t[]) {tex_x, tex_y, tex_x + 16, tex_y, tex_x + 16,
-							  tex_y + 16, tex_x, tex_y + 16, tex_x, tex_y,
-							  tex_x + 16, tex_y, tex_x + 16, tex_y + 16, tex_x,
-							  tex_y + 16});
+							  tex_y + 16, tex_x, tex_y + 16});
 
 			x += width;
 		}
 
 		str++;
+	}
+}
+
+void gutil_draw_item(struct item_data* item, int x, int y, int layer) {
+	assert(item);
+
+	struct item* it = item_get(item);
+
+	if(it) {
+		mat4 model;
+		glm_translate_make(model, (vec3) {x, y, 0});
+
+		gfx_depth_range(0.1F * layer, 0.1F * (layer + 1));
+		it->renderItem(it, item, model, true);
+		gfx_depth_range(0.0F, 1.0F);
+
+		if(it->has_damage && item->durability > 0) {
+			gfx_texture(false);
+			gutil_texquad_col(x + 4, y + 26, 0, 0, 0, 0, 26, 4, 0, 0, 0, 255);
+			gutil_texquad_col(
+				x + 4, y + 26, 0, 0, 0, 0,
+				26 * (1.0F - (float)item->durability / (float)it->max_damage),
+				2, 4, 251, 0, 255);
+			gfx_texture(true);
+		}
+
+		if(item->count > 1) {
+			char count[4];
+			snprintf(count, sizeof(count), "%u", item->count);
+			gutil_text(17 * 2 - gutil_font_width(count, 16) + x, y + 18, count,
+					   16, true);
+		}
+	} else {
+		char tmp[16];
+		snprintf(tmp, sizeof(tmp), "%u", item->id);
+		gutil_text(17 * 2 - gutil_font_width(tmp, 16) + x, y + 2, tmp, 16,
+				   true);
+
+		snprintf(tmp, sizeof(tmp), "%u", item->count);
+		gutil_text(17 * 2 - gutil_font_width(tmp, 16) + x, y + 18, tmp, 16,
+				   true);
 	}
 }

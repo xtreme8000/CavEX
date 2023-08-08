@@ -35,6 +35,7 @@ struct screen {
 extern struct screen screen_ingame;
 extern struct screen screen_load_world;
 extern struct screen screen_select_world;
+extern struct screen screen_inventory;
 
 void screen_set(struct screen* s);
 

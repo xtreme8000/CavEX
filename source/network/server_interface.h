@@ -31,6 +31,8 @@ enum server_rpc_type {
 	SRPC_HOTBAR_SLOT,
 	SRPC_BLOCK_PLACE,
 	SRPC_BLOCK_DIG,
+	SRPC_WINDOW_CLICK,
+	SRPC_WINDOW_CLOSE,
 };
 
 struct server_rpc {
@@ -54,6 +56,15 @@ struct server_rpc {
 		struct {
 			size_t slot;
 		} hotbar_slot;
+		struct {
+			uint8_t window;
+			uint8_t slot;
+			bool right_click;
+			uint16_t action_id;
+		} window_click;
+		struct {
+			uint8_t window;
+		} window_close;
 	} payload;
 };
 

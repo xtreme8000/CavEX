@@ -281,7 +281,7 @@ void render_item_block(struct item* item, struct item_data* stack, mat4 model,
 		glm_scale(view, (vec3) {20, 20, -20});
 		glm_translate(view, (vec3) {0.5F, 0.5F, 0.5F});
 		glm_rotate_z(view, glm_rad(180.0F), view);
-		glm_rotate_x(view, glm_rad(-22.5F), view);
+		glm_rotate_x(view, glm_rad(-30.0F), view);
 		glm_rotate_y(
 			view,
 			glm_rad((item->render_data.block.has_default ?

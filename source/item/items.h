@@ -38,6 +38,7 @@ struct server_local;
 struct item {
 	char name[32];
 	bool has_damage;
+	uint16_t max_damage;
 	uint8_t max_stack;
 	void (*renderItem)(struct item*, struct item_data*, mat4, bool);
 	bool (*onItemPlace)(struct server_local*, struct item_data*,
