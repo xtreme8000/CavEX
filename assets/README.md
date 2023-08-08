@@ -18,9 +18,9 @@ License: [Creative Commons Attribution 3.0 Unported License](https://creativecom
 
 also based on the [Isabella II](http://www.minecraftforum.net/topic/242175-Isabella/) texture pack, see above for more information.
 
-#### gui.png
+#### gui/*.png
 
-Inventory gui textures based on the [Isabella II](http://www.minecraftforum.net/topic/242175-Isabella/) texture pack.
+GUI textures based on the [Isabella II](http://www.minecraftforum.net/topic/242175-Isabella/) texture pack.
 
 #### controls.png
 
