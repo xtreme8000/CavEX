@@ -253,8 +253,6 @@ void gfx_bind_texture(struct tex_gfx* tex) {
 	assert(tex);
 	tex_gfx_bind(tex, GX_TEXMAP0);
 }
-	}
-}
 
 void gfx_mode_world() {
 	gfx_write_buffers(true, true, true);
