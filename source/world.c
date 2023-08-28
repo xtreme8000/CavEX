@@ -98,7 +98,8 @@ static void world_bfs(struct world* w, ilist_chunks_t render, float x, float y,
 	enum side sides[6]
 		= {SIDE_TOP, SIDE_LEFT, SIDE_BACK, SIDE_BOTTOM, SIDE_RIGHT, SIDE_FRONT};
 
-	struct chunk* c_camera = world_find_chunk(w, x, y, z);
+	struct chunk* c_camera
+		= world_find_chunk(w, x, fminf(y, WORLD_HEIGHT - 1), z);
 
 	ilist_chunks_t queue;
 	ilist_chunks_init(queue);
