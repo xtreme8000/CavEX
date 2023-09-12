@@ -1,0 +1,15 @@
+[submodule "source/lodepng"]
+	path = source/3rdparty/lodepng
+	url = https://github.com/lvandeve/lodepng.git
+[submodule "source/cglm"]
+	path = source/3rdparty/cglm
+	url = https://github.com/recp/cglm.git
+[submodule "source/cNBT"]
+	path = source/3rdparty/cNBT
+	url = https://github.com/chmod222/cNBT.git
+[submodule "source/parson"]
+	path = source/3rdparty/parson
+	url = https://github.com/kgabis/parson.git
+[submodule "source/mlib"]
+	path = source/3rdparty/m-lib
+	url = https://github.com/P-p-H-d/mlib.git
