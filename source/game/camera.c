@@ -104,14 +104,25 @@ void camera_ray_pick(struct world* w, float gx0, float gy0, float gz0,
 void camera_physics(struct camera* c, float dt) {
 	assert(c);
 
-	float jdx, jdy;
-	if(input_joystick(dt, &jdx, &jdy)) {
-		c->rx -= jdx * 2.0F;
-		c->ry -= jdy * 2.0F;
+	float px, py, pangle;
+	const float rotation_c = 20.0F;
+	if(input_pointer(&px, &py, &pangle)) {
+		c->rx -= (px - gfx_width() / 2) / (gfx_width() * rotation_c);
+		c->ry += (py - gfx_height() / 2) / (gfx_height() * rotation_c);
+		// pangle could be used for rz, but that would be veeery weird :-)
 	}
 
 	float acc_x = 0, acc_y = 0, acc_z = 0;
 	float speed_c = 40.0F;
+
+	float jdx, jdy;
+	if(input_joystick(dt, &jdx, &jdy)) {
+		float joy_speed_c = 40.0F * speed_c;
+		acc_x += (cos(c->rx) * -jdx + sin(c->rx) * sin(c->ry) * jdy) * joy_speed_c;
+		acc_y += cos(c->ry) * jdy * speed_c;
+		acc_z += (sin(c->rx) * jdx + cos(c->rx) * sin(c->ry) * jdy) * joy_speed_c;
+	}
+
 	float air_friction = 0.05F;
 
 	if(input_held(IB_LEFT)) {

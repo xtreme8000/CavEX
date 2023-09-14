@@ -30,7 +30,7 @@
 #include <malloc.h>
 
 static void screen_ingame_reset(struct screen* s, int width, int height) {
-	input_pointer_enable(false);
+	input_pointer_enable(true);
 }
 
 void screen_ingame_render3D(struct screen* s, mat4 view) {
