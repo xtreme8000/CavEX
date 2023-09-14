@@ -32,6 +32,7 @@ extern GLFWwindow* window;
 static bool input_pointer_enabled;
 static double input_old_pointer_x, input_old_pointer_y;
 static bool input_key_held[1024];
+static int joystick = -1;
 
 void input_init() {
 	for(int k = 0; k < 1024; k++)
@@ -40,6 +41,27 @@ void input_init() {
 	input_pointer_enabled = false;
 	input_old_pointer_x = 0;
 	input_old_pointer_y = 0;
+
+	// Find joystick
+	glfwInit();
+	for(int joy = GLFW_JOYSTICK_1; joy <= GLFW_JOYSTICK_LAST; joy++) {
+		int num_axes = 0;
+		const float *axes = glfwGetJoystickAxes(joy, &num_axes);
+		if(num_axes < 2) continue;
+
+		/* Workaround some buggy motherboard which reports the LED controller
+		 * as a joystick; in such cases the controller is reported as having a
+		 * ridiculously high number of axes. See for example:
+		 * https://bbs.archlinux.org/viewtopic.php?id=261161
+		 */
+		if (num_axes >= 10) {
+			fprintf(stderr, "Skipping controller '%s' with %d axes\n",
+					glfwGetJoystickName(joy), num_axes);
+			continue;
+		}
+		joystick = joy;
+		break;
+	}
 }
 
 void input_poll() { }
@@ -103,6 +125,8 @@ bool input_pointer(float* x, float* y, float* angle) {
 }
 
 void input_native_joystick(float dt, float* dx, float* dy) {
+	*dx = 0.0F;
+	*dy = 0.0F;
 	if(!input_pointer_enabled) {
 		double x2, y2;
 		glfwGetCursorPos(window, &x2, &y2);
@@ -110,9 +134,13 @@ void input_native_joystick(float dt, float* dx, float* dy) {
 		*dy = -(y2 - input_old_pointer_y) * 0.001F;
 		input_old_pointer_x = x2;
 		input_old_pointer_y = y2;
-	} else {
-		*dx = 0.0F;
-		*dy = 0.0F;
+	} else if(joystick >= 0) {
+		int num_axes = 0;
+		const float *axes = glfwGetJoystickAxes(joystick, &num_axes);
+		if(axes && num_axes >= 2) {
+			*dx = axes[0] * dt;
+			*dy = -axes[1] * dt;
+		}
 	}
 }
 
