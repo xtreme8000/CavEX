@@ -158,7 +158,7 @@ void gfx_setup() {
 
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CW);
-	gfx_culling(true);
+	gfx_cull_func(MODE_BACK);
 
 	gfx_depth_func(MODE_LEQUAL);
 
@@ -327,11 +327,17 @@ void gfx_lighting(bool enable) {
 	glUniform1i(glGetUniformLocation(shader_prog, "enable_lighting"), enable);
 }
 
-void gfx_culling(bool enable) {
-	if(enable) {
+void gfx_cull_func(enum cull_func func) {
+	if(func != MODE_NONE) {
 		glEnable(GL_CULL_FACE);
 	} else {
 		glDisable(GL_CULL_FACE);
+	}
+
+	switch(func) {
+		case MODE_FRONT: glCullFace(GL_FRONT); break;
+		case MODE_BACK: glCullFace(GL_BACK); break;
+		default:
 	}
 }
 

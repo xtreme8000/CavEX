@@ -19,9 +19,127 @@
 
 #include <assert.h>
 
+#include "../daytime.h"
 #include "../game/game_state.h"
 #include "../platform/gfx.h"
 #include "gfx_util.h"
+
+void gutil_clouds(mat4 view_matrix, float brightness) {
+	assert(view_matrix);
+
+	float cloud_pos = (gstate.world_time
+					   + time_diff_s(gstate.world_time_start, time_get())
+						   * 1000.0F / DAY_TICK_MS)
+		* 12.0F / 400.0F;
+
+	vec3 shift = {roundf(gstate.camera.x / 12.0F) * 12.0F
+					  - (cloud_pos - roundf(cloud_pos / 12.0F) * 12.0F),
+				  108.5F, roundf(gstate.camera.z / 12.0F) * 12.0F};
+
+	mat4 model_view;
+	glm_translate_to(view_matrix, shift, model_view);
+	gfx_matrix_modelview(model_view);
+
+	gfx_fog(true);
+	gfx_fog_pos(shift[0] - gstate.camera.x, shift[2] - gstate.camera.z,
+				gstate.config.fog_distance * 1.5F);
+	gfx_texture(false);
+	gfx_blending(MODE_BLEND);
+	gfx_lighting(false);
+	gfx_cull_func(MODE_NONE);
+	gfx_write_buffers(false, true, true);
+
+	int ox = roundf(gstate.camera.x / 12.0F) + roundf(cloud_pos / 12.0F);
+	int oy = roundf(gstate.camera.z / 12.0F);
+
+	uint8_t shade[6] = {
+		roundf(brightness * 1.0F * 255),  roundf(brightness * 0.75F * 255),
+		roundf(brightness * 0.84F * 255), roundf(brightness * 0.84F * 255),
+		roundf(brightness * 0.92F * 255), roundf(brightness * 0.92F * 255),
+	};
+
+	for(int k = 0; k < 2; k++) {
+		if(k == 1)
+			gfx_write_buffers(true, false, true);
+
+		for(int y = -16; y <= 16; y++) {
+			for(int x = -16; x <= 16; x++) {
+				uint8_t color[4];
+				tex_gfx_lookup(&texture_clouds, ox + x, oy + y, color);
+
+				if(color[3] >= 128) {
+					int16_t min[] = {x * 12, y * 12, 0};
+					int16_t box[] = {x * 12 + 12, y * 12 + 12, 4};
+
+					// top, bottom, back, front, right, left
+					gfx_draw_quads(
+						24,
+						(int16_t[]) {
+							min[0], box[2], min[1], box[0], box[2], min[1],
+							box[0], box[2], box[1], min[0], box[2], box[1],
+
+							min[0], min[2], min[1], min[0], min[2], box[1],
+							box[0], min[2], box[1], box[0], min[2], min[1],
+
+							min[0], box[2], min[1], min[0], min[2], min[1],
+							box[0], min[2], min[1], box[0], box[2], min[1],
+
+							min[0], box[2], box[1], box[0], box[2], box[1],
+							box[0], min[2], box[1], min[0], min[2], box[1],
+
+							box[0], min[2], min[1], box[0], min[2], box[1],
+							box[0], box[2], box[1], box[0], box[2], min[1],
+
+							min[0], min[2], min[1], min[0], box[2], min[1],
+							min[0], box[2], box[1], min[0], min[2], box[1],
+						},
+						(uint8_t[]) {
+							shade[0], shade[0], shade[0], 0xBF,
+							shade[0], shade[0], shade[0], 0xBF,
+							shade[0], shade[0], shade[0], 0xBF,
+							shade[0], shade[0], shade[0], 0xBF,
+
+							shade[1], shade[1], shade[1], 0xBF,
+							shade[1], shade[1], shade[1], 0xBF,
+							shade[1], shade[1], shade[1], 0xBF,
+							shade[1], shade[1], shade[1], 0xBF,
+
+							shade[2], shade[2], shade[2], 0xBF,
+							shade[2], shade[2], shade[2], 0xBF,
+							shade[2], shade[2], shade[2], 0xBF,
+							shade[2], shade[2], shade[2], 0xBF,
+
+							shade[3], shade[3], shade[3], 0xBF,
+							shade[3], shade[3], shade[3], 0xBF,
+							shade[3], shade[3], shade[3], 0xBF,
+							shade[3], shade[3], shade[3], 0xBF,
+
+							shade[4], shade[4], shade[4], 0xBF,
+							shade[4], shade[4], shade[4], 0xBF,
+							shade[4], shade[4], shade[4], 0xBF,
+							shade[4], shade[4], shade[4], 0xBF,
+
+							shade[5], shade[5], shade[5], 0xBF,
+							shade[5], shade[5], shade[5], 0xBF,
+							shade[5], shade[5], shade[5], 0xBF,
+							shade[5], shade[5], shade[5], 0xBF,
+						},
+						(uint16_t[]) {
+							0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+							0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+							0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+						});
+				}
+			}
+		}
+	}
+
+	gfx_write_buffers(true, true, true);
+	gfx_blending(MODE_OFF);
+	gfx_texture(true);
+	gfx_cull_func(MODE_BACK);
+	gfx_fog(false);
+}
 
 void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
 				   vec3 color_bottom) {

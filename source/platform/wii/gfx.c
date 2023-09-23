@@ -405,8 +405,12 @@ void gfx_lighting(bool enable) {
 	GX_SetVtxDesc(GX_VA_CLR0, enable ? GX_INDEX8 : GX_DIRECT);
 }
 
-void gfx_culling(bool enable) {
-	GX_SetCullMode(enable ? GX_CULL_BACK : GX_CULL_NONE);
+void gfx_cull_func(enum cull_func func) {
+	switch(func) {
+		case MODE_NONE: GX_SetCullMode(GX_CULL_NONE); break;
+		case MODE_BACK: GX_SetCullMode(GX_CULL_BACK); break;
+		case MODE_FRONT: GX_SetCullMode(GX_CULL_FRONT); break;
+	}
 }
 
 void gfx_scissor(bool enable, uint32_t x, uint32_t y, uint32_t width,

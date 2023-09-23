@@ -29,7 +29,7 @@
 #include "platform/gfx.h"
 #include "stack.h"
 
-#define CHUNK_INDEX(x, y, z) ((x) + ((z) + (y)*CHUNK_SIZE) * CHUNK_SIZE)
+#define CHUNK_INDEX(x, y, z) ((x) + ((z) + (y) * CHUNK_SIZE) * CHUNK_SIZE)
 #define CHUNK_LIGHT_INDEX(x, y, z)                                             \
 	((x) + ((z) + (y) * (CHUNK_SIZE + 2)) * (CHUNK_SIZE + 2))
 
@@ -247,8 +247,8 @@ void chunk_render(struct chunk* c, bool pass, float x, float y, float z) {
 
 	if(!pass && c->has_displist[12]) {
 		check_matrix_set(c, &needs_matrix);
-		gfx_culling(false);
+		gfx_cull_func(MODE_NONE);
 		displaylist_render(c->mesh + 12);
-		gfx_culling(true);
+		gfx_cull_func(MODE_BACK);
 	}
 }

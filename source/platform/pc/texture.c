@@ -18,6 +18,7 @@
 */
 
 #include <GL/glew.h>
+#include <string.h>
 
 #include "../texture.h"
 
@@ -47,4 +48,15 @@ void tex_gfx_load(struct tex_gfx* tex, void* img, size_t width, size_t height,
 void tex_gfx_bind(struct tex_gfx* tex, int slot) {
 	assert(tex);
 	glBindTexture(GL_TEXTURE_2D, tex->id);
+}
+
+void tex_gfx_lookup(struct tex_gfx* tex, int x, int y, uint8_t* color) {
+	assert(tex && color);
+
+	memcpy(color,
+		   tex->data
+			   + (((unsigned int)x % tex->width)
+				  + ((unsigned int)y % tex->height) * tex->width)
+				   * 4,
+		   4);
 }

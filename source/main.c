@@ -164,12 +164,18 @@ int main(void) {
 			gstate.stats.chunks_rendered = 0;
 		}
 
-		if(gstate.current_screen->render3D)
+		if(gstate.current_screen->render3D) {
+			gfx_fog(false);
 			gstate.current_screen->render3D(gstate.current_screen,
 											gstate.camera.view);
+		}
 
-		if(render_world)
+		if(render_world) {
 			world_render(&gstate.world, &gstate.camera, true);
+
+			if(gstate.world.dimension == WORLD_DIM_OVERWORLD)
+				gutil_clouds(gstate.camera.view, daytime_brightness(daytime));
+		}
 
 		gfx_mode_gui();
 

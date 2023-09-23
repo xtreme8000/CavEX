@@ -61,6 +61,7 @@ extern struct tex_gfx texture_gui_inventory;
 extern struct tex_gfx texture_gui2;
 extern struct tex_gfx texture_controls;
 extern struct tex_gfx texture_pointer;
+extern struct tex_gfx texture_clouds;
 
 void tex_init(void);
 
@@ -72,5 +73,6 @@ void tex_gfx_load(struct tex_gfx* tex, void* img, size_t width, size_t height,
 void tex_gfx_load_file(struct tex_gfx* tex, const char* filename,
 					   enum tex_format type, bool linear);
 void tex_gfx_bind(struct tex_gfx* tex, int slot);
+void tex_gfx_lookup(struct tex_gfx* tex, int x, int y, uint8_t* color);
 
 #endif

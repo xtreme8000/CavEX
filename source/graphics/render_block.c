@@ -1559,13 +1559,13 @@ void render_block_cracks(struct block_data* blk, mat4 view, w_coord_t x,
 		gfx_depth_func(MODE_EQUAL);
 
 		if(b->double_sided)
-			gfx_culling(false);
+			gfx_cull_func(MODE_NONE);
 
 		gfx_bind_texture(&texture_terrain);
 		displaylist_render_immediate(&block_cracks_dl, vertices * 4);
 
 		if(b->double_sided)
-			gfx_culling(true);
+			gfx_cull_func(MODE_BACK);
 
 		gfx_depth_func(MODE_LEQUAL);
 		gfx_blending(MODE_OFF);

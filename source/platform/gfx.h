@@ -39,6 +39,12 @@ enum depth_func {
 	MODE_EQUAL,
 };
 
+enum cull_func {
+	MODE_NONE,
+	MODE_BACK,
+	MODE_FRONT,
+};
+
 void gfx_setup(void);
 void gfx_update_light(float daytime, const float* light_lookup);
 void gfx_finish(bool vsync);
@@ -64,7 +70,7 @@ void gfx_depth_range(float near, float far);
 void gfx_depth_func(enum depth_func func);
 void gfx_texture(bool enable);
 void gfx_lighting(bool enable);
-void gfx_culling(bool enable);
+void gfx_cull_func(enum cull_func func);
 void gfx_scissor(bool enable, uint32_t x, uint32_t y, uint32_t width,
 				 uint32_t height);
 void gfx_draw_lines(size_t vertex_count, const int16_t* vertices,

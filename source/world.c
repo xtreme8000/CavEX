@@ -32,7 +32,7 @@
 	(glm_vec2_distance2(                                                       \
 		 (vec2) {(c)->x + CHUNK_SIZE / 2, (c)->z + CHUNK_SIZE / 2},            \
 		 (vec2) {gstate.camera.x, gstate.camera.z})                            \
-	 <= glm_pow2((dist)*gstate.config.fog_distance))
+	 <= glm_pow2((dist) * gstate.config.fog_distance))
 
 void world_unload_section(struct world* w, w_coord_t x, w_coord_t z) {
 	assert(w);

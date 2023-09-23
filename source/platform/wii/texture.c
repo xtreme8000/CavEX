@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <gccore.h>
 #include <malloc.h>
+#include <string.h>
 
 #define rgba16(r, g, b, a)                                                     \
 	(((int)(a) << 12) | ((int)(r) << 8) | ((int)(g) << 4) | (int)(b))
@@ -224,4 +225,22 @@ void tex_gfx_load(struct tex_gfx* tex, void* img, size_t width, size_t height,
 void tex_gfx_bind(struct tex_gfx* tex, int slot) {
 	assert(tex && slot >= GX_TEXMAP0 && slot < GX_MAX_TEXMAP);
 	GX_LoadTexObj(&tex->obj, slot);
+}
+
+void tex_gfx_lookup(struct tex_gfx* tex, int x, int y, uint8_t* color) {
+	assert(tex && color);
+
+	x = ((unsigned int)x) % tex->width;
+	y = ((unsigned int)y) % tex->height;
+
+	switch(tex->fmt) {
+		case TEX_FMT_IA4: {
+			uint8_t* blk
+				= tex->data + ((x / 8) + (y / 4) * (tex->width / 8)) * 32;
+			uint8_t pixel = blk[(x % 8) + (y % 4) * 8];
+			color[0] = color[1] = color[2] = (pixel & 0x0F) << 4;
+			color[3] = pixel & 0xF0;
+		} break;
+		default: assert(false); memset(color, 0, 4);
+	}
 }

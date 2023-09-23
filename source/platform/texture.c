@@ -35,6 +35,7 @@ struct tex_gfx texture_gui_inventory;
 struct tex_gfx texture_gui2;
 struct tex_gfx texture_controls;
 struct tex_gfx texture_pointer;
+struct tex_gfx texture_clouds;
 
 #define distance_2d(x1, y1, x2, y2)                                            \
 	(((x1) - (x2)) * ((x1) - (x2)) + ((y1) - (y2)) * ((y1) - (y2)))
@@ -69,6 +70,8 @@ void tex_init() {
 	tex_gfx_load_file(&texture_items, "items.png", TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_controls, "controls.png", TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_pointer, "pointer.png", TEX_FMT_RGBA16, false);
+	tex_gfx_load_file(&texture_clouds, "environment/clouds.png", TEX_FMT_IA4,
+					  false);
 
 	size_t fog_size = 128;
 	uint8_t* fog = malloc(fog_size * fog_size * 4);
