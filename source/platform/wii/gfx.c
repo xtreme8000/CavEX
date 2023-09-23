@@ -21,7 +21,6 @@
 #include <gccore.h>
 #include <malloc.h>
 #include <math.h>
-#include <ogc/tpl.h>
 #include <string.h>
 
 #include "../../graphics/texture_atlas.h"
@@ -146,8 +145,7 @@ void gfx_setup() {
 	GX_SetScissor(0, 0, screenMode->fbWidth, screenMode->efbHeight);
 	GX_SetDispCopySrc(0, 0, screenMode->fbWidth, screenMode->efbHeight);
 	GX_SetDispCopyDst(screenMode->fbWidth, screenMode->xfbHeight);
-	GX_SetCopyFilter(screenMode->aa, screenMode->sample_pattern, GX_TRUE,
-					 screenMode->vfilter);
+	GX_SetCopyFilter(GX_FALSE, NULL, GX_FALSE, NULL);
 	GX_SetFieldMode(screenMode->field_rendering,
 					((screenMode->viHeight == 2 * screenMode->xfbHeight) ?
 						 GX_ENABLE :
