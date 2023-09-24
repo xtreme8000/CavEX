@@ -190,6 +190,8 @@ void gfx_setup() {
 	GX_SetTexCoordGen(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_POS, GX_TEXMTX1);
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
+	GX_SetLineWidth(12, GX_TO_ZERO);
+
 	GX_DrawDone();
 }
 
