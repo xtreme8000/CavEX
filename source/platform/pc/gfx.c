@@ -206,6 +206,33 @@ void gfx_bind_texture(struct tex_gfx* tex) {
 	tex_gfx_bind(tex, 0);
 }
 
+void gfx_copy_framebuffer(uint8_t* dest, size_t* width, size_t* height) {
+	assert(width && height);
+
+	*width = gfx_width();
+	*height = gfx_height();
+
+	if(!dest)
+		return;
+
+	void* tmp = malloc(*width * 4);
+
+	if(!tmp)
+		return;
+
+	glReadPixels(0, 0, *width, *height, GL_RGBA, GL_UNSIGNED_BYTE, dest);
+
+	// flip image
+	for(size_t y = 0; y < *height / 2; y++) {
+		memcpy(tmp, dest + y * (*width) * 4, *width * 4);
+		memcpy(dest + y * (*width) * 4, dest + (*height - 1 - y) * (*width) * 4,
+			   *width * 4);
+		memcpy(dest + (*height - 1 - y) * (*width) * 4, tmp, *width * 4);
+	}
+
+	free(tmp);
+}
+
 void gfx_mode_world() {
 	gfx_write_buffers(true, true, true);
 	gfx_matrix_texture(false, NULL);

@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifdef PLATFORM_WII
 #include <fat.h>
@@ -42,10 +43,9 @@
 
 #include "cNBT/nbt.h"
 #include "cglm/cglm.h"
+#include "lodepng/lodepng.h"
 
 int main(void) {
-	time_reset();
-
 	gstate.quit = false;
 	gstate.camera = (struct camera) {
 		.x = 0, .y = 0, .z = 0, .rx = 0, .ry = 0, .controller = {0, 0, 0}};
@@ -182,6 +182,23 @@ int main(void) {
 		if(gstate.current_screen->render2D)
 			gstate.current_screen->render2D(gstate.current_screen, gfx_width(),
 											gfx_height());
+
+		if(input_pressed(IB_SCREENSHOT)) {
+			size_t width, height;
+			gfx_copy_framebuffer(NULL, &width, &height);
+
+			void* image = malloc(width * height * 4);
+
+			if(image) {
+				gfx_copy_framebuffer(image, &width, &height);
+
+				char name[64];
+				snprintf(name, sizeof(name), "%ld.png", (long)time(NULL));
+
+				lodepng_encode32_file(name, image, width, height);
+				free(image);
+			}
+		}
 
 		input_poll();
 		gfx_finish(true);

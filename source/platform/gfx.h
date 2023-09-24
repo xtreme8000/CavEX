@@ -54,6 +54,8 @@ void gfx_clear_buffers(uint8_t r, uint8_t g, uint8_t b);
 int gfx_width(void);
 int gfx_height(void);
 
+void gfx_copy_framebuffer(uint8_t* dest, size_t* width, size_t* height);
+
 void gfx_matrix_projection(mat4 proj, bool is_perspective);
 void gfx_matrix_modelview(mat4 mv);
 void gfx_matrix_texture(bool enable, mat4 tex);

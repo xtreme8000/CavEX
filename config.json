@@ -21,6 +21,7 @@
 		"gui_left": [2, 202],
 		"gui_right": [3, 203],
 		"gui_click": [4, 204],
-		"gui_click_alt": [5, 205]
+		"gui_click_alt": [5, 205],
+		"screenshot": [7],
 	}
 }

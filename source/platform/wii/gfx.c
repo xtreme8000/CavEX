@@ -252,6 +252,55 @@ void gfx_bind_texture(struct tex_gfx* tex) {
 	tex_gfx_bind(tex, GX_TEXMAP0);
 }
 
+void gfx_copy_framebuffer(uint8_t* dest, size_t* width, size_t* height) {
+	assert(width && height);
+
+	*width = screenMode->fbWidth;
+	*height = screenMode->efbHeight;
+
+	if(!dest)
+		return;
+
+	size_t length
+		= GX_GetTexBufferSize(*width, *height, GX_TF_RGBA8, GX_FALSE, 0);
+	uint8_t* buffer = memalign(32, length);
+
+	if(!buffer)
+		return;
+
+	GX_SetTexCopySrc(0, 0, *width, *height);
+	GX_SetTexCopyDst(*width, *height, GX_TF_RGBA8, GX_FALSE);
+	GX_CopyTex(buffer, GX_FALSE);
+	GX_PixModeSync();
+	GX_SetDrawDone();
+	DCInvalidateRange(buffer, length);
+	GX_WaitDrawDone();
+
+	uint8_t* src = buffer;
+
+	for(size_t y = 0; y < *height; y += 4) {
+		for(size_t x = 0; x < *width; x += 4) {
+			for(size_t by = 0; by < 4; by++) {
+				for(size_t bx = 0; bx < 4; bx++) {
+					uint8_t* col = dest + (x + bx + (y + by) * (*width)) * 4;
+					col[3] = *(src++);
+					col[0] = *(src++);
+				}
+			}
+
+			for(size_t by = 0; by < 4; by++) {
+				for(size_t bx = 0; bx < 4; bx++) {
+					uint8_t* col = dest + (x + bx + (y + by) * (*width)) * 4;
+					col[1] = *(src++);
+					col[2] = *(src++);
+				}
+			}
+		}
+	}
+
+	free(buffer);
+}
+
 void gfx_mode_world() {
 	gfx_write_buffers(true, true, true);
 }

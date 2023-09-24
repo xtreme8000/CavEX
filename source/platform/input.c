@@ -303,6 +303,7 @@ static const char* input_config_translate(enum input_button key) {
 		case IB_GUI_RIGHT: return "input.gui_right";
 		case IB_GUI_CLICK: return "input.gui_click";
 		case IB_GUI_CLICK_ALT: return "input.gui_click_alt";
+		case IB_SCREENSHOT: return "input.screenshot";
 		default: return NULL;
 	}
 }
