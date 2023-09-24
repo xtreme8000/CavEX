@@ -184,7 +184,6 @@ void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
 	gfx_fog(false);
 	gfx_texture(true);
 	gfx_blending(MODE_BLEND2);
-	gfx_bind_texture(&texture_gui2);
 
 	mat4 tmp;
 	glm_translate_to(view_matrix,
@@ -193,19 +192,20 @@ void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
 	glm_rotate_x(tmp, glm_rad(celestial_angle * 360.0F), model_view);
 	gfx_matrix_modelview(model_view);
 
+	gfx_bind_texture(&texture_sun);
 	gfx_draw_quads(
 		4, (int16_t[]) {-30, 100, -30, -30, 100, 30, 30, 100, 30, 30, 100, -30},
 		(uint8_t[]) {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 					 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
-		(uint16_t[]) {201, 65, 201, 65 + 32, 201 + 32, 65 + 32, 201 + 32, 65});
+		(uint16_t[]) {0, 0, 0, 256, 256, 256, 256, 0});
 
-	gfx_draw_quads(
-		4,
-		(int16_t[]) {-20, -100, -20, 20, -100, -20, 20, -100, 20, -20, -100,
-					 20},
-		(uint8_t[]) {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-					 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
-		(uint16_t[]) {201, 32, 201, 32 + 32, 201 + 32, 32 + 32, 201 + 32, 32});
+	gfx_bind_texture(&texture_moon);
+	gfx_draw_quads(4,
+				   (int16_t[]) {-20, -100, -20, 20, -100, -20, 20, -100, 20,
+								-20, -100, 20},
+				   (uint8_t[]) {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+								0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
+				   (uint16_t[]) {0, 0, 0, 256, 256, 256, 256, 0});
 
 	gfx_blending(MODE_OFF);
 	gfx_write_buffers(true, true, true);

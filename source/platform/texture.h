@@ -62,6 +62,8 @@ extern struct tex_gfx texture_gui2;
 extern struct tex_gfx texture_controls;
 extern struct tex_gfx texture_pointer;
 extern struct tex_gfx texture_clouds;
+extern struct tex_gfx texture_sun;
+extern struct tex_gfx texture_moon;
 
 void tex_init(void);
 
