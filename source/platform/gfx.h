@@ -47,6 +47,7 @@ enum cull_func {
 
 void gfx_setup(void);
 void gfx_update_light(float daytime, const float* light_lookup);
+float gfx_lookup_light(uint8_t light);
 void gfx_finish(bool vsync);
 void gfx_flip_buffers(float* gpu_wait, float* vsync_wait);
 void gfx_bind_texture(struct tex_gfx* tex);

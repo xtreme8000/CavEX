@@ -65,6 +65,19 @@ extern struct tex_gfx texture_clouds;
 extern struct tex_gfx texture_sun;
 extern struct tex_gfx texture_moon;
 
+extern struct tex_gfx texture_mob_char;
+
+extern struct tex_gfx texture_armor_chain1;
+extern struct tex_gfx texture_armor_chain2;
+extern struct tex_gfx texture_armor_cloth1;
+extern struct tex_gfx texture_armor_cloth2;
+extern struct tex_gfx texture_armor_gold1;
+extern struct tex_gfx texture_armor_gold2;
+extern struct tex_gfx texture_armor_iron1;
+extern struct tex_gfx texture_armor_iron2;
+extern struct tex_gfx texture_armor_diamond1;
+extern struct tex_gfx texture_armor_diamond2;
+
 void tex_init(void);
 
 uint8_t* tex_read(const char* filename, size_t* width, size_t* height);

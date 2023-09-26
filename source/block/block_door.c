@@ -97,6 +97,7 @@ struct block block_wooden_door = {
 		.max_stack = 1,
 		.renderItem = render_item_flat,
 		.onItemPlace = block_place_default,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -126,6 +127,7 @@ struct block block_iron_door = {
 		.max_stack = 1,
 		.renderItem = render_item_flat,
 		.onItemPlace = block_place_default,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

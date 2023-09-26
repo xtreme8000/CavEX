@@ -101,6 +101,7 @@ struct block block_tallgrass = {
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace1,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -131,6 +132,7 @@ struct block block_deadbush = {
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace2,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

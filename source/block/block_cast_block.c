@@ -75,6 +75,7 @@ struct block block_iron = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -104,6 +105,7 @@ struct block block_gold = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -133,6 +135,7 @@ struct block block_diamond = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -162,6 +165,7 @@ struct block block_lapis = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

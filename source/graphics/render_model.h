@@ -1,5 +1,5 @@
 /*
-	Copyright (c) 2022 ByteBit/xtreme8000
+	Copyright (c) 2023 ByteBit/xtreme8000
 
 	This file is part of CavEX.
 
@@ -17,18 +17,19 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef RENDER_ITEM_H
-#define RENDER_ITEM_H
-
-#include "../cglm/cglm.h"
+#ifndef RENDER_MODEL_H
+#define RENDER_MODEL_H
 
 #include "../item/items.h"
+#include "../platform/gfx.h"
 
-void render_item_init(void);
-void render_item_update_light(uint8_t light);
-void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
-					  bool fullbright, enum render_item_env env);
-void render_item_block(struct item* item, struct item_data* stack, mat4 model,
-					   bool fullbright, enum render_item_env env);
+void render_model_box(mat4 view, vec3 position, vec3 pivot, vec3 rotation,
+					  ivec2 origin, ivec3 box, float padding, bool mirror,
+					  float brightness);
+void render_model_player(mat4 mv, float head_pitch, float head_yaw,
+						 float foot_angle, float arm_angle,
+						 struct item_data* held_item, struct item_data* helmet,
+						 struct item_data* chestplate,
+						 struct item_data* leggings, struct item_data* boots);
 
 #endif

@@ -73,6 +73,7 @@ struct block block_workbench = {
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 0,
 		.render_data.block.default_rotation = 2,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

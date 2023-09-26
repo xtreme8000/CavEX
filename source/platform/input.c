@@ -419,15 +419,12 @@ bool input_held(enum input_button b) {
 
 	bool any_pressed = false;
 	bool any_held = false;
-	bool any_released = false;
 
 	for(size_t k = 0; k < length; k++) {
 		bool pressed, released, held;
 		input_native_key_status(mapping[k], &pressed, &released, &held);
 		if(pressed)
 			any_pressed = true;
-		if(released)
-			any_released = true;
 		if(held)
 			any_held = true;
 	}

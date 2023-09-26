@@ -126,6 +126,7 @@ struct block block_trapdoor = {
 		.renderItem = render_item_block,
 		.onItemPlace = onItemPlace,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

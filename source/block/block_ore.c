@@ -77,6 +77,7 @@ struct block block_coalore = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -106,6 +107,7 @@ struct block block_ironore = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -135,6 +137,7 @@ struct block block_goldore = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -164,6 +167,7 @@ struct block block_diamondore = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -193,6 +197,7 @@ struct block block_redstoneore = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -222,6 +227,7 @@ struct block block_redstoneore_lit = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -251,6 +257,7 @@ struct block block_lapisore = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

@@ -35,14 +35,43 @@ struct item_data {
 #include "../item/tool.h"
 struct server_local;
 
+enum armor_type {
+	ARMOR_TYPE_HELMET,
+	ARMOR_TYPE_CHESTPLATE,
+	ARMOR_TYPE_LEGGINGS,
+	ARMOR_TYPE_BOOTS,
+};
+
+enum armor_tier {
+	ARMOR_TIER_BLOCK,
+	ARMOR_TIER_CHAIN,
+	ARMOR_TIER_CLOTH,
+	ARMOR_TIER_GOLD,
+	ARMOR_TIER_IRON,
+	ARMOR_TIER_DIAMOND,
+};
+
+enum render_item_env {
+	R_ITEM_ENV_INVENTORY,
+	R_ITEM_ENV_FIRSTPERSON,
+	R_ITEM_ENV_THIRDPERSON,
+	R_ITEM_ENV_ENTITY,
+};
+
 struct item {
 	char name[32];
 	bool has_damage;
 	uint16_t max_damage;
 	uint8_t max_stack;
-	void (*renderItem)(struct item*, struct item_data*, mat4, bool);
+	void (*renderItem)(struct item*, struct item_data*, mat4, bool,
+					   enum render_item_env);
 	bool (*onItemPlace)(struct server_local*, struct item_data*,
 						struct block_info*, struct block_info*, enum side);
+	struct item_armor {
+		bool is_armor;
+		enum armor_type type;
+		enum armor_tier tier;
+	} armor;
 	struct item_tool {
 		enum tool_type type;
 		enum tool_tier tier;

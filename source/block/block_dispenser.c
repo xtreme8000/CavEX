@@ -111,6 +111,7 @@ struct block block_dispenser = {
 		.render_data.block.has_default = true,
 		.render_data.block.default_metadata = 2,
 		.render_data.block.default_rotation = 0,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

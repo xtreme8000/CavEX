@@ -22,6 +22,7 @@
 #include "../../block/blocks.h"
 #include "../../graphics/gfx_util.h"
 #include "../../graphics/gui_util.h"
+#include "../../graphics/render_model.h"
 #include "../../network/server_interface.h"
 #include "../../platform/gfx.h"
 #include "../../platform/input.h"
@@ -98,17 +99,39 @@ void screen_ingame_render3D(struct screen* s, mat4 view) {
 	glm_rotate_z(model, glm_rad(-sinf(sqrtLerpPI) * 20.0F), model);
 	glm_rotate_x(model, glm_rad(-sinf(sqrtLerpPI) * 80.0F), model);
 
-	glm_scale_uni(model, 0.4F);
-	glm_translate(model, (vec3) {-0.5F, -0.5F, -0.5F});
+	struct block_data in_block
+		= world_get_block(&gstate.world, floorf(gstate.camera.x),
+						  floorf(gstate.camera.y), floorf(gstate.camera.z));
+	uint8_t light = (in_block.torch_light << 4) | in_block.sky_light;
 
 	gfx_depth_range(0.0F, 0.1F);
+	gfx_write_buffers(true, true, true);
 
 	struct item_data item;
 	if(inventory_get_slot(windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]),
 						  slot + INVENTORY_SLOT_HOTBAR, &item)
-	   && item_get(&item))
-		items[item.id]->renderItem(item_get(&item), &item, model, false);
+	   && item_get(&item)) {
+		glm_scale_uni(model, 0.4F);
+		glm_translate(model, (vec3) {-0.5F, -0.5F, -0.5F});
+		render_item_update_light(light);
+		items[item.id]->renderItem(item_get(&item), &item, model, false,
+								   R_ITEM_ENV_FIRSTPERSON);
+	} else {
+		glm_translate(model, (vec3) {0.0F, 0.2F, 0.0F});
+		glm_rotate_y(model, glm_rad(-90.0F), model);
+		glm_rotate_z(model, glm_rad(-120.0F), model);
+		glm_scale_uni(model, 1.0F / 16.0F);
 
+		gfx_lighting(false);
+		gfx_bind_texture(&texture_mob_char);
+		// TODO: position, depth fix in inventory
+		render_model_box(model, (vec3) {0.0F, 0.0F, 0.0F},
+						 (vec3) {2.0F, 12.0F, 2.0F}, (vec3) {0.0F, 0.0F, 0.0F},
+						 (ivec2) {44, 20}, (ivec3) {4, 4, 12}, 0.0F, true,
+						 gfx_lookup_light(light));
+	}
+
+	gfx_write_buffers(true, false, false);
 	gfx_depth_range(0.0F, 1.0F);
 }
 
@@ -206,13 +229,19 @@ static void screen_ingame_update(struct screen* s, float dt) {
 
 	size_t slot = inventory_get_hotbar(
 		windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]));
+	bool old_item_exists = inventory_get_hotbar_item(
+		windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), NULL);
 
 	if(input_pressed(IB_SCROLL_LEFT)) {
 		size_t next_slot = (slot == 0) ? INVENTORY_SIZE_HOTBAR - 1 : slot - 1;
 		inventory_set_hotbar(
 			windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), next_slot);
+		bool new_item_exists = inventory_get_hotbar_item(
+			windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), NULL);
+
 		if(time_diff_s(gstate.held_item_animation.switch_item.start, time_get())
-		   >= 0.15F) {
+			   >= 0.15F
+		   && (old_item_exists || new_item_exists)) {
 			gstate.held_item_animation.switch_item.start = time_get();
 			gstate.held_item_animation.switch_item.old_slot = slot;
 		}
@@ -230,8 +259,12 @@ static void screen_ingame_update(struct screen* s, float dt) {
 		size_t next_slot = (slot == INVENTORY_SIZE_HOTBAR - 1) ? 0 : slot + 1;
 		inventory_set_hotbar(
 			windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), next_slot);
+		bool new_item_exists = inventory_get_hotbar_item(
+			windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), NULL);
+
 		if(time_diff_s(gstate.held_item_animation.switch_item.start, time_get())
-		   >= 0.15F) {
+			   >= 0.15F
+		   && (old_item_exists || new_item_exists)) {
 			gstate.held_item_animation.switch_item.start = time_get();
 			gstate.held_item_animation.switch_item.old_slot = slot;
 		}
@@ -254,12 +287,6 @@ static void screen_ingame_update(struct screen* s, float dt) {
 
 	if(input_pressed(IB_INVENTORY))
 		screen_set(&screen_inventory);
-
-	struct block_data in_block
-		= world_get_block(&gstate.world, floorf(gstate.camera.x),
-						  floorf(gstate.camera.y), floorf(gstate.camera.z));
-
-	render_item_update_light((in_block.torch_light << 4) | in_block.sky_light);
 }
 
 static void screen_ingame_render2D(struct screen* s, int width, int height) {

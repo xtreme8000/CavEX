@@ -170,11 +170,11 @@ void gfx_setup() {
 	glUniform1i(glGetUniformLocation(shader_prog, "tex"), 0);
 }
 
+static float colors[256];
+
 void gfx_update_light(float daytime, const float* light_lookup) {
 	assert(daytime > -GLM_FLT_EPSILON && daytime < 1.0F + GLM_FLT_EPSILON
 		   && light_lookup);
-
-	float colors[256];
 
 	for(int sky = 0; sky < 16; sky++) {
 		for(int torch = 0; torch < 16; torch++) {
@@ -184,6 +184,10 @@ void gfx_update_light(float daytime, const float* light_lookup) {
 	}
 
 	glUniform1fv(glGetUniformLocation(shader_prog, "lighting"), 256, colors);
+}
+
+float gfx_lookup_light(uint8_t light) {
+	return colors[light];
 }
 
 void gfx_clear_buffers(uint8_t r, uint8_t g, uint8_t b) {

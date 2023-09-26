@@ -19,9 +19,11 @@
 
 #include "../../graphics/gfx_util.h"
 #include "../../graphics/gui_util.h"
+#include "../../graphics/render_model.h"
 #include "../../network/server_interface.h"
 #include "../../platform/gfx.h"
 #include "../../platform/input.h"
+#include "../../platform/time.h"
 #include "../game_state.h"
 #include "screen.h"
 
@@ -224,6 +226,40 @@ static void screen_inventory_render2D(struct screen* s, int width, int height) {
 	gutil_text(off_x + 86 * 2, off_y + 16 * 2, "\2478Crafting", 16, false);
 
 	struct inv_slot* selection = slots + selected_slot;
+
+	float angle_x
+		= atan2f((pointer_has_item ? pointer_x : off_x + selection->x + 8 * 2)
+					 - (off_x + 52 * 2),
+				 192.0F);
+	float angle_y
+		= atan2f((pointer_has_item ? pointer_y : off_y + selection->y + 8 * 2)
+					 - (off_y + 19 * 2),
+				 192.0F);
+
+	mat4 view;
+	glm_mat4_identity(view);
+	glm_translate(view, (vec3) {off_x + 52 * 2, off_y + 39 * 2, 0.0F});
+	glm_scale(view, (vec3) {3.75F, -3.75F, 1.0F});
+	glm_rotate_x(view, angle_y * 0.66F * 0.5F, view);
+	glm_rotate_y(view, angle_x * 0.5F, view);
+	glm_translate(view, (vec3) {0.0F, 10.0F, 0.0F});
+
+	gfx_write_buffers(true, true, true);
+	struct item_data held_item, helmet, chestplate, leggings, boots;
+	render_model_player(
+		view, glm_deg(angle_y * 0.66F * 0.5F), glm_deg(angle_x * 0.5F), 0.0F,
+		0.0F, inventory_get_hotbar_item(inv, &held_item) ? &held_item : NULL,
+		inventory_get_slot(inv, INVENTORY_SLOT_ARMOR + 0, &helmet) ? &helmet :
+																	 NULL,
+		inventory_get_slot(inv, INVENTORY_SLOT_ARMOR + 1, &chestplate) ?
+			&chestplate :
+			NULL,
+		inventory_get_slot(inv, INVENTORY_SLOT_ARMOR + 2, &leggings) ?
+			&leggings :
+			NULL,
+		inventory_get_slot(inv, INVENTORY_SLOT_ARMOR + 3, &boots) ? &boots :
+																	NULL);
+	gfx_write_buffers(true, false, false);
 
 	// draw items
 	for(size_t k = 0; k < slots_index; k++) {

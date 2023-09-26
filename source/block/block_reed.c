@@ -64,6 +64,7 @@ struct block block_reed = {
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = block_place_default,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

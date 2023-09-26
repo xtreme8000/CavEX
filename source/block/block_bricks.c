@@ -63,6 +63,7 @@ struct block block_bricks = {
 		.renderItem = render_item_block,
 		.onItemPlace = block_place_default,
 		.render_data.block.has_default = false,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

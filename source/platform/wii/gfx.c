@@ -114,14 +114,11 @@ void gfx_setup() {
 		gfx_screen_width = 640;
 	}
 
-	if(VIDEO_GetCurrentTvMode() == VI_PAL) {
-		// screenMode->viHeight = VI_MAX_HEIGHT_PAL;
+	if(VIDEO_GetCurrentTvMode() == VI_PAL
+	   || VIDEO_GetCurrentTvMode() == VI_MPAL) {
 		screenMode->viXOrigin = (VI_MAX_WIDTH_PAL - screenMode->viWidth) / 2;
-		screenMode->viYOrigin = (VI_MAX_HEIGHT_PAL - screenMode->viHeight) / 2;
 	} else {
-		// screenMode->viHeight = VI_MAX_HEIGHT_NTSC;
 		screenMode->viXOrigin = (VI_MAX_WIDTH_NTSC - screenMode->viWidth) / 2;
-		screenMode->viYOrigin = (VI_MAX_HEIGHT_NTSC - screenMode->viHeight) / 2;
 	}
 
 	s8 hoffset = 0;
@@ -212,6 +209,10 @@ void gfx_update_light(float daytime, const float* light_lookup) {
 
 	DCStoreRange(colors, sizeof(colors));
 	GX_InvVtxCache();
+}
+
+float gfx_lookup_light(uint8_t light) {
+	return (float)colors[light * 3] / 255.0F;
 }
 
 void gfx_clear_buffers(uint8_t r, uint8_t g, uint8_t b) {
@@ -312,7 +313,7 @@ void gfx_mode_gui() {
 
 	Mtx44 projection;
 
-	guOrtho(projection, 0, gfx_height(), 0, gfx_width(), 0, 256);
+	guOrtho(projection, 0, gfx_height(), 0, gfx_width(), -256, 256);
 	GX_LoadProjectionMtx(projection, GX_ORTHOGRAPHIC);
 	gfx_matrix_modelview(GLM_MAT4_IDENTITY);
 

@@ -39,6 +39,19 @@ struct tex_gfx texture_clouds;
 struct tex_gfx texture_sun;
 struct tex_gfx texture_moon;
 
+struct tex_gfx texture_mob_char;
+
+struct tex_gfx texture_armor_chain1;
+struct tex_gfx texture_armor_chain2;
+struct tex_gfx texture_armor_cloth1;
+struct tex_gfx texture_armor_cloth2;
+struct tex_gfx texture_armor_gold1;
+struct tex_gfx texture_armor_gold2;
+struct tex_gfx texture_armor_iron1;
+struct tex_gfx texture_armor_iron2;
+struct tex_gfx texture_armor_diamond1;
+struct tex_gfx texture_armor_diamond2;
+
 #define distance_2d(x1, y1, x2, y2)                                            \
 	(((x1) - (x2)) * ((x1) - (x2)) + ((y1) - (y2)) * ((y1) - (y2)))
 
@@ -76,6 +89,29 @@ void tex_init() {
 					  false);
 	tex_gfx_load_file(&texture_sun, "terrain/sun.png", TEX_FMT_RGB16, false);
 	tex_gfx_load_file(&texture_moon, "terrain/moon.png", TEX_FMT_RGB16, false);
+
+	tex_gfx_load_file(&texture_armor_chain1, "armor/chain_1.png",
+					  TEX_FMT_RGBA16, false);
+	tex_gfx_load_file(&texture_armor_chain2, "armor/chain_2.png",
+					  TEX_FMT_RGBA16, false);
+	tex_gfx_load_file(&texture_armor_cloth1, "armor/cloth_1.png",
+					  TEX_FMT_RGBA16, false);
+	tex_gfx_load_file(&texture_armor_cloth2, "armor/cloth_2.png",
+					  TEX_FMT_RGBA16, false);
+	tex_gfx_load_file(&texture_armor_gold1, "armor/gold_1.png", TEX_FMT_RGBA16,
+					  false);
+	tex_gfx_load_file(&texture_armor_gold2, "armor/gold_2.png", TEX_FMT_RGBA16,
+					  false);
+	tex_gfx_load_file(&texture_armor_iron1, "armor/iron_1.png", TEX_FMT_RGBA16,
+					  false);
+	tex_gfx_load_file(&texture_armor_iron2, "armor/iron_2.png", TEX_FMT_RGBA16,
+					  false);
+	tex_gfx_load_file(&texture_armor_diamond1, "armor/diamond_1.png",
+					  TEX_FMT_RGBA16, false);
+	tex_gfx_load_file(&texture_armor_diamond2, "armor/diamond_2.png",
+					  TEX_FMT_RGBA16, false);
+
+	tex_gfx_load_file(&texture_mob_char, "mob/char.png", TEX_FMT_RGBA16, false);
 
 	size_t fog_size = 128;
 	uint8_t* fog = malloc(fog_size * fog_size * 4);

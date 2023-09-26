@@ -95,6 +95,7 @@ struct block block_rail = {
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -125,6 +126,7 @@ struct block block_powered_rail = {
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };
@@ -155,6 +157,7 @@ struct block block_detector_rail = {
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

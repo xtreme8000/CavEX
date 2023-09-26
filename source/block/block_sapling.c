@@ -83,6 +83,7 @@ struct block block_sapling = {
 		.max_stack = 64,
 		.renderItem = render_item_flat,
 		.onItemPlace = onItemPlace,
+		.armor.is_armor = false,
 		.tool.type = TOOL_TYPE_ANY,
 	},
 };

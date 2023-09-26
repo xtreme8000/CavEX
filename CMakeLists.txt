@@ -105,6 +105,7 @@ add_executable(cavex
 				source/graphics/gui_util.c
 				source/graphics/render_block.c
 				source/graphics/render_item.c
+				source/graphics/render_model.c
 				source/graphics/texture_atlas.c
 
 				source/platform/displaylist.c

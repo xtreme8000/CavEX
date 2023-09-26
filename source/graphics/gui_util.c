@@ -217,7 +217,9 @@ void gutil_draw_item(struct item_data* item, int x, int y, int layer) {
 		glm_translate_make(model, (vec3) {x, y, 0});
 
 		gfx_depth_range(0.1F * layer, 0.1F * (layer + 1));
-		it->renderItem(it, item, model, true);
+		gfx_write_buffers(true, true, true);
+		it->renderItem(it, item, model, true, R_ITEM_ENV_INVENTORY);
+		gfx_write_buffers(true, false, false);
 		gfx_depth_range(0.0F, 1.0F);
 
 		if(it->has_damage && item->durability > 0) {

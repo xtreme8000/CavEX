@@ -52,14 +52,12 @@ void render_item_init() {
 }
 
 void render_item_update_light(uint8_t light) {
-	memset(vertex_light, light, sizeof(vertex_light_inv));
+	memset(vertex_light, light, sizeof(vertex_light));
 }
 
 void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
-					  bool inventory) {
+					  bool fullbright, enum render_item_env env) {
 	assert(item && stack && model);
-
-	gfx_matrix_modelview(model);
 
 	uint8_t s, t;
 
@@ -90,126 +88,135 @@ void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
 		gfx_bind_texture(&texture_items);
 	}
 
-	if(inventory) {
+	if(env == R_ITEM_ENV_INVENTORY) {
+		gfx_matrix_modelview(model);
 		gutil_texquad(0, 0, s, t, 16, 16, 16 * 2, 16 * 2);
 	} else {
 		displaylist_reset(&dl);
 
+		uint8_t light = fullbright ? *vertex_light_inv : *vertex_light;
+
 		// left layer
 		displaylist_pos(&dl, 0, 256, -16);
-		displaylist_color(&dl, *vertex_light);
+		displaylist_color(&dl, light);
 		displaylist_texcoord(&dl, s + 16, t);
 
 		displaylist_pos(&dl, 0, 0, -16);
-		displaylist_color(&dl, *vertex_light);
+		displaylist_color(&dl, light);
 		displaylist_texcoord(&dl, s + 16, t + 16);
 
 		displaylist_pos(&dl, 256, 0, -16);
-		displaylist_color(&dl, *vertex_light);
+		displaylist_color(&dl, light);
 		displaylist_texcoord(&dl, s, t + 16);
 
 		displaylist_pos(&dl, 256, 256, -16);
-		displaylist_color(&dl, *vertex_light);
+		displaylist_color(&dl, light);
 		displaylist_texcoord(&dl, s, t);
 
 		// right layer
 		displaylist_pos(&dl, 0, 256, 0);
-		displaylist_color(&dl, *vertex_light);
+		displaylist_color(&dl, light);
 		displaylist_texcoord(&dl, s + 16, t);
 
 		displaylist_pos(&dl, 256, 256, 0);
-		displaylist_color(&dl, *vertex_light);
+		displaylist_color(&dl, light);
 		displaylist_texcoord(&dl, s, t);
 
 		displaylist_pos(&dl, 256, 0, 0);
-		displaylist_color(&dl, *vertex_light);
+		displaylist_color(&dl, light);
 		displaylist_texcoord(&dl, s, t + 16);
 
 		displaylist_pos(&dl, 0, 0, 0);
-		displaylist_color(&dl, *vertex_light);
+		displaylist_color(&dl, light);
 		displaylist_texcoord(&dl, s + 16, t + 16);
 
 		for(int k = 0; k < 16; k++) {
 			// front
 			displaylist_pos(&dl, 256 - (k + 1) * 16, 256, 0);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_080));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_080));
 			displaylist_texcoord(&dl, s + k + 1, t);
 
 			displaylist_pos(&dl, 256 - (k + 1) * 16, 0, 0);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_080));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_080));
 			displaylist_texcoord(&dl, s + k + 1, t + 16);
 
 			displaylist_pos(&dl, 256 - (k + 1) * 16, 0, -16);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_080));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_080));
 			displaylist_texcoord(&dl, s + k, t + 16);
 
 			displaylist_pos(&dl, 256 - (k + 1) * 16, 256, -16);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_080));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_080));
 			displaylist_texcoord(&dl, s + k, t);
 
 			// back
 			displaylist_pos(&dl, 256 - k * 16, 256, 0);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_080));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_080));
 			displaylist_texcoord(&dl, s + k + 1, t);
 
 			displaylist_pos(&dl, 256 - k * 16, 256, -16);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_080));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_080));
 			displaylist_texcoord(&dl, s + k, t);
 
 			displaylist_pos(&dl, 256 - k * 16, 0, -16);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_080));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_080));
 			displaylist_texcoord(&dl, s + k, t + 16);
 
 			displaylist_pos(&dl, 256 - k * 16, 0, 0);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_080));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_080));
 			displaylist_texcoord(&dl, s + k + 1, t + 16);
 
 			// top
 			displaylist_pos(&dl, 0, 256 - k * 16, 0);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_064));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_064));
 			displaylist_texcoord(&dl, s + 16, t + k);
 
 			displaylist_pos(&dl, 0, 256 - k * 16, -16);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_064));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_064));
 			displaylist_texcoord(&dl, s + 16, t + k + 1);
 
 			displaylist_pos(&dl, 256, 256 - k * 16, -16);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_064));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_064));
 			displaylist_texcoord(&dl, s, t + k + 1);
 
 			displaylist_pos(&dl, 256, 256 - k * 16, 0);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_064));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_064));
 			displaylist_texcoord(&dl, s, t + k);
 
 			// bottom
 			displaylist_pos(&dl, 0, 256 - (k + 1) * 16, 0);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_064));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_064));
 			displaylist_texcoord(&dl, s + 16, t + k);
 
 			displaylist_pos(&dl, 256, 256 - (k + 1) * 16, 0);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_064));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_064));
 			displaylist_texcoord(&dl, s, t + k);
 
 			displaylist_pos(&dl, 256, 256 - (k + 1) * 16, -16);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_064));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_064));
 			displaylist_texcoord(&dl, s, t + k + 1);
 
 			displaylist_pos(&dl, 0, 256 - (k + 1) * 16, -16);
-			displaylist_color(&dl, DIM_LIGHT(*vertex_light, level_table_064));
+			displaylist_color(&dl, DIM_LIGHT(light, level_table_064));
 			displaylist_texcoord(&dl, s + 16, t + k + 1);
+		}
+
+		if(env == R_ITEM_ENV_THIRDPERSON) {
+			glm_translate(model, (vec3) {-4.0F, -8.0F, -7.0F});
+			glm_rotate_x(model, glm_rad(60.0F), model);
+			glm_scale(model, (vec3) {9.0F, 9.0F, 9.0F});
 		}
 
 		glm_translate(model, (vec3) {0.5F, 0.2F, 0.5F});
 		glm_scale_uni(model, 1.5F);
-		glm_rotate_y(model, glm_rad(50.0F), model);
+		glm_rotate_y(model,
+					 glm_rad(env == R_ITEM_ENV_FIRSTPERSON ? 50.0F : 90.0F),
+					 model);
 		glm_rotate_z(model, glm_rad(335.0F), model);
 		glm_translate(model, (vec3) {1.0F / 16.0F - 1.0F, -1.0F / 16.0F, 0.0F});
 
 		gfx_matrix_modelview(model);
 		gfx_lighting(true);
-		gfx_write_buffers(true, true, true);
 		displaylist_render_immediate(&dl, (2 + 16 * 4) * 4);
-		gfx_write_buffers(true, false, false);
 		gfx_lighting(false);
 	}
 
@@ -217,7 +224,7 @@ void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
 }
 
 void render_item_block(struct item* item, struct item_data* stack, mat4 model,
-					   bool inventory) {
+					   bool fullbright, enum render_item_env env) {
 	assert(item && stack && model);
 	assert(item_is_block(stack));
 
@@ -245,7 +252,7 @@ void render_item_block(struct item* item, struct item_data* stack, mat4 model,
 			item->render_data.block.default_metadata :
 			stack->durability,
 		.sky_light = 15,
-		.torch_light = inventory ? 15 : b->luminance,
+		.torch_light = env == R_ITEM_ENV_INVENTORY ? 15 : b->luminance,
 	};
 
 	struct block_data n[6] = {
@@ -267,16 +274,17 @@ void render_item_block(struct item* item, struct item_data* stack, mat4 model,
 
 	for(int k = 0; k < 6; k++) {
 		vertices += b->renderBlock(&dl, &this, (enum side)k, &neighbour,
-								   inventory ? vertex_light_inv : vertex_light,
+								   fullbright ? vertex_light_inv : vertex_light,
 								   false);
 		if(b->renderBlockAlways)
 			vertices += b->renderBlockAlways(
 				&dl, &this, (enum side)k, &neighbour,
-				inventory ? vertex_light_inv : vertex_light, false);
+				fullbright ? vertex_light_inv : vertex_light, false);
 	}
 
-	if(inventory) {
-		mat4 view;
+	mat4 view;
+
+	if(env == R_ITEM_ENV_INVENTORY) {
 		glm_translate_make(view, (vec3) {3 * 2, 3 * 2, -16});
 		glm_scale(view, (vec3) {20, 20, -20});
 		glm_translate(view, (vec3) {0.5F, 0.5F, 0.5F});
@@ -290,19 +298,22 @@ void render_item_block(struct item* item, struct item_data* stack, mat4 model,
 					- 45.0F),
 			view);
 		glm_translate(view, (vec3) {-0.5F, -0.5F, -0.5F});
-
-		mat4 modelview;
-		glm_mat4_mul(model, view, modelview);
-		gfx_matrix_modelview(modelview);
+	} else if(env == R_ITEM_ENV_THIRDPERSON) {
+		glm_translate_make(view, (vec3) {-4.0F, -14.0F, 3.0F});
+		glm_rotate_x(view, glm_rad(22.5F), view);
+		glm_rotate_y(view, glm_rad(45.0F), view);
+		glm_scale(view, (vec3) {6.0F, 6.0F, 6.0F});
 	} else {
-		gfx_matrix_modelview(model);
+		glm_mat4_identity(view);
 	}
+
+	mat4 modelview;
+	glm_mat4_mul(model, view, modelview);
+	gfx_matrix_modelview(modelview);
 
 	gfx_bind_texture(b->transparent ? &texture_anim : &texture_terrain);
 	gfx_lighting(true);
-	gfx_write_buffers(true, true, true);
 	displaylist_render_immediate(&dl, vertices * 4);
 	gfx_matrix_modelview(GLM_MAT4_IDENTITY);
-	gfx_write_buffers(true, false, false);
 	gfx_lighting(false);
 }
