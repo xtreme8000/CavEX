@@ -171,29 +171,35 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 
 	gfx_bind_texture(&texture_mob_char);
 
+	// head
 	render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F, 0.0F, 4.0F},
 					 (vec3) {head_pitch, head_yaw, 0.0F}, (ivec2) {8, 8},
 					 (ivec3) {8, 8, 8}, 0.0F, false, 1.0F);
+	// head overlay
 	render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F, 0.0F, 4.0F},
 					 (vec3) {head_pitch, head_yaw, 0.0F}, (ivec2) {40, 8},
 					 (ivec3) {8, 8, 8}, 0.5F, false, 1.0F);
-
+	// body
 	render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F, 12.0F, 2.0F},
 					 (vec3) {0.0F, 0.0F, 0.0F}, (ivec2) {20, 20},
 					 (ivec3) {8, 4, 12}, 0.0F, false, 1.0F);
+	// left foot
 	render_model_box(mv, (vec3) {2.0F, -16.0F, 0.0F},
 					 (vec3) {2.0F, 12.0F, 2.0F},
 					 (vec3) {foot_angle, 0.0F, 0.0F}, (ivec2) {4, 20},
 					 (ivec3) {4, 4, 12}, 0.0F, true, 1.0F);
+	// right foot
 	render_model_box(mv, (vec3) {-2.0F, -16.0F, 0.0F},
 					 (vec3) {2.0F, 12.0F, 2.0F},
 					 (vec3) {-foot_angle, 0.0F, 0.0F}, (ivec2) {4, 20},
 					 (ivec3) {4, 4, 12}, 0.0F, false, 1.0F);
-	render_model_box(mv, (vec3) {6.0F, -4.0F, 0.0F}, (vec3) {2.0F, 12.0F, 2.0F},
+	// left arm
+	render_model_box(mv, (vec3) {4.0F, -4.0F, 0.0F}, (vec3) {0.0F, 12.0F, 2.0F},
 					 (vec3) {arm_angle, 0.0F, 4.0F}, (ivec2) {44, 20},
 					 (ivec3) {4, 4, 12}, 0.0F, true, 1.0F);
+	// right arm
 	render_model_box(
-		mv, (vec3) {-6.0F, -4.0F, 0.0F}, (vec3) {2.0F, 12.0F, 2.0F},
+		mv, (vec3) {-4.0F, -4.0F, 0.0F}, (vec3) {4.0F, 12.0F, 2.0F},
 		(vec3) {(held_item_it ? -22.5F : 0.0F) - arm_angle, 0.0F, -4.0F},
 		(ivec2) {44, 20}, (ivec3) {4, 4, 12}, 0.0F, false, 1.0F);
 
@@ -235,10 +241,13 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 			mat4 mv_item;
 			glm_mat4_mul(mv, model, mv_item);
 
+			// pumpkin etc.
 			helmet_it->renderItem(helmet_it, helmet, mv_item, true,
 								  R_ITEM_ENV_ENTITY);
 		} else {
 			gfx_bind_texture(armor_texture[helmet_it->armor.tier][0]);
+
+			// head
 			render_model_box(
 				mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F, 0.0F, 4.0F},
 				(vec3) {head_pitch, head_yaw, 0.0F}, (ivec2) {8, 8},
@@ -249,16 +258,20 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 	if(chestplate_it && chestplate_it->armor.is_armor
 	   && chestplate_it->armor.type == ARMOR_TYPE_CHESTPLATE) {
 		gfx_bind_texture(armor_texture[chestplate_it->armor.tier][0]);
+
+		// body
 		render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F},
 						 (vec3) {4.0F, 12.0F, 2.0F}, (vec3) {0.0F, 0.0F, 0.0F},
 						 (ivec2) {20, 20}, (ivec3) {8, 4, 12}, 1.0F, false,
 						 1.0F);
-		render_model_box(mv, (vec3) {6.0F, -4.0F, 0.0F},
-						 (vec3) {2.0F, 12.0F, 2.0F},
+		// left arm
+		render_model_box(mv, (vec3) {4.0F, -4.0F, 0.0F},
+						 (vec3) {0.0F, 12.0F, 2.0F},
 						 (vec3) {arm_angle, 0.0F, 4.0F}, (ivec2) {44, 20},
 						 (ivec3) {4, 4, 12}, 1.0F, true, 1.0F);
+		// right arm
 		render_model_box(
-			mv, (vec3) {-6.0F, -4.0F, 0.0F}, (vec3) {2.0F, 12.0F, 2.0F},
+			mv, (vec3) {-4.0F, -4.0F, 0.0F}, (vec3) {4.0F, 12.0F, 2.0F},
 			(vec3) {(held_item_it ? -22.5F : 0.0F) - arm_angle, 0.0F, -4.0F},
 			(ivec2) {44, 20}, (ivec3) {4, 4, 12}, 1.0F, false, 1.0F);
 	}
@@ -266,14 +279,17 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 	if(leggings_it && leggings_it->armor.is_armor
 	   && leggings_it->armor.type == ARMOR_TYPE_LEGGINGS) {
 		gfx_bind_texture(armor_texture[leggings_it->armor.tier][1]);
+		// body
 		render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F},
 						 (vec3) {4.0F, 12.0F, 2.0F}, (vec3) {0.0F, 0.0F, 0.0F},
 						 (ivec2) {20, 20}, (ivec3) {8, 4, 12}, 0.5F, false,
 						 1.0F);
+		// left leg
 		render_model_box(mv, (vec3) {2.0F, -16.0F, 0.0F},
 						 (vec3) {2.0F, 12.0F, 2.0F},
 						 (vec3) {foot_angle, 0.0F, 0.0F}, (ivec2) {4, 20},
 						 (ivec3) {4, 4, 12}, 0.5F, true, 1.0F);
+		// right leg
 		render_model_box(mv, (vec3) {-2.0F, -16.0F, 0.0F},
 						 (vec3) {2.0F, 12.0F, 2.0F},
 						 (vec3) {-foot_angle, 0.0F, 0.0F}, (ivec2) {4, 20},
@@ -283,10 +299,12 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 	if(boots_it && boots_it->armor.is_armor
 	   && boots_it->armor.type == ARMOR_TYPE_BOOTS) {
 		gfx_bind_texture(armor_texture[boots_it->armor.tier][0]);
+		// left leg
 		render_model_box(mv, (vec3) {2.0F, -16.0F, 0.0F},
 						 (vec3) {2.0F, 12.0F, 2.0F},
 						 (vec3) {foot_angle, 0.0F, 0.0F}, (ivec2) {4, 20},
 						 (ivec3) {4, 4, 12}, 1.0F, true, 1.0F);
+		// right leg
 		render_model_box(mv, (vec3) {-2.0F, -16.0F, 0.0F},
 						 (vec3) {2.0F, 12.0F, 2.0F},
 						 (vec3) {-foot_angle, 0.0F, 0.0F}, (ivec2) {4, 20},
