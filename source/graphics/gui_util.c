@@ -107,14 +107,44 @@ void gutil_bg() {
 	}
 }
 
-static const uint8_t font_char_width[256] = {
-	8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-	8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 1, 4, 5, 5, 5, 5, 2, 4, 4, 4, 5,
-	1, 5, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 1, 4, 5, 4, 5, 6, 5,
-	5, 5, 5, 5, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	5, 5, 5, 3, 5, 3, 5, 5, 2, 5, 5, 5, 5, 5, 4, 5, 5, 1, 5, 4, 2, 5,
-	5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 4, 1, 4, 6, 5,
-};
+static uint8_t font_char_width[256];
+
+void gutil_reset_font(struct tex_gfx* tex) {
+	assert(tex);
+
+	int char_width = tex->width / 16;
+	int char_height = tex->height / 16;
+
+	for(int y = 0; y < 16; y++) {
+		for(int x = 0; x < 16; x++) {
+			int width = 0;
+
+			for(int i = 0; i < char_width; i++) {
+				bool has_pixel = false;
+
+				for(int j = 0; j < char_height; j++) {
+					uint8_t col[4];
+					tex_gfx_lookup(tex, x * char_width + i, y * char_height + j,
+								   col);
+
+					if(col[0] || col[1] || col[2]) {
+						has_pixel = true;
+						break;
+					}
+				}
+
+				if(!has_pixel)
+					break;
+
+				width++;
+			}
+
+			font_char_width[x + y * 16] = width * 8 / char_width;
+		}
+	}
+
+	font_char_width[' '] = 4;
+}
 
 int gutil_font_width(char* str, int scale) {
 	int x = 0;

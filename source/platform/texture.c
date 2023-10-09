@@ -23,6 +23,7 @@
 
 #include "../config.h"
 #include "../game/game_state.h"
+#include "../graphics/gui_util.h"
 #include "../lodepng/lodepng.h"
 #include "texture.h"
 
@@ -80,6 +81,8 @@ void tex_init() {
 		tex_gfx_load(&texture_terrain, output, w, h, TEX_FMT_RGBA16, false);
 
 	tex_gfx_load_file(&texture_font, "default.png", TEX_FMT_I8, false);
+	gutil_reset_font(&texture_font);
+
 	tex_gfx_load_file(&texture_anim, "anim.png", TEX_FMT_RGBA32, false);
 	tex_gfx_load_file(&texture_gui_inventory, "gui/inventory.png",
 					  TEX_FMT_RGBA16, false);
