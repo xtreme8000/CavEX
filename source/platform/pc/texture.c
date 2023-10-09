@@ -22,6 +22,8 @@
 
 #include "../texture.h"
 
+void tex_init_pre() { }
+
 void tex_gfx_load(struct tex_gfx* tex, void* img, size_t width, size_t height,
 				  enum tex_format type, bool linear) {
 	assert(tex && img && width > 0 && height > 0);

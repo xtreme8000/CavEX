@@ -30,6 +30,43 @@
 #define xy16(x, y) (((int)(x) << 8) | (int)(y))
 #define ia8(i, a) (((int)(a) << 4) | (int)(i))
 
+static uint8_t lut_3[256];
+static uint8_t lut_4[256];
+static uint8_t lut_5[256];
+static uint8_t lut_6[256];
+
+static uint8_t conv_color(uint8_t col, size_t depth) {
+	return ((col << (8 - depth)) | (col >> (2 * depth - 8)));
+}
+
+static void lut_gen(int depth, uint8_t* lut) {
+	assert(depth >= 1 && depth <= 8 && lut);
+
+	for(int k = 0; k < 256; k++) {
+		int best = 0;
+		int best_error = INT_MAX;
+
+		for(int i = 0; i < (1 << depth); i++) {
+			int col = conv_color(i, depth);
+			int error = abs(col - k);
+
+			if(error < best_error) {
+				best_error = error;
+				best = i;
+			}
+		}
+
+		lut[k] = best;
+	}
+}
+
+void tex_init_pre() {
+	lut_gen(3, lut_3);
+	lut_gen(4, lut_4);
+	lut_gen(5, lut_5);
+	lut_gen(6, lut_6);
+}
+
 static void* tex_conv_rgba32(uint8_t* image, size_t width, size_t height) {
 	assert(image && (width % 4) == 0 && (height % 4) == 0);
 	uint16_t* output = memalign(32, width * height * sizeof(uint16_t) * 2);
@@ -76,14 +113,14 @@ static void* tex_conv_rgba16(uint8_t* image, size_t width, size_t height) {
 			for(size_t by = 0; by < 4; by++) {
 				for(size_t bx = 0; bx < 4; bx++) {
 					uint8_t* col = image + (x + bx + (y + by) * width) * 4;
-					int alpha = col[3] >> 5;
+					int alpha = lut_3[col[3]];
 
 					if(alpha < 7) {
-						output[output_idx++] = rgba16(col[0] >> 4, col[1] >> 4,
-													  col[2] >> 4, alpha);
+						output[output_idx++] = rgba16(
+							lut_4[col[0]], lut_4[col[1]], lut_4[col[2]], alpha);
 					} else {
-						output[output_idx++]
-							= rgb16_2(col[0] >> 3, col[1] >> 3, col[2] >> 3);
+						output[output_idx++] = rgb16_2(
+							lut_5[col[0]], lut_5[col[1]], lut_5[col[2]]);
 					}
 				}
 			}
@@ -110,7 +147,7 @@ static void* tex_conv_rgb16(uint8_t* image, size_t width, size_t height) {
 				for(size_t bx = 0; bx < 4; bx++) {
 					uint8_t* col = image + (x + bx + (y + by) * width) * 4;
 					output[output_idx++]
-						= rgb16(col[0] >> 3, col[1] >> 2, col[2] >> 3);
+						= rgb16(lut_5[col[0]], lut_6[col[1]], lut_5[col[2]]);
 				}
 			}
 		}
@@ -162,8 +199,8 @@ static void* tex_conv_ia4(uint8_t* image, size_t width, size_t height) {
 				for(size_t bx = 0; bx < 8; bx++) {
 					uint8_t* col = image + (x + bx + (y + by) * width) * 4;
 					output[output_idx++] = ia8(
-						(((int)col[0] + (int)col[1] + (int)col[2]) / 3) >> 4,
-						col[3] >> 4);
+						lut_4[((int)col[0] + (int)col[1] + (int)col[2]) / 3],
+						lut_4[col[3]]);
 				}
 			}
 		}
@@ -238,9 +275,15 @@ void tex_gfx_lookup(struct tex_gfx* tex, int x, int y, uint8_t* color) {
 			uint8_t* blk
 				= tex->data + ((x / 8) + (y / 4) * (tex->width / 8)) * 32;
 			uint8_t pixel = blk[(x % 8) + (y % 4) * 8];
-			color[0] = color[1] = color[2] = (pixel & 0x0F) << 4;
-			color[3] = pixel & 0xF0;
+			color[0] = color[1] = color[2] = conv_color(pixel & 0x0F, 4);
+			color[3] = conv_color((pixel & 0xF0) >> 4, 4);
 		} break;
-		default: assert(false); memset(color, 0, 4);
+		case TEX_FMT_I8: {
+			uint8_t* blk
+				= tex->data + ((x / 8) + (y / 4) * (tex->width / 8)) * 32;
+			uint8_t pixel = blk[(x % 8) + (y % 4) * 8];
+			color[0] = color[1] = color[2] = color[3] = pixel;
+		} break;
+		default: assert(false);
 	}
 }

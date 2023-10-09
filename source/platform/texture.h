@@ -78,6 +78,7 @@ extern struct tex_gfx texture_armor_iron2;
 extern struct tex_gfx texture_armor_diamond1;
 extern struct tex_gfx texture_armor_diamond2;
 
+void tex_init_pre(void);
 void tex_init(void);
 
 uint8_t* tex_read(const char* filename, size_t* width, size_t* height);

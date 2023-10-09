@@ -72,6 +72,8 @@ static void gen_texture_fog(uint8_t* img, size_t size) {
 }
 
 void tex_init() {
+	tex_init_pre();
+
 	size_t w, h;
 	void* output = tex_atlas_block("terrain.png", &w, &h);
 	if(output)
