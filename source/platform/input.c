@@ -122,17 +122,81 @@ void input_native_joystick(float dt, float* dx, float* dy) {
 
 #include <wiiuse/wpad.h>
 
+static struct {
+	float dx, dy;
+	float magnitude;
+	bool available;
+} joystick_input[3];
+
+static bool js_emulated_btns_prev[3][4];
+static bool js_emulated_btns_held[3][4];
+
 void input_init() {
 	WPAD_Init();
-	WPAD_SetDataFormat(0, WPAD_FMT_BTNS_ACC_IR);
-	WPAD_SetVRes(WPAD_CHAN_ALL, gfx_width(), gfx_height());
+	WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_BTNS_ACC_IR);
+	WPAD_SetVRes(WPAD_CHAN_0, gfx_width(), gfx_height());
+
+	for(int k = 0; k < 4; k++) {
+		for(int j = 0; j < 3; j++)
+			js_emulated_btns_prev[j][k] = js_emulated_btns_held[j][k] = false;
+	}
 }
 
 void input_poll() {
 	WPAD_ScanPads();
+
+	expansion_t e;
+	WPAD_Expansion(WPAD_CHAN_0, &e);
+
+	if(e.type == WPAD_EXP_NUNCHUK) {
+		joystick_input[0].dx = sin(glm_rad(e.nunchuk.js.ang));
+		joystick_input[0].dy = cos(glm_rad(e.nunchuk.js.ang));
+		joystick_input[0].magnitude = e.nunchuk.js.mag;
+		joystick_input[0].available = true;
+	} else {
+		joystick_input[0].available = false;
+	}
+
+	if(e.type == WPAD_EXP_CLASSIC) {
+		joystick_input[1].dx = sin(glm_rad(e.classic.ljs.ang));
+		joystick_input[1].dy = cos(glm_rad(e.classic.ljs.ang));
+		joystick_input[1].magnitude = e.classic.ljs.mag;
+		joystick_input[1].available = true;
+
+		joystick_input[2].dx = sin(glm_rad(e.classic.rjs.ang));
+		joystick_input[2].dy = cos(glm_rad(e.classic.rjs.ang));
+		joystick_input[2].magnitude = e.classic.rjs.mag;
+		joystick_input[2].available = true;
+	} else {
+		joystick_input[1].available = joystick_input[2].available = false;
+	}
+
+	for(int j = 0; j < 3; j++) {
+		for(int k = 0; k < 4; k++) {
+			js_emulated_btns_prev[j][k] = js_emulated_btns_held[j][k];
+			js_emulated_btns_held[j][k] = false;
+		}
+
+		if(joystick_input[j].available) {
+			float x = joystick_input[j].dx * joystick_input[j].magnitude;
+			float y = joystick_input[j].dy * joystick_input[j].magnitude;
+
+			if(x > 0.2F) {
+				js_emulated_btns_held[j][3] = true;
+			} else if(x < -0.2F) {
+				js_emulated_btns_held[j][2] = true;
+			}
+
+			if(y > 0.2F) {
+				js_emulated_btns_held[j][0] = true;
+			} else if(y < -0.2F) {
+				js_emulated_btns_held[j][1] = true;
+			}
+		}
+	}
 }
 
-uint32_t input_wpad_translate(int key) {
+static uint32_t input_wpad_translate(int key) {
 	switch(key) {
 		case 0: return WPAD_BUTTON_UP;
 		case 1: return WPAD_BUTTON_DOWN;
@@ -196,6 +260,20 @@ uint32_t input_wpad_translate(int key) {
 
 void input_native_key_status(int key, bool* pressed, bool* released,
 							 bool* held) {
+	if(key >= 900 && key < 924) {
+		int js = (key - 900) / 10;
+		int offset = (key - 900) % 10;
+		if(offset < 4) {
+			*held = js_emulated_btns_held[js][offset]
+				&& js_emulated_btns_prev[js][offset];
+			*pressed = js_emulated_btns_held[js][offset]
+				&& !js_emulated_btns_prev[js][offset];
+			*released = !js_emulated_btns_held[js][offset]
+				&& js_emulated_btns_prev[js][offset];
+			return;
+		}
+	}
+
 	*pressed = WPAD_ButtonsDown(WPAD_CHAN_0) & input_wpad_translate(key);
 	*released = WPAD_ButtonsUp(WPAD_CHAN_0) & input_wpad_translate(key);
 	*held = !(*pressed) && !(*released)
@@ -204,6 +282,27 @@ void input_native_key_status(int key, bool* pressed, bool* released,
 
 bool input_native_key_symbol(int key, int* symbol, int* symbol_help,
 							 enum input_category* category, int* priority) {
+	if(key >= 900 && key < 904) {
+		*symbol = *symbol_help = 17;
+		*category = INPUT_CAT_NUNCHUK;
+		*priority = 1;
+		return true;
+	}
+
+	if(key >= 910 && key < 914) {
+		*symbol = *symbol_help = 18;
+		*category = INPUT_CAT_CLASSIC_CONTROLLER;
+		*priority = 1;
+		return true;
+	}
+
+	if(key >= 920 && key < 924) {
+		*symbol = *symbol_help = 19;
+		*category = INPUT_CAT_CLASSIC_CONTROLLER;
+		*priority = 1;
+		return true;
+	}
+
 	if(key < 0 || key > 308)
 		return false;
 
@@ -264,15 +363,13 @@ bool input_pointer(float* x, float* y, float* angle) {
 }
 
 void input_native_joystick(float dt, float* dx, float* dy) {
-	expansion_t e;
-	WPAD_Expansion(WPAD_CHAN_0, &e);
-
-	if(e.type == WPAD_EXP_NUNCHUK && e.nunchuk.js.mag > 0.1F) {
-		*dx = sin(glm_rad(e.nunchuk.js.ang)) * e.nunchuk.js.mag * dt;
-		*dy = cos(glm_rad(e.nunchuk.js.ang)) * e.nunchuk.js.mag * dt;
-	} else if(e.type == WPAD_EXP_CLASSIC && e.classic.rjs.mag > 0.1F) {
-		*dx = sin(glm_rad(e.classic.rjs.ang)) * e.classic.rjs.mag * dt;
-		*dy = cos(glm_rad(e.classic.rjs.ang)) * e.classic.rjs.mag * dt;
+	if(joystick_input[0].available && joystick_input[0].magnitude > 0.1F) {
+		*dx = joystick_input[0].dx * joystick_input[0].magnitude * dt;
+		*dy = joystick_input[0].dy * joystick_input[0].magnitude * dt;
+	} else if(joystick_input[2].available
+			  && joystick_input[2].magnitude > 0.1F) {
+		*dx = joystick_input[2].dx * joystick_input[2].magnitude * dt;
+		*dy = joystick_input[2].dy * joystick_input[2].magnitude * dt;
 	} else {
 		*dx = 0.0F;
 		*dy = 0.0F;

@@ -18,6 +18,10 @@
 | --- | :-: |
 | Z | `100` |
 | C | `101` |
+| joystick up | `900` |
+| joystick down | `901` |
+| joystick left | `902` |
+| joystick right | `903` |
 
 | Classic controller | config id |
 | --- | :-: |
@@ -36,6 +40,14 @@
 | plus | `212` |
 | minus | `213` |
 | home | `214` |
+| L joystick up | `910` |
+| L joystick down | `911` |
+| L joystick left | `912` |
+| L joystick right | `913` |
+| R joystick up | `920` |
+| R joystick down | `921` |
+| R joystick left | `922` |
+| R joystick right | `923` |
 
 | Guitar Hero 3 | config id |
 | --- | :-: |
