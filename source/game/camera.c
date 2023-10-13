@@ -183,7 +183,7 @@ void camera_update(struct camera* c) {
 	assert(c);
 
 	glm_perspective(glm_rad(gstate.config.fov),
-					(float)gfx_width() / (float)gfx_height(), 0.1F,
+					(float)gfx_width() / (float)gfx_height(), 0.075F,
 					gstate.config.render_distance, c->projection);
 
 	glm_lookat((vec3) {c->x, c->y, c->z},
