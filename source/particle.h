@@ -1,5 +1,5 @@
 /*
-	Copyright (c) 2022 ByteBit/xtreme8000
+	Copyright (c) 2023 ByteBit/xtreme8000
 
 	This file is part of CavEX.
 
@@ -17,23 +17,26 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef HASH_H
-#define HASH_H
+#ifndef PARTICLE_H
+#define PARTICLE_H
 
-#include <stddef.h>
-#include <stdint.h>
-
+#include "cglm/cglm.h"
 #include "platform/time.h"
+#include "world.h"
 
-float rand_flt(void);
+struct particle {
+	vec3 pos;
+	vec3 pos_old;
+	vec3 vel;
+	vec2 tex_uv;
+	float size;
+	int age;
+};
 
-void* file_read(const char* name);
-
-uint32_t hash_u32(uint32_t x);
-
-void hsv2rgb(float* h, float* s, float* v);
-
-uint8_t nibble_read(uint8_t* base, size_t idx);
-void nibble_write(uint8_t* base, size_t idx, uint8_t data);
+void particle_init(void);
+void particle_generate_block(struct block_info* info);
+void particle_generate_side(struct block_info* info, enum side s);
+void particle_update(void);
+void particle_render(mat4 view, vec3 camera, float delta);
 
 #endif

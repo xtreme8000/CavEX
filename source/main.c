@@ -37,6 +37,7 @@
 #include "network/client_interface.h"
 #include "network/server_interface.h"
 #include "network/server_local.h"
+#include "particle.h"
 #include "platform/gfx.h"
 #include "platform/input.h"
 #include "world.h"
@@ -79,11 +80,13 @@ int main(void) {
 	clin_init();
 	svin_init();
 	chunk_mesher_init();
+	particle_init();
 
 	struct server_local server;
 	server_local_create(&server);
 
 	ptime_t last_frame = time_get();
+	ptime_t last_tick = last_frame;
 
 	while(!gstate.quit) {
 		ptime_t this_frame = time_get();
@@ -99,6 +102,14 @@ int main(void) {
 			/ (float)DAY_LENGTH_TICKS;
 
 		clin_update();
+
+		float tick_delta = time_diff_s(last_tick, time_get()) / 0.05F;
+
+		while(tick_delta >= 1.0F) {
+			last_tick = time_add_ms(last_tick, 50);
+			tick_delta -= 1.0F;
+			particle_update();
+		}
 
 		bool render_world
 			= gstate.current_screen->render_world && gstate.world_loaded;
@@ -160,6 +171,11 @@ int main(void) {
 
 			gstate.stats.chunks_rendered
 				= world_render(&gstate.world, &gstate.camera, false);
+
+			particle_render(
+				gstate.camera.view,
+				(vec3) {gstate.camera.x, gstate.camera.y, gstate.camera.z},
+				tick_delta);
 		} else {
 			gstate.stats.chunks_rendered = 0;
 		}

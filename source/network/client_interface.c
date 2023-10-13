@@ -19,6 +19,7 @@
 
 #include "client_interface.h"
 #include "../game/game_state.h"
+#include "../particle.h"
 #include "../platform/thread.h"
 #include "server_interface.h"
 
@@ -146,10 +147,36 @@ void clin_process(struct client_rpc* call) {
 			gstate.world_time_start = time_get();
 			break;
 		case CRPC_SET_BLOCK:
+			if(call->payload.set_block.block.type == BLOCK_AIR) {
+				struct block_data blk = world_get_block(
+					&gstate.world, call->payload.set_block.x,
+					call->payload.set_block.y, call->payload.set_block.z);
+				struct block_data neighbours[6];
+
+				for(int k = 0; k < SIDE_MAX; k++) {
+					int ox, oy, oz;
+					blocks_side_offset((enum side)k, &ox, &oy, &oz);
+
+					neighbours[k] = world_get_block(
+						&gstate.world, call->payload.set_block.x + ox,
+						call->payload.set_block.y + oy,
+						call->payload.set_block.z + oz);
+				}
+
+				particle_generate_block(&(struct block_info) {
+					.block = &blk,
+					.neighbours = neighbours,
+					.x = call->payload.set_block.x,
+					.y = call->payload.set_block.y,
+					.z = call->payload.set_block.z,
+				});
+			}
+
 			world_set_block(&gstate.world, call->payload.set_block.x,
 							call->payload.set_block.y,
 							call->payload.set_block.z,
 							call->payload.set_block.block, true);
+
 			break;
 	}
 }

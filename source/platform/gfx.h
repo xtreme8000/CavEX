@@ -80,5 +80,7 @@ void gfx_draw_lines(size_t vertex_count, const int16_t* vertices,
 					const uint8_t* colors);
 void gfx_draw_quads(size_t vertex_count, const int16_t* vertices,
 					const uint8_t* colors, const uint16_t* texcoords);
+void gfx_draw_quads_flt(size_t vertex_count, const float* vertices,
+						const uint8_t* colors, const float* texcoords);
 
 #endif

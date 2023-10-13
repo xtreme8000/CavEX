@@ -210,11 +210,9 @@ static void screen_inventory_render2D(struct screen* s, int width, int height) {
 		= windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]);
 
 	// darken background
-	gfx_blending(MODE_BLEND);
 	gfx_texture(false);
 	gutil_texquad_col(0, 0, 0, 0, 0, 0, width, height, 0, 0, 0, 180);
 	gfx_texture(true);
-	gfx_blending(MODE_OFF);
 
 	int off_x = (width - GUI_WIDTH * 2) / 2;
 	int off_y = (height - GUI_HEIGHT * 2) / 2;
@@ -272,10 +270,8 @@ static void screen_inventory_render2D(struct screen* s, int width, int height) {
 
 	gfx_bind_texture(&texture_gui2);
 
-	gfx_blending(MODE_BLEND);
 	gutil_texquad(off_x + selection->x - 8, off_y + selection->y - 8, 208, 0,
 				  24, 24, 24 * 2, 24 * 2);
-	gfx_blending(MODE_OFF);
 
 	int icon_offset = 32;
 	icon_offset += gutil_control_icon(icon_offset, IB_GUI_UP, "Move");

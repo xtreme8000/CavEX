@@ -24,6 +24,10 @@
 
 #include "util.h"
 
+float rand_flt() {
+	return (float)rand() / RAND_MAX;
+}
+
 void* file_read(const char* name) {
 	FILE* f = fopen(name, "rb");
 

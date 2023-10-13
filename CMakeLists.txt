@@ -124,6 +124,7 @@ add_executable(cavex
 				source/util.c
 				source/world.c
 				source/config.c
+				source/particle.c
 
 				source/lodepng/lodepng.c
 

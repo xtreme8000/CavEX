@@ -429,3 +429,22 @@ void gfx_draw_quads(size_t vertex_count, const int16_t* vertices,
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
 }
+
+void gfx_draw_quads_flt(size_t vertex_count, const float* vertices,
+						const uint8_t* colors, const float* texcoords) {
+	assert(vertices && colors && texcoords);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, colors);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, texcoords);
+
+	glDrawArrays(GL_QUADS, 0, vertex_count);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+}

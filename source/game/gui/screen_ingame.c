@@ -24,6 +24,7 @@
 #include "../../graphics/gui_util.h"
 #include "../../graphics/render_model.h"
 #include "../../network/server_interface.h"
+#include "../../particle.h"
 #include "../../platform/gfx.h"
 #include "../../platform/input.h"
 #include "../game_state.h"
@@ -225,6 +226,31 @@ static void screen_ingame_update(struct screen* s, float dt) {
 		   >= 0.2F) {
 		gstate.held_item_animation.punch.start = time_get();
 		gstate.held_item_animation.punch.place = false;
+
+		if(gstate.camera_hit.hit) {
+			struct block_data blk
+				= world_get_block(&gstate.world, gstate.camera_hit.x,
+								  gstate.camera_hit.y, gstate.camera_hit.z);
+
+			struct block_data neighbours[6];
+
+			for(int k = 0; k < SIDE_MAX; k++) {
+				int ox, oy, oz;
+				blocks_side_offset((enum side)k, &ox, &oy, &oz);
+
+				neighbours[k] = world_get_block(
+					&gstate.world, gstate.camera_hit.x + ox,
+					gstate.camera_hit.y + oy, gstate.camera_hit.z + oz);
+			}
+
+			particle_generate_side(
+				&(struct block_info) {.block = &blk,
+									  .neighbours = neighbours,
+									  .x = gstate.camera_hit.x,
+									  .y = gstate.camera_hit.y,
+									  .z = gstate.camera_hit.z},
+				gstate.camera_hit.side);
+		}
 	}
 
 	size_t slot = inventory_get_hotbar(
@@ -360,6 +386,7 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 
 	gfx_blending(MODE_BLEND);
 	gfx_bind_texture(&texture_gui2);
+
 	// draw hotbar selection
 	gutil_texquad((width - 182 * 2) / 2 - 2
 					  + 20 * 2

@@ -163,6 +163,11 @@ void gfx_setup() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGB, GX_RGB8, 0);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 8);
 
+	// entities, particles
+	GX_SetVtxAttrFmt(GX_VTXFMT1, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+	GX_SetVtxAttrFmt(GX_VTXFMT1, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+	GX_SetVtxAttrFmt(GX_VTXFMT1, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+
 	// gui, font drawing
 	GX_SetVtxAttrFmt(GX_VTXFMT2, GX_VA_POS, GX_POS_XYZ, GX_S16, 0);
 	GX_SetVtxAttrFmt(GX_VTXFMT2, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
@@ -501,6 +506,23 @@ void gfx_draw_quads(size_t vertex_count, const int16_t* vertices,
 		GX_Color4u8(colors[k * 4 + 0], colors[k * 4 + 1], colors[k * 4 + 2],
 					colors[k * 4 + 3]);
 		GX_TexCoord2u16(texcoords[k * 2 + 0], texcoords[k * 2 + 1]);
+	}
+
+	GX_End();
+}
+
+void gfx_draw_quads_flt(size_t vertex_count, const float* vertices,
+						const uint8_t* colors, const float* texcoords) {
+	assert(vertices && colors && texcoords);
+
+	GX_Begin(GX_QUADS, GX_VTXFMT1, vertex_count);
+
+	for(size_t k = 0; k < vertex_count; k++) {
+		GX_Position3f32(vertices[k * 3 + 0], vertices[k * 3 + 1],
+						vertices[k * 3 + 2]);
+		GX_Color4u8(colors[k * 4 + 0], colors[k * 4 + 1], colors[k * 4 + 2],
+					colors[k * 4 + 3]);
+		GX_TexCoord2f32(texcoords[k * 2 + 0], texcoords[k * 2 + 1]);
 	}
 
 	GX_End();

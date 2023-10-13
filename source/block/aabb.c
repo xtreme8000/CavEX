@@ -107,3 +107,8 @@ bool aabb_intersection(struct AABB* a, struct AABB* b) {
 		&& (a->y1 <= b->y2 && b->y1 <= a->y2)
 		&& (a->z1 <= b->z2 && b->z1 <= a->z2);
 }
+
+bool aabb_intersection_point(struct AABB* a, float x, float y, float z) {
+	return (x >= a->x1 && x <= a->x2) && (y >= a->y1 && y <= a->y2)
+		&& (z >= a->z1 && z <= a->z2);
+}
