@@ -59,7 +59,9 @@ void inventory_destroy(struct inventory* inv);
 void inventory_clear(struct inventory* inv);
 void inventory_consume(struct inventory* inv, size_t slot);
 bool inventory_collect(struct inventory* inv, struct item_data* item,
-					   size_t slot_start, size_t slot_length, bool* mask);
+					   uint8_t* slot_priority, size_t slot_length, bool* mask);
+bool inventory_collect_inventory(struct inventory* inv, struct item_data* item,
+								 bool* mask);
 size_t inventory_get_hotbar(struct inventory* inv);
 void inventory_set_hotbar(struct inventory* inv, size_t slot);
 bool inventory_get_hotbar_item(struct inventory* inv, struct item_data* item);

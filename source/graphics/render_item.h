@@ -26,9 +26,9 @@
 
 void render_item_init(void);
 void render_item_update_light(uint8_t light);
-void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
+void render_item_flat(struct item* item, struct item_data* stack, mat4 view,
 					  bool fullbright, enum render_item_env env);
-void render_item_block(struct item* item, struct item_data* stack, mat4 model,
+void render_item_block(struct item* item, struct item_data* stack, mat4 view,
 					   bool fullbright, enum render_item_env env);
 
 #endif

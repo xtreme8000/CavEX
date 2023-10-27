@@ -55,9 +55,9 @@ void render_item_update_light(uint8_t light) {
 	memset(vertex_light, light, sizeof(vertex_light));
 }
 
-void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
+void render_item_flat(struct item* item, struct item_data* stack, mat4 view,
 					  bool fullbright, enum render_item_env env) {
-	assert(item && stack && model);
+	assert(item && stack && view);
 
 	uint8_t s, t;
 
@@ -89,7 +89,7 @@ void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
 	}
 
 	if(env == R_ITEM_ENV_INVENTORY) {
-		gfx_matrix_modelview(model);
+		gfx_matrix_modelview(view);
 		gutil_texquad(0, 0, s, t, 16, 16, 16 * 2, 16 * 2);
 	} else {
 		displaylist_reset(&dl);
@@ -200,21 +200,42 @@ void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
 			displaylist_texcoord(&dl, s + 16, t + k + 1);
 		}
 
-		if(env == R_ITEM_ENV_THIRDPERSON) {
-			glm_translate(model, (vec3) {-4.0F, -8.0F, -7.0F});
-			glm_rotate_x(model, glm_rad(60.0F), model);
-			glm_scale(model, (vec3) {9.0F, 9.0F, 9.0F});
+		mat4 model;
+
+		switch(env) {
+			case R_ITEM_ENV_THIRDPERSON:
+				glm_translate_make(model, (vec3) {-4.0F, -8.0F, -7.0F});
+				glm_rotate_x(model, glm_rad(60.0F), model);
+				glm_scale(model, (vec3) {9.0F, 9.0F, 9.0F});
+
+				glm_translate(model, (vec3) {0.5F, 0.2F, 0.5F});
+				glm_scale_uni(model, 1.5F);
+				glm_rotate_y(model, glm_rad(90.0F), model);
+				glm_rotate_z(model, glm_rad(335.0F), model);
+				glm_translate(
+					model, (vec3) {1.0F / 16.0F - 1.0F, -1.0F / 16.0F, 0.0F});
+				break;
+			case R_ITEM_ENV_ENTITY:
+				glm_mat4_identity(model);
+				glm_scale_uni(model, 1.5F);
+				glm_translate_make(model,
+								   (vec3) {0.0F, 0.0F, 0.5F + 1.0F / 32.0F});
+				break;
+			case R_ITEM_ENV_FIRSTPERSON:
+				glm_translate_make(model, (vec3) {0.5F, 0.2F, 0.5F});
+				glm_scale_uni(model, 1.5F);
+				glm_rotate_y(model, glm_rad(50.0F), model);
+				glm_rotate_z(model, glm_rad(335.0F), model);
+				glm_translate(
+					model, (vec3) {1.0F / 16.0F - 1.0F, -1.0F / 16.0F, 0.0F});
+				break;
+			default: break;
 		}
 
-		glm_translate(model, (vec3) {0.5F, 0.2F, 0.5F});
-		glm_scale_uni(model, 1.5F);
-		glm_rotate_y(model,
-					 glm_rad(env == R_ITEM_ENV_FIRSTPERSON ? 50.0F : 90.0F),
-					 model);
-		glm_rotate_z(model, glm_rad(335.0F), model);
-		glm_translate(model, (vec3) {1.0F / 16.0F - 1.0F, -1.0F / 16.0F, 0.0F});
+		mat4 modelview;
+		glm_mat4_mul(view, model, modelview);
+		gfx_matrix_modelview(modelview);
 
-		gfx_matrix_modelview(model);
 		gfx_lighting(true);
 		displaylist_render_immediate(&dl, (2 + 16 * 4) * 4);
 		gfx_lighting(false);
@@ -223,9 +244,9 @@ void render_item_flat(struct item* item, struct item_data* stack, mat4 model,
 	gfx_matrix_modelview(GLM_MAT4_IDENTITY);
 }
 
-void render_item_block(struct item* item, struct item_data* stack, mat4 model,
+void render_item_block(struct item* item, struct item_data* stack, mat4 view,
 					   bool fullbright, enum render_item_env env) {
-	assert(item && stack && model);
+	assert(item && stack && view);
 	assert(item_is_block(stack));
 
 	struct block* b = blocks[stack->id];
@@ -282,33 +303,33 @@ void render_item_block(struct item* item, struct item_data* stack, mat4 model,
 				fullbright ? vertex_light_inv : vertex_light, false);
 	}
 
-	mat4 view;
+	mat4 model;
 
 	if(env == R_ITEM_ENV_INVENTORY) {
-		glm_translate_make(view, (vec3) {3 * 2, 3 * 2, -16});
-		glm_scale(view, (vec3) {20, 20, -20});
-		glm_translate(view, (vec3) {0.5F, 0.5F, 0.5F});
-		glm_rotate_z(view, glm_rad(180.0F), view);
-		glm_rotate_x(view, glm_rad(-30.0F), view);
+		glm_translate_make(model, (vec3) {3 * 2, 3 * 2, -16});
+		glm_scale(model, (vec3) {20, 20, -20});
+		glm_translate(model, (vec3) {0.5F, 0.5F, 0.5F});
+		glm_rotate_z(model, glm_rad(180.0F), model);
+		glm_rotate_x(model, glm_rad(-30.0F), model);
 		glm_rotate_y(
-			view,
+			model,
 			glm_rad((item->render_data.block.has_default ?
 						 item->render_data.block.default_rotation * 90.0F :
 						 0)
 					- 45.0F),
-			view);
-		glm_translate(view, (vec3) {-0.5F, -0.5F, -0.5F});
+			model);
+		glm_translate(model, (vec3) {-0.5F, -0.5F, -0.5F});
 	} else if(env == R_ITEM_ENV_THIRDPERSON) {
-		glm_translate_make(view, (vec3) {-4.0F, -14.0F, 3.0F});
-		glm_rotate_x(view, glm_rad(22.5F), view);
-		glm_rotate_y(view, glm_rad(45.0F), view);
-		glm_scale(view, (vec3) {6.0F, 6.0F, 6.0F});
+		glm_translate_make(model, (vec3) {-4.0F, -14.0F, 3.0F});
+		glm_rotate_x(model, glm_rad(22.5F), model);
+		glm_rotate_y(model, glm_rad(45.0F), model);
+		glm_scale(model, (vec3) {6.0F, 6.0F, 6.0F});
 	} else {
-		glm_mat4_identity(view);
+		glm_mat4_identity(model);
 	}
 
 	mat4 modelview;
-	glm_mat4_mul(model, view, modelview);
+	glm_mat4_mul(view, model, modelview);
 	gfx_matrix_modelview(modelview);
 
 	gfx_bind_texture(b->transparent ? &texture_anim : &texture_terrain);

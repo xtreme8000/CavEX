@@ -45,6 +45,10 @@ static size_t selected_slot;
 
 static void screen_inventory_reset(struct screen* s, int width, int height) {
 	input_pointer_enable(true);
+
+	if(gstate.local_player)
+		gstate.local_player->data.local_player.capture_input = false;
+
 	s->render3D = screen_ingame.render3D;
 
 	pointer_available = false;

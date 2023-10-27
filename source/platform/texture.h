@@ -64,6 +64,7 @@ extern struct tex_gfx texture_pointer;
 extern struct tex_gfx texture_clouds;
 extern struct tex_gfx texture_sun;
 extern struct tex_gfx texture_moon;
+extern struct tex_gfx texture_shadow;
 
 extern struct tex_gfx texture_mob_char;
 

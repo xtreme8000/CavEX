@@ -85,7 +85,7 @@ void inventory_consume(struct inventory* inv, size_t slot) {
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
 bool inventory_collect(struct inventory* inv, struct item_data* item,
-					   size_t slot_start, size_t slot_length, bool* mask) {
+					   uint8_t* slot_priority, size_t slot_length, bool* mask) {
 	assert(inv && item && item->id != 0 && mask);
 
 	struct item* it = item_get(item);
@@ -99,18 +99,20 @@ bool inventory_collect(struct inventory* inv, struct item_data* item,
 		bool has_canidate_empty = false;
 		size_t candidate_empty = 0;
 
-		for(size_t k = slot_start; k < slot_start + slot_length; k++) {
-			if(inv->items[k].id == item->id
-			   && inv->items[k].durability == item->durability
-			   && inv->items[k].count < it->max_stack) {
+		for(size_t k = 0; k < slot_length; k++) {
+			uint8_t slot = slot_priority[k];
+
+			if(inv->items[slot].id == item->id
+			   && inv->items[slot].durability == item->durability
+			   && inv->items[slot].count < it->max_stack) {
 				has_canidate_equal = true;
-				candidate_equal = k;
+				candidate_equal = slot;
 				break;
 			}
 
-			if(!has_canidate_empty && inv->items[k].id == 0) {
+			if(!has_canidate_empty && inv->items[slot].id == 0) {
 				has_canidate_empty = true;
-				candidate_empty = k;
+				candidate_empty = slot;
 			}
 		}
 
@@ -130,6 +132,20 @@ bool inventory_collect(struct inventory* inv, struct item_data* item,
 	}
 
 	return true;
+}
+
+bool inventory_collect_inventory(struct inventory* inv, struct item_data* item,
+								 bool* mask) {
+	uint8_t priorities[INVENTORY_SIZE_HOTBAR + INVENTORY_SIZE_MAIN];
+
+	for(size_t k = 0; k < INVENTORY_SIZE_HOTBAR; k++)
+		priorities[k] = k + INVENTORY_SLOT_HOTBAR;
+
+	for(size_t k = 0; k < INVENTORY_SIZE_MAIN; k++)
+		priorities[k + INVENTORY_SIZE_HOTBAR] = k + INVENTORY_SLOT_MAIN;
+
+	return inventory_collect(inv, item, priorities,
+							 sizeof(priorities) / sizeof(*priorities), mask);
 }
 
 size_t inventory_get_hotbar(struct inventory* inv) {

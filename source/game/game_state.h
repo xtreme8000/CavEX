@@ -25,6 +25,7 @@
 #include <stddef.h>
 
 #include "../config.h"
+#include "../entity/entity.h"
 #include "../item/window_container.h"
 #include "../platform/time.h"
 #include "../world.h"
@@ -53,6 +54,8 @@ struct game_state {
 	struct camera camera;
 	struct camera_ray_result camera_hit;
 	struct world world;
+	struct entity* local_player;
+	dict_entity_t entities;
 	uint64_t world_time;
 	ptime_t world_time_start;
 	struct window_container* windows[256];

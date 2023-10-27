@@ -82,6 +82,9 @@ int main(void) {
 	chunk_mesher_init();
 	particle_init();
 
+	dict_entity_init(gstate.entities);
+	gstate.local_player = NULL;
+
 	struct server_local server;
 	server_local_create(&server);
 
@@ -109,7 +112,12 @@ int main(void) {
 			last_tick = time_add_ms(last_tick, 50);
 			tick_delta -= 1.0F;
 			particle_update();
+			entities_client_tick(gstate.entities);
 		}
+
+		if(gstate.local_player)
+			camera_attach(&gstate.camera, gstate.local_player, tick_delta,
+						  gstate.stats.dt);
 
 		bool render_world
 			= gstate.current_screen->render_world && gstate.world_loaded;
@@ -171,11 +179,6 @@ int main(void) {
 
 			gstate.stats.chunks_rendered
 				= world_render(&gstate.world, &gstate.camera, false);
-
-			particle_render(
-				gstate.camera.view,
-				(vec3) {gstate.camera.x, gstate.camera.y, gstate.camera.z},
-				tick_delta);
 		} else {
 			gstate.stats.chunks_rendered = 0;
 		}
@@ -187,6 +190,14 @@ int main(void) {
 		}
 
 		if(render_world) {
+			gfx_fog(false);
+			particle_render(
+				gstate.camera.view,
+				(vec3) {gstate.camera.x, gstate.camera.y, gstate.camera.z},
+				tick_delta);
+			entities_client_render(gstate.entities, &gstate.camera, tick_delta);
+			gfx_fog(true);
+
 			world_render(&gstate.world, &gstate.camera, true);
 
 			if(gstate.world.dimension == WORLD_DIM_OVERWORLD)

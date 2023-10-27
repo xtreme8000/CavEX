@@ -43,6 +43,7 @@ struct server_local {
 		struct inventory inventory;
 	} player;
 	struct server_world world;
+	dict_entity_t entities;
 	uint64_t world_time;
 	ptime_t world_time_start;
 	string_t level_name;

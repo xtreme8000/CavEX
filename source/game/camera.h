@@ -34,6 +34,7 @@ struct camera {
 	} controller;
 };
 
+#include "../entity/entity.h"
 #include "../world.h"
 
 struct camera_ray_result {
@@ -47,5 +48,7 @@ void camera_ray_pick(struct world* w, float gx0, float gy0, float gz0,
 					 struct camera_ray_result* res);
 void camera_physics(struct camera* c, float dt);
 void camera_update(struct camera* c);
+void camera_attach(struct camera* c, struct entity* e, float tick_delta,
+				   float dt);
 
 #endif

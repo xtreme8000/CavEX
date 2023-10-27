@@ -55,6 +55,9 @@ struct world_option {
 static void screen_sworld_reset(struct screen* s, int width, int height) {
 	input_pointer_enable(true);
 
+	if(gstate.local_player)
+		gstate.local_player->data.local_player.capture_input = false;
+
 	if(worlds) {
 		while(!stack_empty(worlds)) {
 			struct world_option opt;

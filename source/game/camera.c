@@ -195,3 +195,23 @@ void camera_update(struct camera* c) {
 	glm_mat4_mul(c->projection, c->view, view_proj);
 	glm_frustum_planes(view_proj, c->frustum_planes);
 }
+
+void camera_attach(struct camera* c, struct entity* e, float tick_delta,
+				   float dt) {
+	vec3 pos_lerp;
+	glm_vec3_lerp(e->pos_old, e->pos, tick_delta, pos_lerp);
+	c->x = pos_lerp[0];
+	c->y = pos_lerp[1];
+	c->z = pos_lerp[2];
+
+	float jdx, jdy;
+	if(input_joystick(dt, &jdx, &jdy)) {
+		c->rx -= jdx * 2.0F;
+		c->ry -= jdy * 2.0F;
+	}
+
+	c->ry = glm_clamp(c->ry, glm_rad(0.5F), GLM_PI - glm_rad(0.5F));
+
+	e->orient[0] = c->rx;
+	e->orient[1] = c->ry;
+}

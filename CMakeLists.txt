@@ -75,6 +75,10 @@ add_executable(cavex
 				source/block/block_workbench.c
 				source/block/face_occlusion.c
 
+				source/entity/entity.c
+				source/entity/entity_local_player.c
+				source/entity/entity_item.c
+
 				source/cNBT/buffer.c
 				source/cNBT/nbt_loading.c
 				source/cNBT/nbt_parsing.c

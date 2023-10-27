@@ -34,6 +34,10 @@ enum client_rpc_type {
 	CRPC_WORLD_RESET,
 	CRPC_SET_BLOCK,
 	CRPC_WINDOW_TRANSACTION,
+	CRPC_SPAWN_ITEM,
+	CRPC_PICKUP_ITEM,
+	CRPC_ENTITY_DESTROY,
+	CRPC_ENTITY_MOVE,
 };
 
 struct client_rpc {
@@ -62,6 +66,7 @@ struct client_rpc {
 		uint64_t time_set;
 		struct {
 			enum world_dim dimension;
+			uint32_t local_entity;
 		} world_reset;
 		struct {
 			w_coord_t x, y, z;
@@ -72,6 +77,22 @@ struct client_rpc {
 			uint16_t action_id;
 			bool accepted;
 		} window_transaction;
+		struct {
+			uint32_t entity_id;
+			struct item_data item;
+			vec3 pos;
+		} spawn_item;
+		struct {
+			uint32_t entity_id;
+			uint32_t collector_id;
+		} pickup_item;
+		struct {
+			uint32_t entity_id;
+		} entity_destroy;
+		struct {
+			uint32_t entity_id;
+			vec3 pos;
+		} entity_move;
 	} payload;
 };
 

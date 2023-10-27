@@ -33,6 +33,9 @@
 
 static void screen_ingame_reset(struct screen* s, int width, int height) {
 	input_pointer_enable(false);
+
+	if(gstate.local_player)
+		gstate.local_player->data.local_player.capture_input = true;
 }
 
 void screen_ingame_render3D(struct screen* s, mat4 view) {
@@ -106,7 +109,6 @@ void screen_ingame_render3D(struct screen* s, mat4 view) {
 	uint8_t light = (in_block.torch_light << 4) | in_block.sky_light;
 
 	gfx_depth_range(0.0F, 0.1F);
-	gfx_write_buffers(true, true, true);
 
 	struct item_data item;
 	if(inventory_get_slot(windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]),
@@ -132,13 +134,10 @@ void screen_ingame_render3D(struct screen* s, mat4 view) {
 						 gfx_lookup_light(light));
 	}
 
-	gfx_write_buffers(true, false, false);
 	gfx_depth_range(0.0F, 1.0F);
 }
 
 static void screen_ingame_update(struct screen* s, float dt) {
-	camera_physics(&gstate.camera, dt);
-
 	if(gstate.camera_hit.hit && input_pressed(IB_ACTION2)
 	   && !gstate.digging.active) {
 		struct item_data item;
@@ -393,7 +392,6 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 						  * inventory_get_hotbar(windowc_get_latest(
 							  gstate.windows[WINDOWC_INVENTORY])),
 				  height - 32 * 8 / 5 - 23 * 2, 208, 0, 24, 24, 24 * 2, 24 * 2);
-	gfx_blending(MODE_OFF);
 }
 
 struct screen screen_ingame = {

@@ -48,7 +48,8 @@ struct world_section {
 	struct chunk* column[COLUMN_HEIGHT];
 };
 
-#define SECTION_TO_ID(x, z) (((int64_t)(z) << 32) | (((int64_t)(x)&0xFFFFFFFF)))
+#define SECTION_TO_ID(x, z)                                                    \
+	(((int64_t)(z) << 32) | (((int64_t)(x) & 0xFFFFFFFF)))
 
 DICT_DEF2(dict_wsection, int64_t, M_BASIC_OPLIST, struct world_section,
 		  M_POD_OPLIST)

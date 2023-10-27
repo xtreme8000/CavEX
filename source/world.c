@@ -548,9 +548,10 @@ size_t world_render(struct world* w, struct camera* c, bool pass) {
 bool world_aabb_intersection(struct world* w, struct AABB* a) {
 	assert(w && a);
 
-	w_coord_t min_x = floorf(a->x1) - 1;
+	w_coord_t min_x = floorf(a->x1);
+	// need to look one further, otherwise fence block breaks
 	w_coord_t min_y = floorf(a->y1) - 1;
-	w_coord_t min_z = floorf(a->z1) - 1;
+	w_coord_t min_z = floorf(a->z1);
 
 	w_coord_t max_x = ceilf(a->x2) + 1;
 	w_coord_t max_y = ceilf(a->y2) + 1;

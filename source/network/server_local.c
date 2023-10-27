@@ -32,6 +32,31 @@
 #define CHUNK_DIST2(x1, x2, z1, z2)                                            \
 	(((x1) - (x2)) * ((x1) - (x2)) + ((z1) - (z2)) * ((z1) - (z2)))
 
+static struct entity* spawn_item(vec3 pos, struct item_data* it, bool throw,
+								 struct server_local* s) {
+	uint32_t entity_id = entity_gen_id(s->entities);
+	struct entity* e = dict_entity_safe_get(s->entities, entity_id);
+	entity_item(entity_id, e, true, &s->world, *it);
+	e->teleport(e, pos);
+
+	if(throw) {
+		float rx = glm_rad(-s->player.rx);
+		float ry = glm_rad(s->player.ry + 90.0F);
+		e->vel[0] = sinf(rx) * sinf(ry) * 0.25F;
+		e->vel[1] = cosf(ry) * 0.25F;
+		e->vel[2] = cosf(rx) * sinf(ry) * 0.25F;
+	}
+
+	clin_rpc_send(&(struct client_rpc) {
+		.type = CRPC_SPAWN_ITEM,
+		.payload.spawn_item.entity_id = e->id,
+		.payload.spawn_item.item = e->data.item.item,
+		.payload.spawn_item.pos = {e->pos[0], e->pos[1], e->pos[2]},
+	});
+
+	return e;
+}
+
 static void server_local_process(struct server_rpc* call, void* user) {
 	assert(call && user);
 
@@ -92,10 +117,10 @@ static void server_local_process(struct server_rpc* call, void* user) {
 
 					if(item.id != 0) {
 						inventory_clear_slot(&s->player.inventory, k);
-						inventory_collect(&s->player.inventory, &item,
-										  INVENTORY_SLOT_MAIN,
-										  INVENTORY_SIZE_MAIN, slots_changed);
 						slots_changed[k] = true;
+						spawn_item(
+							(vec3) {s->player.x, s->player.y, s->player.z},
+							&item, true, s);
 					}
 				}
 
@@ -116,46 +141,25 @@ static void server_local_process(struct server_rpc* call, void* user) {
 			   && call->payload.block_dig.y < WORLD_HEIGHT
 			   && call->payload.block_dig.finished) {
 				struct block_data blk;
-				bool slots_changed[INVENTORY_SIZE];
-				memset(slots_changed, false, sizeof(slots_changed));
-
 				if(server_world_get_block(&s->world, call->payload.block_dig.x,
 										  call->payload.block_dig.y,
 										  call->payload.block_dig.z, &blk)) {
-					struct item_data drop = (struct item_data) {
-						.id = blk.type,
-						.durability = blk.metadata,
-						.count = 1,
-					};
+					server_world_set_block(&s->world, call->payload.block_dig.x,
+										   call->payload.block_dig.y,
+										   call->payload.block_dig.z,
+										   (struct block_data) {
+											   .type = BLOCK_AIR,
+											   .metadata = 0,
+										   });
 
-					// TODO: correct priority
-					inventory_collect(&s->player.inventory, &drop,
-									  INVENTORY_SLOT_HOTBAR,
-									  INVENTORY_SIZE_HOTBAR, slots_changed);
-					inventory_collect(&s->player.inventory, &drop,
-									  INVENTORY_SLOT_MAIN, INVENTORY_SIZE_MAIN,
-									  slots_changed);
-
-					for(size_t k = 0; k < INVENTORY_SIZE; k++) {
-						if(slots_changed[k])
-							clin_rpc_send(&(struct client_rpc) {
-								.type = CRPC_INVENTORY_SLOT,
-								.payload.inventory_slot.window
-								= WINDOWC_INVENTORY,
-								.payload.inventory_slot.slot = k,
-								.payload.inventory_slot.item
-								= s->player.inventory.items[k],
-							});
-					}
+					spawn_item((vec3) {call->payload.block_dig.x + 0.5F,
+									   call->payload.block_dig.y + 0.5F,
+									   call->payload.block_dig.z + 0.5F},
+							   &(struct item_data) {.id = blk.type,
+													.durability = blk.metadata,
+													.count = 1},
+							   false, s);
 				}
-
-				server_world_set_block(&s->world, call->payload.block_dig.x,
-									   call->payload.block_dig.y,
-									   call->payload.block_dig.z,
-									   (struct block_data) {
-										   .type = BLOCK_AIR,
-										   .metadata = 0,
-									   });
 			}
 			break;
 		case SRPC_BLOCK_PLACE:
@@ -222,7 +226,8 @@ static void server_local_process(struct server_rpc* call, void* user) {
 			// save chunks here, then destroy all
 			clin_rpc_send(&(struct client_rpc) {
 				.type = CRPC_WORLD_RESET,
-				.payload.world_reset.dimension = WORLD_DIM_OVERWORLD,
+				.payload.world_reset.dimension = s->player.dimension,
+				.payload.world_reset.local_entity = 0,
 			});
 
 			level_archive_write_player(
@@ -231,6 +236,7 @@ static void server_local_process(struct server_rpc* call, void* user) {
 
 			level_archive_write_inventory(&s->level, &s->player.inventory);
 
+			dict_entity_reset(s->entities);
 			server_world_destroy(&s->world);
 			level_archive_destroy(&s->level);
 
@@ -262,9 +268,12 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				if(level_archive_read(&s->level, LEVEL_TIME, &s->world_time, 0))
 					s->world_time_start = time_get();
 
+				dict_entity_reset(s->entities);
+
 				clin_rpc_send(&(struct client_rpc) {
 					.type = CRPC_WORLD_RESET,
 					.payload.world_reset.dimension = dim,
+					.payload.world_reset.local_entity = 0,
 				});
 			}
 			break;
@@ -278,6 +287,37 @@ static void server_local_update(struct server_local* s) {
 
 	if(!s->player.has_pos)
 		return;
+
+	dict_entity_it_t it;
+	dict_entity_it(it, s->entities);
+
+	while(!dict_entity_end_p(it)) {
+		uint32_t key = dict_entity_ref(it)->key;
+		struct entity* e = &dict_entity_ref(it)->value;
+
+		if(e->tick_server) {
+			bool remove = (e->delay_destroy == 0) || e->tick_server(e, s);
+			dict_entity_next(it);
+
+			if(remove) {
+				clin_rpc_send(&(struct client_rpc) {
+					.type = CRPC_ENTITY_DESTROY,
+					.payload.entity_destroy.entity_id = key,
+				});
+
+				dict_entity_erase(s->entities, key);
+			} else if(e->delay_destroy < 0) {
+				clin_rpc_send(&(struct client_rpc) {
+					.type = CRPC_ENTITY_MOVE,
+					.payload.entity_move.entity_id = key,
+					.payload.entity_move.pos
+					= {e->pos[0], e->pos[1], e->pos[2]},
+				});
+			}
+		} else {
+			dict_entity_next(it);
+		}
+	}
 
 	w_coord_t px = WCOORD_CHUNK_OFFSET(floor(s->player.x));
 	w_coord_t pz = WCOORD_CHUNK_OFFSET(floor(s->player.z));
@@ -392,6 +432,7 @@ void server_local_create(struct server_local* s) {
 	s->player.finished_loading = false;
 	string_init(s->level_name);
 	inventory_create(&s->player.inventory, INVENTORY_SIZE);
+	dict_entity_init(s->entities);
 
 	struct thread t;
 	thread_create(&t, server_local_thread, s, 8);
