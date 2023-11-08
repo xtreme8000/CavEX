@@ -23,9 +23,9 @@ static enum block_material getMaterial(struct block_info* this) {
 	return MATERIAL_STONE;
 }
 
-static bool getBoundingBox(struct block_info* this, bool entity,
-						   struct AABB* x) {
-	return false;
+static size_t getBoundingBox(struct block_info* this, bool entity,
+							 struct AABB* x) {
+	return 0;
 }
 
 static struct face_occlusion*

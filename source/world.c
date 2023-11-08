@@ -397,15 +397,24 @@ bool world_block_intersection(struct world* w, struct ray* r, w_coord_t x,
 	struct block_data blk = world_get_block(w, x, y, z);
 
 	if(blocks[blk.type]) {
-		struct AABB bbox;
+		struct block_info blk_info = (struct block_info) {
+			.block = &blk,
+			.x = x,
+			.y = y,
+			.z = z,
+		};
 
-		if(blocks[blk.type]->getBoundingBox(
-			   &(struct block_info) {.block = &blk, .x = x, .y = y, .z = z},
-			   false, &bbox)) {
-			aabb_translate(&bbox, x, y, z);
-			return aabb_intersection_ray(&bbox, r, s);
-		} else {
-			return false;
+		size_t count = blocks[blk.type]->getBoundingBox(&blk_info, false, NULL);
+		if(count > 0) {
+			struct AABB bbox[count];
+			blocks[blk.type]->getBoundingBox(&blk_info, false, bbox);
+
+			for(size_t k = 0; k < count; k++) {
+				aabb_translate(bbox + k, x, y, z);
+
+				if(aabb_intersection_ray(bbox + k, r, s))
+					return true;
+			}
 		}
 	}
 
@@ -563,17 +572,26 @@ bool world_aabb_intersection(struct world* w, struct AABB* a) {
 				struct block_data blk = world_get_block(w, x, y, z);
 
 				if(blocks[blk.type]) {
-					struct AABB b;
-					if(blocks[blk.type]->getBoundingBox(
-						   &(struct block_info) {.block = &blk,
-												 .neighbours = NULL,
-												 .x = x,
-												 .y = y,
-												 .z = z},
-						   true, &b)) {
-						aabb_translate(&b, x, y, z);
-						if(aabb_intersection(a, &b))
-							return true;
+					struct block_info blk_info = (struct block_info) {
+						.block = &blk,
+						.neighbours = NULL,
+						.x = x,
+						.y = y,
+						.z = z,
+					};
+
+					size_t count = blocks[blk.type]->getBoundingBox(&blk_info,
+																	true, NULL);
+					if(count > 0) {
+						struct AABB bbox[count];
+						blocks[blk.type]->getBoundingBox(&blk_info, true, bbox);
+
+						for(size_t k = 0; k < count; k++) {
+							aabb_translate(bbox + k, x, y, z);
+
+							if(aabb_intersection(a, bbox + k))
+								return true;
+						}
 					}
 				}
 			}

@@ -90,9 +90,10 @@ bool entity_get_block(struct entity* e, w_coord_t x, w_coord_t y, w_coord_t z,
 bool entity_intersection_threshold(struct entity* e, struct AABB* aabb,
 								   vec3 old_pos, vec3 new_pos,
 								   float* threshold);
-bool entity_aabb_intersection(struct entity* e, struct AABB* a,
-							  bool (*test)(struct block_data*, w_coord_t,
-										   w_coord_t, w_coord_t));
+bool entity_intersection(struct entity* e, struct AABB* a,
+						 bool (*test)(struct AABB* entity,
+									  struct block_info* blk_info));
+bool entity_aabb_intersection(struct entity* e, struct AABB* a);
 void entity_try_move(struct entity* e, vec3 pos, vec3 vel, struct AABB* bbox,
 					 size_t coord, bool* collision_xz, bool* on_ground);
 

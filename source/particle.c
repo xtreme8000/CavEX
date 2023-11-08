@@ -59,18 +59,25 @@ void particle_generate_block(struct block_info* info) {
 	if(!blocks[info->block->type])
 		return;
 
-	struct AABB aabb;
-	blocks[info->block->type]->getBoundingBox(info, false, &aabb);
+	size_t count = blocks[info->block->type]->getBoundingBox(info, false, NULL);
+
+	if(!count)
+		return;
+
+	struct AABB aabb[count];
+	blocks[info->block->type]->getBoundingBox(info, false, aabb);
+
+	// use only first AABB
 
 	float volume
-		= (aabb.x2 - aabb.x1) * (aabb.y2 - aabb.y1) * (aabb.z2 - aabb.z1);
+		= (aabb->x2 - aabb->x1) * (aabb->y2 - aabb->y1) * (aabb->z2 - aabb->z1);
 
 	uint8_t tex = blocks[info->block->type]->getTextureIndex(info, SIDE_FRONT);
 
 	for(int k = 0; k < volume * PARTICLES_VOLUME; k++) {
-		float x = rand_flt() * (aabb.x2 - aabb.x1) + aabb.x1;
-		float y = rand_flt() * (aabb.y2 - aabb.y1) + aabb.y1;
-		float z = rand_flt() * (aabb.z2 - aabb.z1) + aabb.z1;
+		float x = rand_flt() * (aabb->x2 - aabb->x1) + aabb->x1;
+		float y = rand_flt() * (aabb->y2 - aabb->y1) + aabb->y1;
+		float z = rand_flt() * (aabb->z2 - aabb->z1) + aabb->z1;
 
 		vec3 vel = {rand_flt() - 0.5F, rand_flt() - 0.5F, rand_flt() - 0.5F};
 		glm_vec3_normalize(vel);
@@ -86,17 +93,30 @@ void particle_generate_side(struct block_info* info, enum side s) {
 	if(!blocks[info->block->type])
 		return;
 
-	struct AABB aabb;
-	blocks[info->block->type]->getBoundingBox(info, false, &aabb);
+	size_t count = blocks[info->block->type]->getBoundingBox(info, false, NULL);
+
+	if(!count)
+		return;
+
+	struct AABB aabb[count];
+	blocks[info->block->type]->getBoundingBox(info, false, aabb);
+
+	// use only first AABB
 
 	float area;
 	switch(s) {
 		case SIDE_RIGHT:
-		case SIDE_LEFT: area = (aabb.y2 - aabb.y1) * (aabb.z2 - aabb.z1); break;
+		case SIDE_LEFT:
+			area = (aabb->y2 - aabb->y1) * (aabb->z2 - aabb->z1);
+			break;
 		case SIDE_BOTTOM:
-		case SIDE_TOP: area = (aabb.x2 - aabb.x1) * (aabb.z2 - aabb.z1); break;
+		case SIDE_TOP:
+			area = (aabb->x2 - aabb->x1) * (aabb->z2 - aabb->z1);
+			break;
 		case SIDE_FRONT:
-		case SIDE_BACK: area = (aabb.x2 - aabb.x1) * (aabb.y2 - aabb.y1); break;
+		case SIDE_BACK:
+			area = (aabb->x2 - aabb->x1) * (aabb->y2 - aabb->y1);
+			break;
 		default: return;
 	}
 
@@ -104,17 +124,17 @@ void particle_generate_side(struct block_info* info, enum side s) {
 	float offset = 0.0625F;
 
 	for(int k = 0; k < area * PARTICLES_AREA; k++) {
-		float x = rand_flt() * (aabb.x2 - aabb.x1) + aabb.x1;
-		float y = rand_flt() * (aabb.y2 - aabb.y1) + aabb.y1;
-		float z = rand_flt() * (aabb.z2 - aabb.z1) + aabb.z1;
+		float x = rand_flt() * (aabb->x2 - aabb->x1) + aabb->x1;
+		float y = rand_flt() * (aabb->y2 - aabb->y1) + aabb->y1;
+		float z = rand_flt() * (aabb->z2 - aabb->z1) + aabb->z1;
 
 		switch(s) {
-			case SIDE_LEFT: x = aabb.x1 - offset; break;
-			case SIDE_RIGHT: x = aabb.x2 + offset; break;
-			case SIDE_BOTTOM: y = aabb.y1 - offset; break;
-			case SIDE_TOP: y = aabb.y2 + offset; break;
-			case SIDE_FRONT: z = aabb.z1 - offset; break;
-			case SIDE_BACK: z = aabb.z2 + offset; break;
+			case SIDE_LEFT: x = aabb->x1 - offset; break;
+			case SIDE_RIGHT: x = aabb->x2 + offset; break;
+			case SIDE_BOTTOM: y = aabb->y1 - offset; break;
+			case SIDE_TOP: y = aabb->y2 + offset; break;
+			case SIDE_FRONT: z = aabb->z1 - offset; break;
+			case SIDE_BACK: z = aabb->z2 + offset; break;
 			default: return;
 		}
 
@@ -181,18 +201,29 @@ void particle_update() {
 		struct block_data in_block = world_get_block(&gstate.world, bx, by, bz);
 
 		bool intersect = false;
-		struct AABB aabb;
-		if(blocks[in_block.type]
-		   && blocks[in_block.type]->getBoundingBox(
-			   &(struct block_info) {.block = &in_block,
-									 .neighbours = NULL,
-									 .x = bx,
-									 .y = by,
-									 .z = bz},
-			   true, &aabb)) {
-			aabb_translate(&aabb, bx, by, bz);
-			intersect = aabb_intersection_point(&aabb, new_pos[0], new_pos[1],
-												new_pos[2]);
+		if(blocks[in_block.type]) {
+			struct block_info blk = (struct block_info) {
+				.block = &in_block,
+				.neighbours = NULL,
+				.x = bx,
+				.y = by,
+				.z = bz,
+			};
+
+			size_t count
+				= blocks[in_block.type]->getBoundingBox(&blk, true, NULL);
+			if(count > 0) {
+				struct AABB aabb[count];
+				blocks[in_block.type]->getBoundingBox(&blk, true, aabb);
+
+				for(size_t k = 0; k < count; k++) {
+					aabb_translate(aabb + k, bx, by, bz);
+					intersect = aabb_intersection_point(aabb + k, new_pos[0],
+														new_pos[1], new_pos[2]);
+					if(intersect)
+						break;
+				}
+			}
 		}
 
 		if(!intersect) {

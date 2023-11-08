@@ -24,32 +24,34 @@ static enum block_material getMaterial(struct block_info* this) {
 	return MATERIAL_WOOD;
 }
 
-static bool getBoundingBox(struct block_info* this, bool entity,
-						   struct AABB* x) {
-	if(this->block->metadata & 0x04) {
-		switch(this->block->metadata & 0x03) {
-			case 0:
-				aabb_setsize(x, 1.0F, 1.0F, 0.1875F);
-				aabb_translate(x, 0, 0, 0.40625F);
-				break;
-			case 1:
-				aabb_setsize(x, 1.0F, 1.0F, 0.1875F);
-				aabb_translate(x, 0, 0, -0.40625F);
-				break;
-			case 2:
-				aabb_setsize(x, 0.1875F, 1.0F, 1.0F);
-				aabb_translate(x, 0.40625F, 0, 0);
-				break;
-			case 3:
-				aabb_setsize(x, 0.1875F, 1.0F, 1.0F);
-				aabb_translate(x, -0.40625F, 0, 0);
-				break;
+static size_t getBoundingBox(struct block_info* this, bool entity,
+							 struct AABB* x) {
+	if(x) {
+		if(this->block->metadata & 0x04) {
+			switch(this->block->metadata & 0x03) {
+				case 0:
+					aabb_setsize(x, 1.0F, 1.0F, 0.1875F);
+					aabb_translate(x, 0, 0, 0.40625F);
+					break;
+				case 1:
+					aabb_setsize(x, 1.0F, 1.0F, 0.1875F);
+					aabb_translate(x, 0, 0, -0.40625F);
+					break;
+				case 2:
+					aabb_setsize(x, 0.1875F, 1.0F, 1.0F);
+					aabb_translate(x, 0.40625F, 0, 0);
+					break;
+				case 3:
+					aabb_setsize(x, 0.1875F, 1.0F, 1.0F);
+					aabb_translate(x, -0.40625F, 0, 0);
+					break;
+			}
+		} else {
+			aabb_setsize(x, 1.0F, 0.1875F, 1.0F);
 		}
-	} else {
-		aabb_setsize(x, 1.0F, 0.1875F, 1.0F);
 	}
 
-	return true;
+	return 1;
 }
 
 static struct face_occlusion*

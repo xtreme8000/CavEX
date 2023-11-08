@@ -37,7 +37,7 @@ struct block {
 	uint8_t (*getTextureIndex)(struct block_info*, enum side);
 	struct face_occlusion* (*getSideMask)(struct block_info*, enum side,
 										  struct block_info*);
-	bool (*getBoundingBox)(struct block_info*, bool, struct AABB*);
+	size_t (*getBoundingBox)(struct block_info*, bool, struct AABB*);
 	size_t (*renderBlock)(struct displaylist*, struct block_info*, enum side,
 						  struct block_info*, uint8_t*, bool);
 	size_t (*renderBlockAlways)(struct displaylist*, struct block_info*,

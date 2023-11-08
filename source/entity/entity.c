@@ -92,31 +92,44 @@ void entity_shadow(struct entity* e, struct AABB* a, mat4 view) {
 				struct block_data blk;
 
 				if(entity_get_block(e, x, y, z, &blk) && blocks[blk.type]) {
-					struct AABB b;
-					if(blocks[blk.type]->getBoundingBox(
-						   &(struct block_info) {.block = &blk,
-												 .neighbours = NULL,
-												 .x = x,
-												 .y = y,
-												 .z = z},
-						   true, &b)) {
-						aabb_translate(&b, x, y, z);
-						if(a->y2 > b.y2 && aabb_intersection(a, &b)) {
-							float u1 = (b.x1 - a->x1) * du;
-							float u2 = (b.x2 - a->x1) * du;
-							float v1 = (b.z1 - a->z1) * dv;
-							float v2 = (b.z2 - a->z1) * dv;
+					struct block_info blk_info = (struct block_info) {
+						.block = &blk,
+						.neighbours = NULL,
+						.x = x,
+						.y = y,
+						.z = z,
+					};
 
-							gfx_draw_quads_flt(
-								4,
-								(float[]) {b.x1, b.y2 + offset, b.z1, b.x2,
-										   b.y2 + offset, b.z1, b.x2,
-										   b.y2 + offset, b.z2, b.x1,
-										   b.y2 + offset, b.z2},
-								(uint8_t[]) {0xFF, 0xFF, 0xFF, 0x60, 0xFF, 0xFF,
-											 0xFF, 0x60, 0xFF, 0xFF, 0xFF, 0x60,
-											 0xFF, 0xFF, 0xFF, 0x60},
-								(float[]) {u1, v1, u2, v1, u2, v2, u1, v2});
+					size_t count = blocks[blk.type]->getBoundingBox(&blk_info,
+																	true, NULL);
+					if(count > 0) {
+						struct AABB bbox[count];
+						blocks[blk.type]->getBoundingBox(&blk_info, true, bbox);
+
+						for(size_t k = 0; k < count; k++) {
+							aabb_translate(bbox + k, x, y, z);
+
+							if(a->y2 > bbox[k].y2
+							   && aabb_intersection(a, bbox + k)) {
+								float u1 = (bbox[k].x1 - a->x1) * du;
+								float u2 = (bbox[k].x2 - a->x1) * du;
+								float v1 = (bbox[k].z1 - a->z1) * dv;
+								float v2 = (bbox[k].z2 - a->z1) * dv;
+
+								gfx_draw_quads_flt(
+									4,
+									(float[]) {bbox[k].x1, bbox[k].y2 + offset,
+											   bbox[k].z1, bbox[k].x2,
+											   bbox[k].y2 + offset, bbox[k].z1,
+											   bbox[k].x2, bbox[k].y2 + offset,
+											   bbox[k].z2, bbox[k].x1,
+											   bbox[k].y2 + offset, bbox[k].z2},
+									(uint8_t[]) {0xFF, 0xFF, 0xFF, 0x60, 0xFF,
+												 0xFF, 0xFF, 0x60, 0xFF, 0xFF,
+												 0xFF, 0x60, 0xFF, 0xFF, 0xFF,
+												 0x60},
+									(float[]) {u1, v1, u2, v1, u2, v2, u1, v2});
+							}
 						}
 					}
 				}
@@ -132,10 +145,32 @@ void entity_shadow(struct entity* e, struct AABB* a, mat4 view) {
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
-bool entity_aabb_intersection(struct entity* e, struct AABB* a,
-							  bool (*test)(struct block_data*, w_coord_t,
-										   w_coord_t, w_coord_t)) {
-	assert(e && a);
+static bool entity_block_aabb_test(struct AABB* entity,
+								   struct block_info* blk_info) {
+	assert(entity && blk_info);
+
+	struct block* b = blocks[blk_info->block->type];
+	size_t count = b->getBoundingBox(blk_info, true, NULL);
+
+	if(count > 0) {
+		struct AABB bbox[count];
+		b->getBoundingBox(blk_info, true, bbox);
+
+		for(size_t k = 0; k < count; k++) {
+			aabb_translate(bbox + k, blk_info->x, blk_info->y, blk_info->z);
+
+			if(aabb_intersection(entity, bbox + k))
+				return true;
+		}
+	}
+
+	return false;
+}
+
+bool entity_intersection(struct entity* e, struct AABB* a,
+						 bool (*test)(struct AABB* entity,
+									  struct block_info* blk_info)) {
+	assert(e && a && test);
 
 	w_coord_t min_x = floorf(a->x1);
 	// need to look one further, otherwise fence block breaks
@@ -151,27 +186,23 @@ bool entity_aabb_intersection(struct entity* e, struct AABB* a,
 			for(w_coord_t y = min_y; y < max_y; y++) {
 				struct block_data blk;
 
-				if(entity_get_block(e, x, y, z, &blk) && blocks[blk.type]) {
-					struct AABB b;
-					if(blocks[blk.type]->getBoundingBox(
+				if(entity_get_block(e, x, y, z, &blk) && blocks[blk.type]
+				   && test(a,
 						   &(struct block_info) {.block = &blk,
 												 .neighbours = NULL,
 												 .x = x,
 												 .y = y,
-												 .z = z},
-						   true, &b)
-					   || (test && test(&blk, x, y, z))) {
-						aabb_translate(&b, x, y, z);
-						if(aabb_intersection(a, &b)
-						   && (!test || test(&blk, x, y, z)))
-							return true;
-					}
-				}
+												 .z = z}))
+					return true;
 			}
 		}
 	}
 
 	return false;
+}
+
+bool entity_aabb_intersection(struct entity* e, struct AABB* a) {
+	return entity_intersection(e, a, entity_block_aabb_test);
 }
 
 bool entity_intersection_threshold(struct entity* e, struct AABB* aabb,
@@ -181,11 +212,11 @@ bool entity_intersection_threshold(struct entity* e, struct AABB* aabb,
 
 	struct AABB tmp = *aabb;
 	aabb_translate(&tmp, old_pos[0], old_pos[1], old_pos[2]);
-	bool a = entity_aabb_intersection(e, &tmp, NULL);
+	bool a = entity_aabb_intersection(e, &tmp);
 
 	tmp = *aabb;
 	aabb_translate(&tmp, new_pos[0], new_pos[1], new_pos[2]);
-	bool b = entity_aabb_intersection(e, &tmp, NULL);
+	bool b = entity_aabb_intersection(e, &tmp);
 
 	if(!a && b) {
 		float range_min = 0.0F;
@@ -207,7 +238,7 @@ bool entity_intersection_threshold(struct entity* e, struct AABB* aabb,
 			struct AABB dest = *aabb;
 			aabb_translate(&dest, pos_mid[0], pos_mid[1], pos_mid[2]);
 
-			if(entity_aabb_intersection(e, &dest, NULL)) {
+			if(entity_aabb_intersection(e, &dest)) {
 				range_max = mid;
 			} else {
 				range_min = mid;

@@ -23,10 +23,11 @@ static enum block_material getMaterial(struct block_info* this) {
 	return MATERIAL_WOOD;
 }
 
-static bool getBoundingBox(struct block_info* this, bool entity,
-						   struct AABB* x) {
-	aabb_setsize(x, 1.0F, 0.5625F, 1.0F);
-	return true;
+static size_t getBoundingBox(struct block_info* this, bool entity,
+							 struct AABB* x) {
+	if(x)
+		aabb_setsize(x, 1.0F, 0.5625F, 1.0F);
+	return 1;
 }
 
 // TODO: add missing bed legs to mask? (difficult, many states)

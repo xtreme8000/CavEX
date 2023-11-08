@@ -21,19 +21,36 @@
 #include "../platform/input.h"
 #include "entity.h"
 
-static bool test_in_lava(struct block_data* blk, w_coord_t x, w_coord_t y,
-						 w_coord_t z) {
-	return blk->type == BLOCK_LAVA_FLOW || blk->type == BLOCK_LAVA_STILL;
+static void liquid_aabb(struct AABB* out, struct block_info* blk_info) {
+	int block_height = (blk_info->block->metadata & 0x8) ?
+		16 :
+		(8 - blk_info->block->metadata) * 2 * 7 / 8;
+	aabb_setsize(out, 1.0F, (float)block_height / 16.0F, 1.0F);
+	aabb_translate(out, blk_info->x, blk_info->y, blk_info->z);
 }
 
-static bool test_in_water(struct block_data* blk, w_coord_t x, w_coord_t y,
-						  w_coord_t z) {
-	return blk->type == BLOCK_WATER_FLOW || blk->type == BLOCK_WATER_STILL;
+static bool test_in_lava(struct AABB* entity, struct block_info* blk_info) {
+	if(blk_info->block->type != BLOCK_LAVA_FLOW
+	   && blk_info->block->type != BLOCK_LAVA_STILL)
+		return false;
+
+	struct AABB bbox;
+	liquid_aabb(&bbox, blk_info);
+	return aabb_intersection(entity, &bbox);
 }
 
-static bool test_in_liquid(struct block_data* blk, w_coord_t x, w_coord_t y,
-						   w_coord_t z) {
-	return test_in_water(blk, x, y, z) || test_in_lava(blk, x, y, z);
+static bool test_in_water(struct AABB* entity, struct block_info* blk_info) {
+	if(blk_info->block->type != BLOCK_WATER_FLOW
+	   && blk_info->block->type != BLOCK_WATER_STILL)
+		return false;
+
+	struct AABB bbox;
+	liquid_aabb(&bbox, blk_info);
+	return aabb_intersection(entity, &bbox);
+}
+
+static bool test_in_liquid(struct AABB* entity, struct block_info* blk_info) {
+	return test_in_water(entity, blk_info) || test_in_lava(entity, blk_info);
 }
 
 static bool entity_tick(struct entity* e) {
@@ -51,8 +68,8 @@ static bool entity_tick(struct entity* e) {
 	aabb_translate(&bbox, e->pos[0], e->pos[1] + 1.8F / 2.0F - 1.62F,
 				   e->pos[2]);
 
-	bool in_water = entity_aabb_intersection(e, &bbox, test_in_water);
-	bool in_lava = entity_aabb_intersection(e, &bbox, test_in_lava);
+	bool in_water = entity_intersection(e, &bbox, test_in_water);
+	bool in_lava = entity_intersection(e, &bbox, test_in_lava);
 
 	float slipperiness
 		= (in_lava || in_water) ? 1.0F : (e->on_ground ? 0.6F : 1.0F);
@@ -178,7 +195,7 @@ static bool entity_tick(struct entity* e) {
 					   e->pos[1] + e->vel[1] + 1.8F / 2.0F - 1.62F + 0.6F,
 					   e->pos[2] + e->vel[2]);
 
-		if(!entity_aabb_intersection(e, &tmp, test_in_liquid))
+		if(!entity_intersection(e, &tmp, test_in_liquid))
 			e->vel[1] = 0.3F;
 	}
 

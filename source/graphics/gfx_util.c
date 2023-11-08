@@ -216,11 +216,17 @@ void gutil_block_selection(mat4 view_matrix, struct block_info* this) {
 	assert(view_matrix && this);
 
 	int pad = 1;
-	struct AABB box;
 
-	if(!blocks[this->block->type]
-	   || !blocks[this->block->type]->getBoundingBox(this, false, &box))
+	if(!blocks[this->block->type])
 		return;
+
+	size_t count = blocks[this->block->type]->getBoundingBox(this, false, NULL);
+
+	if(!count)
+		return;
+
+	struct AABB bbox[count];
+	blocks[this->block->type]->getBoundingBox(this, false, bbox);
 
 	gfx_fog(false);
 	gfx_lighting(false);
@@ -232,53 +238,60 @@ void gutil_block_selection(mat4 view_matrix, struct block_info* this) {
 					 model_view);
 	gfx_matrix_modelview(model_view);
 
-	gfx_draw_lines(
-		24,
-		(int16_t[]) {
-			// bottom
-			-pad + box.x1 * 256, -pad + box.y1 * 256, -pad + box.z1 * 256,
-			box.x2 * 256 + pad, -pad + box.y1 * 256, -pad + box.z1 * 256,
+	for(size_t k = 0; k < count; k++) {
+		struct AABB* box = bbox + k;
+		gfx_draw_lines(
+			24,
+			(int16_t[]) {
+				// bottom
+				-pad + box->x1 * 256, -pad + box->y1 * 256,
+				-pad + box->z1 * 256, box->x2 * 256 + pad, -pad + box->y1 * 256,
+				-pad + box->z1 * 256,
 
-			-pad + box.x1 * 256, -pad + box.y1 * 256, -pad + box.z1 * 256,
-			-pad + box.x1 * 256, -pad + box.y1 * 256, box.z2 * 256 + pad,
+				-pad + box->x1 * 256, -pad + box->y1 * 256,
+				-pad + box->z1 * 256, -pad + box->x1 * 256,
+				-pad + box->y1 * 256, box->z2 * 256 + pad,
 
-			box.x2 * 256 + pad, -pad + box.y1 * 256, box.z2 * 256 + pad,
-			box.x2 * 256 + pad, -pad + box.y1 * 256, -pad + box.z1 * 256,
+				box->x2 * 256 + pad, -pad + box->y1 * 256, box->z2 * 256 + pad,
+				box->x2 * 256 + pad, -pad + box->y1 * 256, -pad + box->z1 * 256,
 
-			box.x2 * 256 + pad, -pad + box.y1 * 256, box.z2 * 256 + pad,
-			-pad + box.x1 * 256, -pad + box.y1 * 256, box.z2 * 256 + pad,
+				box->x2 * 256 + pad, -pad + box->y1 * 256, box->z2 * 256 + pad,
+				-pad + box->x1 * 256, -pad + box->y1 * 256, box->z2 * 256 + pad,
 
-			// top
-			-pad + box.x1 * 256, box.y2 * 256 + pad, -pad + box.z1 * 256,
-			box.x2 * 256 + pad, box.y2 * 256 + pad, -pad + box.z1 * 256,
+				// top
+				-pad + box->x1 * 256, box->y2 * 256 + pad, -pad + box->z1 * 256,
+				box->x2 * 256 + pad, box->y2 * 256 + pad, -pad + box->z1 * 256,
 
-			-pad + box.x1 * 256, box.y2 * 256 + pad, -pad + box.z1 * 256,
-			-pad + box.x1 * 256, box.y2 * 256 + pad, box.z2 * 256 + pad,
+				-pad + box->x1 * 256, box->y2 * 256 + pad, -pad + box->z1 * 256,
+				-pad + box->x1 * 256, box->y2 * 256 + pad, box->z2 * 256 + pad,
 
-			box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad,
-			box.x2 * 256 + pad, box.y2 * 256 + pad, -pad + box.z1 * 256,
+				box->x2 * 256 + pad, box->y2 * 256 + pad, box->z2 * 256 + pad,
+				box->x2 * 256 + pad, box->y2 * 256 + pad, -pad + box->z1 * 256,
 
-			box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad,
-			-pad + box.x1 * 256, box.y2 * 256 + pad, box.z2 * 256 + pad,
+				box->x2 * 256 + pad, box->y2 * 256 + pad, box->z2 * 256 + pad,
+				-pad + box->x1 * 256, box->y2 * 256 + pad, box->z2 * 256 + pad,
 
-			// vertical
-			-pad + box.x1 * 256, -pad + box.y1 * 256, -pad + box.z1 * 256,
-			-pad + box.x1 * 256, box.y2 * 256 + pad, -pad + box.z1 * 256,
+				// vertical
+				-pad + box->x1 * 256, -pad + box->y1 * 256,
+				-pad + box->z1 * 256, -pad + box->x1 * 256, box->y2 * 256 + pad,
+				-pad + box->z1 * 256,
 
-			box.x2 * 256 + pad, -pad + box.y1 * 256, -pad + box.z1 * 256,
-			box.x2 * 256 + pad, box.y2 * 256 + pad, -pad + box.z1 * 256,
+				box->x2 * 256 + pad, -pad + box->y1 * 256, -pad + box->z1 * 256,
+				box->x2 * 256 + pad, box->y2 * 256 + pad, -pad + box->z1 * 256,
 
-			-pad + box.x1 * 256, -pad + box.y1 * 256, box.z2 * 256 + pad,
-			-pad + box.x1 * 256, box.y2 * 256 + pad, box.z2 * 256 + pad,
+				-pad + box->x1 * 256, -pad + box->y1 * 256, box->z2 * 256 + pad,
+				-pad + box->x1 * 256, box->y2 * 256 + pad, box->z2 * 256 + pad,
 
-			box.x2 * 256 + pad, -pad + box.y1 * 256, box.z2 * 256 + pad,
-			box.x2 * 256 + pad, box.y2 * 256 + pad, box.z2 * 256 + pad},
-		(uint8_t[]) {0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153,
-					 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153,
-					 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153,
-					 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153,
-					 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153,
-					 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153, 0, 0, 0, 153});
+				box->x2 * 256 + pad, -pad + box->y1 * 256, box->z2 * 256 + pad,
+				box->x2 * 256 + pad, box->y2 * 256 + pad, box->z2 * 256 + pad},
+			(uint8_t[]) {0, 0,	 0, 153, 0, 0,	 0, 153, 0, 0,	 0, 153, 0, 0,
+						 0, 153, 0, 0,	 0, 153, 0, 0,	 0, 153, 0, 0,	 0, 153,
+						 0, 0,	 0, 153, 0, 0,	 0, 153, 0, 0,	 0, 153, 0, 0,
+						 0, 153, 0, 0,	 0, 153, 0, 0,	 0, 153, 0, 0,	 0, 153,
+						 0, 0,	 0, 153, 0, 0,	 0, 153, 0, 0,	 0, 153, 0, 0,
+						 0, 153, 0, 0,	 0, 153, 0, 0,	 0, 153, 0, 0,	 0, 153,
+						 0, 0,	 0, 153, 0, 0,	 0, 153, 0, 0,	 0, 153});
+	}
 
 	gfx_texture(true);
 	gfx_lighting(true);

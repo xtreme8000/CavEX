@@ -24,19 +24,21 @@ static enum block_material getMaterial(struct block_info* this) {
 	return MATERIAL_WOOD;
 }
 
-static bool getBoundingBox(struct block_info* this, bool entity,
-						   struct AABB* x) {
-	aabb_setsize(x, 0.3125F, 0.625F, 0.3125F);
+static size_t getBoundingBox(struct block_info* this, bool entity,
+							 struct AABB* x) {
+	if(x) {
+		aabb_setsize(x, 0.3125F, 0.625F, 0.3125F);
 
-	switch(this->block->metadata) {
-		case 1: aabb_translate(x, -0.34375F, 0.1875F, 0); break;
-		case 2: aabb_translate(x, 0.34375F, 0.1875F, 0); break;
-		case 3: aabb_translate(x, 0, 0.1875F, -0.34375F); break;
-		case 4: aabb_translate(x, 0, 0.1875F, 0.34375F); break;
-		default: aabb_setsize(x, 0.2F, 0.6F, 0.2F); break;
+		switch(this->block->metadata) {
+			case 1: aabb_translate(x, -0.34375F, 0.1875F, 0); break;
+			case 2: aabb_translate(x, 0.34375F, 0.1875F, 0); break;
+			case 3: aabb_translate(x, 0, 0.1875F, -0.34375F); break;
+			case 4: aabb_translate(x, 0, 0.1875F, 0.34375F); break;
+			default: aabb_setsize(x, 0.2F, 0.6F, 0.2F); break;
+		}
 	}
 
-	return !entity;
+	return entity ? 0 : 1;
 }
 
 static struct face_occlusion*

@@ -46,7 +46,7 @@ static bool entity_server_tick(struct entity* e, struct server_local* s) {
 	struct AABB tmp = bbox;
 	aabb_translate(&tmp, e->pos[0], e->pos[1], e->pos[2]);
 
-	if(entity_aabb_intersection(e, &tmp, NULL)) { // is item stuck in block?
+	if(entity_aabb_intersection(e, &tmp)) { // is item stuck in block?
 		// find possible new position, try top/bottom last
 		enum side sides[6] = {SIDE_LEFT, SIDE_RIGHT, SIDE_FRONT,
 							  SIDE_BACK, SIDE_TOP,	 SIDE_BOTTOM};
@@ -60,7 +60,7 @@ static bool entity_server_tick(struct entity* e, struct server_local* s) {
 			struct AABB tmp2 = tmp;
 			aabb_translate(&tmp2, x, y, z);
 
-			if(!entity_aabb_intersection(e, &tmp2, NULL)) {
+			if(!entity_aabb_intersection(e, &tmp2)) {
 				float threshold;
 				entity_intersection_threshold(e, &bbox, new_pos, e->pos,
 											  &threshold);

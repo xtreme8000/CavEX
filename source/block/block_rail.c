@@ -24,15 +24,16 @@ static enum block_material getMaterial(struct block_info* this) {
 	return MATERIAL_STONE;
 }
 
-static bool getBoundingBox(struct block_info* this, bool entity,
-						   struct AABB* x) {
-	aabb_setsize(x, 1.0F,
-				 ((this->block->metadata & 0x7) > 1
-				  && (this->block->metadata & 0x7) < 6) ?
-					 0.625F :
-					 0.125F,
-				 1.0F);
-	return !entity;
+static size_t getBoundingBox(struct block_info* this, bool entity,
+							 struct AABB* x) {
+	if(x)
+		aabb_setsize(x, 1.0F,
+					 ((this->block->metadata & 0x7) > 1
+					  && (this->block->metadata & 0x7) < 6) ?
+						 0.625F :
+						 0.125F,
+					 1.0F);
+	return entity ? 0 : 1;
 }
 
 static struct face_occlusion*
