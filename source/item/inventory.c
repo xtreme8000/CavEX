@@ -250,13 +250,37 @@ static bool inventory_place_item(struct inventory* inv, size_t slot) {
 	return true;
 }
 
+static bool inventory_place_one_item(struct inventory* inv, size_t slot) {
+	assert(inv->picked_item.id != 0);
+
+	if(inv->items[slot].id == inv->picked_item.id
+	   && inv->items[slot].durability == inv->picked_item.durability
+	   && inv->items[slot].count < item_get(&inv->picked_item)->max_stack) {
+		inv->items[slot].count++;
+		inv->picked_item.count--;
+	} else if(inv->items[slot].id == 0) {
+		inv->items[slot] = inv->picked_item;
+		inv->items[slot].count = 1;
+		inv->picked_item.count--;
+	} else {
+		return false;
+	}
+
+	if(inv->picked_item.count == 0) {
+		inv->picked_item.id = 0;
+		inv->picked_item.durability = 0;
+	}
+
+	return true;
+}
+
 bool inventory_action(struct inventory* inv, size_t slot, bool right) {
 	assert(inv && slot < inv->capacity);
 
 	if(right) {
 		return (inv->picked_item.id == 0) ?
 			inventory_pick_item_split(inv, slot) :
-			false;
+			inventory_place_one_item(inv, slot);
 	} else {
 		return (inv->picked_item.id == 0) ? inventory_pick_item(inv, slot) :
 											inventory_place_item(inv, slot);
