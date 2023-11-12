@@ -134,6 +134,22 @@ static void server_local_process(struct server_rpc* call, void* user) {
 							= s->player.inventory.items[k],
 						});
 				}
+
+				struct item_data picked_item;
+				if(inventory_get_picked_item(&s->player.inventory,
+											 &picked_item)) {
+					inventory_clear_picked_item(&s->player.inventory);
+					spawn_item((vec3) {s->player.x, s->player.y, s->player.z},
+							   &picked_item, true, s);
+
+					clin_rpc_send(&(struct client_rpc) {
+						.type = CRPC_INVENTORY_SLOT,
+						.payload.inventory_slot.window = WINDOWC_INVENTORY,
+						.payload.inventory_slot.slot = NETWORK_SLOT_PICKED_ITEM,
+						.payload.inventory_slot.item
+						= s->player.inventory.picked_item,
+					});
+				}
 			}
 			break;
 		case SRPC_BLOCK_DIG:

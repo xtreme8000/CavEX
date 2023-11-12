@@ -184,6 +184,18 @@ bool inventory_get_slot(struct inventory* inv, size_t slot,
 	return inv->items[slot].id > 0;
 }
 
+void inventory_clear_picked_item(struct inventory* inv) {
+	assert(inv);
+	inv->picked_item.id = 0;
+	inv->picked_item.durability = 0;
+	inv->picked_item.count = 0;
+}
+
+void inventory_set_picked_item(struct inventory* inv, struct item_data item) {
+	assert(inv);
+	inv->picked_item = item;
+}
+
 bool inventory_get_picked_item(struct inventory* inv, struct item_data* item) {
 	assert(inv);
 

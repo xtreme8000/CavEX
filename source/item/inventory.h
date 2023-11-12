@@ -38,6 +38,8 @@
 #define INVENTORY_SLOT_MAIN 9
 #define INVENTORY_SLOT_HOTBAR 36
 
+#define SPECIAL_SLOT_PICKED_ITEM 255
+
 struct inventory {
 	struct item_data picked_item;
 	struct item_data* items;
@@ -70,6 +72,8 @@ void inventory_set_slot(struct inventory* inv, size_t slot,
 void inventory_clear_slot(struct inventory* inv, size_t slot);
 bool inventory_get_slot(struct inventory* inv, size_t slot,
 						struct item_data* item);
+void inventory_clear_picked_item(struct inventory* inv);
+void inventory_set_picked_item(struct inventory* inv, struct item_data item);
 bool inventory_get_picked_item(struct inventory* inv, struct item_data* item);
 bool inventory_action(struct inventory* inv, size_t slot, bool right);
 

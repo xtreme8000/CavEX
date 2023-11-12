@@ -104,7 +104,7 @@ static void screen_inventory_update(struct screen* s, float dt) {
 	struct inventory* inv
 		= windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]);
 
-	if(input_pressed(IB_INVENTORY) && !inventory_get_picked_item(inv, NULL)) {
+	if(input_pressed(IB_INVENTORY)) {
 		svin_rpc_send(&(struct server_rpc) {
 			.type = SRPC_WINDOW_CLOSE,
 			.payload.window_close.window = WINDOWC_INVENTORY,
@@ -289,8 +289,7 @@ static void screen_inventory_render2D(struct screen* s, int width, int height) {
 			+= gutil_control_icon(icon_offset, IB_GUI_CLICK_ALT, "Split stack");
 	}
 
-	if(!inventory_get_picked_item(inv, NULL))
-		icon_offset += gutil_control_icon(icon_offset, IB_INVENTORY, "Leave");
+	icon_offset += gutil_control_icon(icon_offset, IB_INVENTORY, "Leave");
 
 	struct item_data item;
 	if(inventory_get_picked_item(inv, &item)) {

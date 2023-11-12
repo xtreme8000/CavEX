@@ -137,7 +137,12 @@ void windowc_slot_change(struct window_container* wc, size_t slot,
 	ilist_inventory_it(it, wc->invs);
 
 	struct inventory* prev = ilist_inventory_ref(it);
-	inventory_set_slot(prev, slot, item);
+
+	if(slot == SPECIAL_SLOT_PICKED_ITEM) {
+		inventory_set_picked_item(prev, item);
+	} else {
+		inventory_set_slot(prev, slot, item);
+	}
 
 	ilist_inventory_next(it);
 
