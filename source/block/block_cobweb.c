@@ -39,12 +39,24 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	return tex_atlas_lookup(TEXAT_COBWEB);
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	if(it) {
+		it->id = ITEM_STRING;
+		it->durability = 0;
+		it->count = 1;
+	}
+
+	return 1;
+}
+
 struct block block_cobweb = {
 	.name = "Cobweb",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_cross,
 	.renderBlockAlways = NULL,
@@ -57,9 +69,9 @@ struct block block_cobweb = {
 	.flammable = false,
 	.place_ignore = false,
 	.digging.hardness = 6000, // TODO: might not be correct
-	.digging.tool = TOOL_TYPE_ANY,
-	.digging.min = TOOL_TIER_ANY,
-	.digging.best = TOOL_TIER_ANY,
+	.digging.tool = TOOL_TYPE_SWORD,
+	.digging.min = TOOL_TIER_WOOD,
+	.digging.best = TOOL_TIER_WOOD,
 	.block_item = {
 		.has_damage = false,
 		.max_stack = 64,

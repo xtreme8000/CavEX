@@ -49,12 +49,33 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	}
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	bool has_seeds = this->block->metadata >= 5;
+	bool has_wheat = this->block->metadata == 7;
+
+	if(it && has_seeds) {
+		it[0].id = ITEM_SEED;
+		it[0].durability = 0;
+		it[0].count = rand_gen_range(g, 1, 3);
+
+		if(has_wheat) {
+			it[1].id = ITEM_WHEAT;
+			it[1].durability = 0;
+			it[1].count = 1;
+		}
+	}
+
+	return (has_seeds ? (has_wheat ? 2 : 1) : 0);
+}
+
 struct block block_crops = {
 	.name = "Crops",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_crops,
 	.renderBlockAlways = NULL,

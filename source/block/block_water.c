@@ -51,12 +51,18 @@ static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(5, 0);
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	return 0;
+}
+
 struct block block_water_still = {
 	.name = "Water",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex1,
+	.getDroppedItem = getDroppedItem,
 	.transparent = true,
 	.renderBlock = render_block_fluid,
 	.renderBlockAlways = NULL,
@@ -87,6 +93,7 @@ struct block block_water_flowing = {
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex2,
+	.getDroppedItem = getDroppedItem,
 	.transparent = true,
 	.renderBlock = render_block_fluid,
 	.renderBlockAlways = NULL,

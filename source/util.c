@@ -21,11 +21,30 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "util.h"
 
-float rand_flt() {
-	return (float)rand() / RAND_MAX;
+void rand_gen_seed(struct random_gen* g) {
+	assert(g);
+	g->seed = time(NULL);
+}
+
+uint32_t rand_gen(struct random_gen* g) {
+	g->seed ^= g->seed << 13;
+	g->seed ^= g->seed >> 17;
+	g->seed ^= g->seed << 5;
+	return g->seed;
+}
+
+int rand_gen_range(struct random_gen* g, int min, int max) {
+	assert(g);
+	return rand_gen(g) % (max - min) + min;
+}
+
+float rand_gen_flt(struct random_gen* g) {
+	assert(g);
+	return (float)rand_gen(g) / UINT32_MAX;
 }
 
 void* file_read(const char* name) {
@@ -39,7 +58,7 @@ void* file_read(const char* name) {
 	fseek(f, 0, SEEK_SET);
 	char* res = malloc(length + 1);
 	res[length] = 0;
-	fread(res, length, 1, f);
+	(void)!fread(res, length, 1, f);
 	fclose(f);
 
 	return res;

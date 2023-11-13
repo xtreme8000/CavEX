@@ -70,12 +70,35 @@ static bool onItemPlace(struct server_local* s, struct item_data* it,
 	return block_place_default(s, it, where, on, on_side);
 }
 
+static size_t drop_snow(struct block_info* this, struct item_data* it,
+						struct random_gen* g) {
+	if(it) {
+		it->id = ITEM_SNOW_BALL;
+		it->durability = 0;
+		it->count = 1;
+	}
+
+	return 1;
+}
+
+static size_t drop_snow_block(struct block_info* this, struct item_data* it,
+							  struct random_gen* g) {
+	if(it) {
+		it->id = ITEM_SNOW_BALL;
+		it->durability = 0;
+		it->count = 4;
+	}
+
+	return 1;
+}
+
 struct block block_snow = {
 	.name = "Snow",
 	.getSideMask = getSideMask1,
 	.getBoundingBox = getBoundingBox1,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = drop_snow,
 	.transparent = false,
 	.renderBlock = render_block_layer,
 	.renderBlockAlways = NULL,
@@ -107,6 +130,7 @@ struct block block_snow_block = {
 	.getBoundingBox = getBoundingBox2,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = drop_snow_block,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

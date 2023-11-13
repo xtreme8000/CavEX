@@ -39,12 +39,24 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	return tex_atlas_lookup(TEXAT_GLOWSTONE);
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	if(it) {
+		it->id = ITEM_GLOWSTONE_DUST;
+		it->durability = 0;
+		it->count = rand_gen_range(g, 2, 4);
+	}
+
+	return 1;
+}
+
 struct block block_glowstone = {
 	.name = "Glowstone",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

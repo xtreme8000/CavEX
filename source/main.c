@@ -59,6 +59,8 @@ int main(void) {
 	gstate.digging.cooldown = time_get();
 	gstate.digging.active = false;
 
+	rand_gen_seed(&gstate.rand_src);
+
 #ifdef PLATFORM_WII
 	fatInitDefault();
 #endif

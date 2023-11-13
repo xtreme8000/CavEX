@@ -31,6 +31,22 @@ struct item_data {
 	uint8_t count;
 };
 
+enum item_type {
+	ITEM_COAL = 263,
+	ITEM_DIAMOND = 264,
+	ITEM_SEED = 295,
+	ITEM_WHEAT = 296,
+	ITEM_BREAD = 297,
+	ITEM_STRING = 287,
+	ITEM_FLINT = 318,
+	ITEM_REDSTONE = 331,
+	ITEM_SNOW_BALL = 332,
+	ITEM_CLAY_BALL = 337,
+	ITEM_REED = 338,
+	ITEM_GLOWSTONE_DUST = 348,
+	ITEM_DYE = 351,
+};
+
 #include "../block/blocks_data.h"
 #include "../item/tool.h"
 struct server_local;

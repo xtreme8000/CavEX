@@ -101,9 +101,6 @@ static void screen_inventory_reset(struct screen* s, int width, int height) {
 }
 
 static void screen_inventory_update(struct screen* s, float dt) {
-	struct inventory* inv
-		= windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]);
-
 	if(input_pressed(IB_INVENTORY)) {
 		svin_rpc_send(&(struct server_rpc) {
 			.type = SRPC_WINDOW_CLOSE,

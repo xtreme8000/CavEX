@@ -49,12 +49,24 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	}
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	if(it) {
+		it->id = BLOCK_DIRT;
+		it->durability = 0;
+		it->count = 1;
+	}
+
+	return 1;
+}
+
 struct block block_farmland = {
 	.name = "Farmland",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_farmland,
 	.renderBlockAlways = NULL,

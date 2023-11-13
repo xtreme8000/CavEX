@@ -45,6 +45,7 @@ struct block block_bricks = {
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = block_drop_default,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

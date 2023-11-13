@@ -46,10 +46,24 @@ getSideMask(struct block_info* this, enum side side, struct block_info* it) {
 
 static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	switch(this->block->metadata & 0x3) {
+		default:
+		case 0: return tex_atlas_lookup(TEXAT_LEAVES_OAK);
 		case 1: return tex_atlas_lookup(TEXAT_LEAVES_SPRUCE);
 		case 2: return tex_atlas_lookup(TEXAT_LEAVES_BIRCH);
-		default: return tex_atlas_lookup(TEXAT_LEAVES_OAK);
 	}
+}
+
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	bool drop_sapling = (rand_gen(g) % 16) == 0;
+
+	if(it && drop_sapling) {
+		it->id = BLOCK_SAPLING;
+		it->durability = this->block->metadata & 0x3;
+		it->count = 1;
+	}
+
+	return drop_sapling ? 1 : 0;
 }
 
 struct block block_leaves = {
@@ -58,6 +72,7 @@ struct block block_leaves = {
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

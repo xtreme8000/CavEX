@@ -85,12 +85,24 @@ static bool onItemPlace(struct server_local* s, struct item_data* it,
 	return false;
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	if(it) {
+		it->id = this->block->type;
+		it->durability = this->block->metadata;
+		it->count = 1;
+	}
+
+	return 1;
+}
+
 struct block block_slab = {
 	.name = "Slab",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_slab,
 	.renderBlockAlways = NULL,

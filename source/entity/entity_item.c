@@ -194,12 +194,4 @@ void entity_item(uint32_t id, struct entity* e, bool server, void* world,
 	e->data.item.item = it;
 
 	entity_default_init(e, server, world);
-
-	if(server) {
-		glm_vec3_copy(
-			(vec3) {rand_flt() - 0.5F, rand_flt() - 0.5F, rand_flt() - 0.5F},
-			e->vel);
-		glm_vec3_normalize(e->vel);
-		glm_vec3_scale(e->vel, (2.0F * rand_flt() + 0.5F) * 0.1F, e->vel);
-	}
 }

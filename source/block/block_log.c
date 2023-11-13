@@ -47,12 +47,24 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	}
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	if(it) {
+		it->id = this->block->type;
+		it->durability = this->block->metadata;
+		it->count = 1;
+	}
+
+	return 1;
+}
+
 struct block block_log = {
 	.name = "Log",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

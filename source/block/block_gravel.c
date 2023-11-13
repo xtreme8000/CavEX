@@ -39,12 +39,24 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	return tex_atlas_lookup(TEXAT_GRAVEL);
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	if(it) {
+		it->id = (rand_gen(g) % 10) == 0 ? ITEM_FLINT : this->block->type;
+		it->durability = 0;
+		it->count = 1;
+	}
+
+	return 1;
+}
+
 struct block block_gravel = {
 	.name = "Gravel",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

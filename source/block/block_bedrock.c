@@ -39,12 +39,18 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	return tex_atlas_lookup(TEXAT_BEDROCK);
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	return 0;
+}
+
 struct block block_bedrock = {
 	.name = "Bedrock",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

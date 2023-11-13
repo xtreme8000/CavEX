@@ -34,6 +34,7 @@
 #define MAX_CHUNKS ((MAX_VIEW_DISTANCE * 2 + 2) * (MAX_VIEW_DISTANCE * 2 + 2))
 
 struct server_local {
+	struct random_gen rand_src;
 	struct {
 		double x, y, z;
 		float rx, ry;

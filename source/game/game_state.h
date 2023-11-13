@@ -39,6 +39,7 @@
 
 struct game_state {
 	sig_atomic_t quit;
+	struct random_gen rand_src;
 	struct config config_user;
 	struct {
 		float dt, fps;

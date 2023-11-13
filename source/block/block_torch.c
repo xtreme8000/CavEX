@@ -84,12 +84,24 @@ static bool onItemPlace(struct server_local* s, struct item_data* it,
 	return true;
 }
 
+static size_t drop_redstone_torch(struct block_info* this, struct item_data* it,
+								  struct random_gen* g) {
+	if(it) {
+		it->id = BLOCK_REDSTONE_TORCH;
+		it->durability = 0;
+		it->count = 1;
+	}
+
+	return 1;
+}
+
 struct block block_torch = {
 	.name = "Torch",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex1,
+	.getDroppedItem = block_drop_default,
 	.transparent = false,
 	.renderBlock = render_block_torch,
 	.renderBlockAlways = NULL,
@@ -120,6 +132,7 @@ struct block block_redstone_torch = {
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex2,
+	.getDroppedItem = drop_redstone_torch,
 	.transparent = false,
 	.renderBlock = render_block_torch,
 	.renderBlockAlways = NULL,
@@ -150,6 +163,7 @@ struct block block_redstone_torch_lit = {
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex3,
+	.getDroppedItem = drop_redstone_torch,
 	.transparent = false,
 	.renderBlock = render_block_torch,
 	.renderBlockAlways = NULL,

@@ -44,12 +44,14 @@ static void particle_add(vec3 pos, vec3 vel, uint8_t tex) {
 		glm_vec3_copy(pos, p->pos);
 		glm_vec3_copy(pos, p->pos_old);
 		glm_vec3_copy(vel, p->vel);
-		p->tex_uv[0]
-			= (TEX_OFFSET(TEXTURE_X(tex)) + rand_flt() * 12.0F) / 256.0F;
-		p->tex_uv[1]
-			= (TEX_OFFSET(TEXTURE_Y(tex)) + rand_flt() * 12.0F) / 256.0F;
-		p->age = 4.0F / (rand_flt() * 0.9F + 0.1F);
-		p->size = (rand_flt() + 1.0F) * 0.03125F;
+		p->tex_uv[0] = (TEX_OFFSET(TEXTURE_X(tex))
+						+ rand_gen_flt(&gstate.rand_src) * 12.0F)
+			/ 256.0F;
+		p->tex_uv[1] = (TEX_OFFSET(TEXTURE_Y(tex))
+						+ rand_gen_flt(&gstate.rand_src) * 12.0F)
+			/ 256.0F;
+		p->age = 4.0F / (rand_gen_flt(&gstate.rand_src) * 0.9F + 0.1F);
+		p->size = (rand_gen_flt(&gstate.rand_src) + 1.0F) * 0.03125F;
 	}
 }
 
@@ -75,13 +77,19 @@ void particle_generate_block(struct block_info* info) {
 	uint8_t tex = blocks[info->block->type]->getTextureIndex(info, SIDE_FRONT);
 
 	for(int k = 0; k < volume * PARTICLES_VOLUME; k++) {
-		float x = rand_flt() * (aabb->x2 - aabb->x1) + aabb->x1;
-		float y = rand_flt() * (aabb->y2 - aabb->y1) + aabb->y1;
-		float z = rand_flt() * (aabb->z2 - aabb->z1) + aabb->z1;
+		float x
+			= rand_gen_flt(&gstate.rand_src) * (aabb->x2 - aabb->x1) + aabb->x1;
+		float y
+			= rand_gen_flt(&gstate.rand_src) * (aabb->y2 - aabb->y1) + aabb->y1;
+		float z
+			= rand_gen_flt(&gstate.rand_src) * (aabb->z2 - aabb->z1) + aabb->z1;
 
-		vec3 vel = {rand_flt() - 0.5F, rand_flt() - 0.5F, rand_flt() - 0.5F};
+		vec3 vel = {rand_gen_flt(&gstate.rand_src) - 0.5F,
+					rand_gen_flt(&gstate.rand_src) - 0.5F,
+					rand_gen_flt(&gstate.rand_src) - 0.5F};
 		glm_vec3_normalize(vel);
-		glm_vec3_scale(vel, (2.0F * rand_flt() + 0.5F) * 0.05F, vel);
+		glm_vec3_scale(
+			vel, (2.0F * rand_gen_flt(&gstate.rand_src) + 0.5F) * 0.05F, vel);
 
 		particle_add((vec3) {info->x + x, info->y + y, info->z + z}, vel, tex);
 	}
@@ -124,9 +132,12 @@ void particle_generate_side(struct block_info* info, enum side s) {
 	float offset = 0.0625F;
 
 	for(int k = 0; k < area * PARTICLES_AREA; k++) {
-		float x = rand_flt() * (aabb->x2 - aabb->x1) + aabb->x1;
-		float y = rand_flt() * (aabb->y2 - aabb->y1) + aabb->y1;
-		float z = rand_flt() * (aabb->z2 - aabb->z1) + aabb->z1;
+		float x
+			= rand_gen_flt(&gstate.rand_src) * (aabb->x2 - aabb->x1) + aabb->x1;
+		float y
+			= rand_gen_flt(&gstate.rand_src) * (aabb->y2 - aabb->y1) + aabb->y1;
+		float z
+			= rand_gen_flt(&gstate.rand_src) * (aabb->z2 - aabb->z1) + aabb->z1;
 
 		switch(s) {
 			case SIDE_LEFT: x = aabb->x1 - offset; break;
@@ -138,9 +149,12 @@ void particle_generate_side(struct block_info* info, enum side s) {
 			default: return;
 		}
 
-		vec3 vel = {rand_flt() - 0.5F, rand_flt() - 0.5F, rand_flt() - 0.5F};
+		vec3 vel = {rand_gen_flt(&gstate.rand_src) - 0.5F,
+					rand_gen_flt(&gstate.rand_src) - 0.5F,
+					rand_gen_flt(&gstate.rand_src) - 0.5F};
 		glm_vec3_normalize(vel);
-		glm_vec3_scale(vel, (2.0F * rand_flt() + 0.5F) * 0.05F, vel);
+		glm_vec3_scale(
+			vel, (2.0F * rand_gen_flt(&gstate.rand_src) + 0.5F) * 0.05F, vel);
 
 		particle_add((vec3) {info->x + x, info->y + y, info->z + z}, vel, tex);
 	}

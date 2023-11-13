@@ -45,6 +45,14 @@ static struct entity* spawn_item(vec3 pos, struct item_data* it, bool throw,
 		e->vel[0] = sinf(rx) * sinf(ry) * 0.25F;
 		e->vel[1] = cosf(ry) * 0.25F;
 		e->vel[2] = cosf(rx) * sinf(ry) * 0.25F;
+	} else {
+		glm_vec3_copy((vec3) {rand_gen_flt(&s->rand_src) - 0.5F,
+							  rand_gen_flt(&s->rand_src) - 0.5F,
+							  rand_gen_flt(&s->rand_src) - 0.5F},
+					  e->vel);
+		glm_vec3_normalize(e->vel);
+		glm_vec3_scale(
+			e->vel, (2.0F * rand_gen_flt(&s->rand_src) + 0.5F) * 0.1F, e->vel);
 	}
 
 	clin_rpc_send(&(struct client_rpc) {
@@ -145,7 +153,7 @@ static void server_local_process(struct server_rpc* call, void* user) {
 					clin_rpc_send(&(struct client_rpc) {
 						.type = CRPC_INVENTORY_SLOT,
 						.payload.inventory_slot.window = WINDOWC_INVENTORY,
-						.payload.inventory_slot.slot = NETWORK_SLOT_PICKED_ITEM,
+						.payload.inventory_slot.slot = SPECIAL_SLOT_PICKED_ITEM,
 						.payload.inventory_slot.item
 						= s->player.inventory.picked_item,
 					});
@@ -168,13 +176,43 @@ static void server_local_process(struct server_rpc* call, void* user) {
 											   .metadata = 0,
 										   });
 
-					spawn_item((vec3) {call->payload.block_dig.x + 0.5F,
+					struct item_data it_data;
+					bool has_tool = inventory_get_hotbar_item(
+						&s->player.inventory, &it_data);
+					struct item* it = has_tool ? item_get(&it_data) : NULL;
+
+					if(blocks[blk.type]
+					   && ((it
+							&& it->tool.type == blocks[blk.type]->digging.tool
+							&& it->tool.tier >= blocks[blk.type]->digging.min)
+						   || blocks[blk.type]->digging.min == TOOL_TIER_ANY
+						   || blocks[blk.type]->digging.tool
+							   == TOOL_TYPE_ANY)) {
+						struct block_info blk_info = (struct block_info) {
+							.block = &blk,
+							.neighbours = NULL,
+							.x = call->payload.block_dig.x,
+							.y = call->payload.block_dig.y,
+							.z = call->payload.block_dig.z,
+						};
+
+						struct random_gen tmp = s->rand_src;
+						size_t count = blocks[blk.type]->getDroppedItem(
+							&blk_info, NULL, &tmp);
+
+						if(count > 0) {
+							struct item_data items[count];
+							blocks[blk.type]->getDroppedItem(&blk_info, items,
+															 &s->rand_src);
+
+							for(size_t k = 0; k < count; k++)
+								spawn_item(
+									(vec3) {call->payload.block_dig.x + 0.5F,
 									   call->payload.block_dig.y + 0.5F,
 									   call->payload.block_dig.z + 0.5F},
-							   &(struct item_data) {.id = blk.type,
-													.durability = blk.metadata,
-													.count = 1},
-							   false, s);
+									items + k, false, s);
+						}
+					}
 				}
 			}
 			break;
@@ -442,6 +480,7 @@ static void* server_local_thread(void* user) {
 
 void server_local_create(struct server_local* s) {
 	assert(s);
+	rand_gen_seed(&s->rand_src);
 	s->world_time = 0;
 	s->world_time_start = time_get();
 	s->player.has_pos = false;

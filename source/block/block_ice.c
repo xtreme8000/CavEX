@@ -40,12 +40,18 @@ static uint8_t getTextureIndex(struct block_info* this, enum side side) {
 	return TEXTURE_INDEX(4, 0);
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	return 0;
+}
+
 struct block block_ice = {
 	.name = "Ice",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
+	.getDroppedItem = getDroppedItem,
 	.transparent = true,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

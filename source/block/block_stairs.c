@@ -162,12 +162,35 @@ static bool onItemPlace(struct server_local* s, struct item_data* it,
 	return true;
 }
 
+static size_t drop_wood(struct block_info* this, struct item_data* it,
+						struct random_gen* g) {
+	if(it) {
+		it->id = BLOCK_PLANKS;
+		it->durability = 0;
+		it->count = 1;
+	}
+
+	return 1;
+}
+
+static size_t drop_cobblestone(struct block_info* this, struct item_data* it,
+							   struct random_gen* g) {
+	if(it) {
+		it->id = BLOCK_COBBLESTONE;
+		it->durability = 0;
+		it->count = 1;
+	}
+
+	return 1;
+}
+
 struct block block_wooden_stairs = {
 	.name = "Stairs",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial1,
 	.getTextureIndex = getTextureIndex1,
+	.getDroppedItem = drop_wood,
 	.transparent = false,
 	.renderBlock = render_block_stairs,
 	.renderBlockAlways = render_block_stairs_always,
@@ -201,6 +224,7 @@ struct block block_stone_stairs = {
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial2,
 	.getTextureIndex = getTextureIndex2,
+	.getDroppedItem = drop_cobblestone,
 	.transparent = false,
 	.renderBlock = render_block_stairs,
 	.renderBlockAlways = render_block_stairs_always,

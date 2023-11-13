@@ -74,12 +74,19 @@ static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
 		tex_atlas_lookup(TEXAT_DOOR_IRON_BOTTOM);
 }
 
+static size_t getDroppedItem(struct block_info* this, struct item_data* it,
+							 struct random_gen* g) {
+	// TODO
+	return 0;
+}
+
 struct block block_wooden_door = {
 	.name = "Wooden Door",
 	.getSideMask = getSideMask,
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial1,
 	.getTextureIndex = getTextureIndex1,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_door,
 	.renderBlockAlways = NULL,
@@ -110,6 +117,7 @@ struct block block_iron_door = {
 	.getBoundingBox = getBoundingBox,
 	.getMaterial = getMaterial2,
 	.getTextureIndex = getTextureIndex2,
+	.getDroppedItem = getDroppedItem,
 	.transparent = false,
 	.renderBlock = render_block_door,
 	.renderBlockAlways = NULL,
