@@ -149,12 +149,12 @@ static void entity_render(struct entity* e, mat4 view, float tick_delta) {
 		glm_mat4_mul(view, model, mv);
 
 		int amount = 1;
-		if(e->data.item.item.count > 1) {
-			amount = 2;
+		if(e->data.item.item.count > 20) {
+			amount = 4;
 		} else if(e->data.item.item.count > 5) {
 			amount = 3;
-		} else if(e->data.item.item.count > 20) {
-			amount = 4;
+		} else if(e->data.item.item.count > 1) {
+			amount = 2;
 		}
 
 		vec3 displacement[4] = {
