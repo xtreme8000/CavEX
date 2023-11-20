@@ -65,6 +65,29 @@ static struct entity* spawn_item(vec3 pos, struct item_data* it, bool throw,
 	return e;
 }
 
+void server_local_spawn_block_drops(struct server_local* s,
+									struct block_info* blk_info) {
+	assert(s && blk_info);
+
+	if(!blocks[blk_info->block->type])
+		return;
+
+	struct random_gen tmp = s->rand_src;
+	size_t count
+		= blocks[blk_info->block->type]->getDroppedItem(blk_info, NULL, &tmp);
+
+	if(count > 0) {
+		struct item_data items[count];
+		blocks[blk_info->block->type]->getDroppedItem(blk_info, items,
+													  &s->rand_src);
+
+		for(size_t k = 0; k < count; k++)
+			spawn_item((vec3) {blk_info->x + 0.5F, blk_info->y + 0.5F,
+							   blk_info->z + 0.5F},
+					   items + k, false, s);
+	}
+}
+
 static void server_local_process(struct server_rpc* call, void* user) {
 	assert(call && user);
 
@@ -186,33 +209,16 @@ static void server_local_process(struct server_rpc* call, void* user) {
 							&& it->tool.type == blocks[blk.type]->digging.tool
 							&& it->tool.tier >= blocks[blk.type]->digging.min)
 						   || blocks[blk.type]->digging.min == TOOL_TIER_ANY
-						   || blocks[blk.type]->digging.tool
-							   == TOOL_TYPE_ANY)) {
-						struct block_info blk_info = (struct block_info) {
+						   || blocks[blk.type]->digging.tool == TOOL_TYPE_ANY))
+						server_local_spawn_block_drops(
+							s,
+							&(struct block_info) {
 							.block = &blk,
 							.neighbours = NULL,
 							.x = call->payload.block_dig.x,
 							.y = call->payload.block_dig.y,
 							.z = call->payload.block_dig.z,
-						};
-
-						struct random_gen tmp = s->rand_src;
-						size_t count = blocks[blk.type]->getDroppedItem(
-							&blk_info, NULL, &tmp);
-
-						if(count > 0) {
-							struct item_data items[count];
-							blocks[blk.type]->getDroppedItem(&blk_info, items,
-															 &s->rand_src);
-
-							for(size_t k = 0; k < count; k++)
-								spawn_item(
-									(vec3) {call->payload.block_dig.x + 0.5F,
-									   call->payload.block_dig.y + 0.5F,
-									   call->payload.block_dig.z + 0.5F},
-									items + k, false, s);
-						}
-					}
+							});
 				}
 			}
 			break;
@@ -372,6 +378,8 @@ static void server_local_update(struct server_local* s) {
 			dict_entity_next(it);
 		}
 	}
+
+	server_world_random_tick(&s->world, &s->rand_src, s);
 
 	w_coord_t px = WCOORD_CHUNK_OFFSET(floor(s->player.x));
 	w_coord_t pz = WCOORD_CHUNK_OFFSET(floor(s->player.z));

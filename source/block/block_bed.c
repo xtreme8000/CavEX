@@ -92,6 +92,7 @@ struct block block_bed = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
+	.onRandomTick = NULL,
 	.transparent = false,
 	.renderBlock = render_block_bed,
 	.renderBlockAlways = NULL,

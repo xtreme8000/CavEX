@@ -49,6 +49,7 @@ struct block block_fire = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
+	.onRandomTick = NULL,
 	.transparent = true,
 	.renderBlock = render_block_fire,
 	.renderBlockAlways = NULL,

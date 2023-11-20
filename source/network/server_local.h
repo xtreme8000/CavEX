@@ -52,5 +52,7 @@ struct server_local {
 };
 
 void server_local_create(struct server_local* s);
+void server_local_spawn_block_drops(struct server_local* s,
+									struct block_info* blk_info);
 
 #endif

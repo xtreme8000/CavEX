@@ -76,6 +76,7 @@ struct block block_crops = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
+	.onRandomTick = NULL,
 	.transparent = false,
 	.renderBlock = render_block_crops,
 	.renderBlockAlways = NULL,

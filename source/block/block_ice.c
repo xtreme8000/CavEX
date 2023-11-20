@@ -52,6 +52,7 @@ struct block block_ice = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
+	.onRandomTick = NULL,
 	.transparent = true,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

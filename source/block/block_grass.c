@@ -17,6 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 static enum block_material getMaterial(struct block_info* this) {
@@ -60,6 +61,48 @@ static size_t getDroppedItem(struct block_info* this, struct item_data* it,
 	return 1;
 }
 
+static void onRandomTick(struct server_local* s, struct block_info* this) {
+	struct block_data top;
+	if(server_world_get_block(&s->world, this->x, this->y + 1, this->z, &top)) {
+		if(top.sky_light < 5 && top.torch_light < 5) {
+			server_world_set_block(&s->world, this->x, this->y, this->z,
+								   (struct block_data) {
+									   .type = BLOCK_DIRT,
+									   .metadata = 0,
+								   });
+		} else if(top.sky_light >= 9 || top.torch_light >= 9) {
+			for(int k = 0; k < 4; k++) {
+				int x = rand_gen_range(&s->rand_src, -1, 2);
+				int y = rand_gen_range(&s->rand_src, -1, 5);
+				int z = rand_gen_range(&s->rand_src, -1, 2);
+
+				struct block_data neighbour, neighbour_top;
+				if((x != 0 || y != 0 || z != 0)
+				   && server_world_get_block(&s->world, this->x + x,
+											 this->y + y, this->z + z,
+											 &neighbour)
+				   && neighbour.type == BLOCK_DIRT
+				   && server_world_get_block(&s->world, this->x + x,
+											 this->y + y + 1, this->z + z,
+											 &neighbour_top)
+				   && (!blocks[neighbour_top.type]
+					   || blocks[neighbour_top.type]->can_see_through)
+				   && neighbour_top.type != BLOCK_WATER_FLOW
+				   && neighbour_top.type != BLOCK_WATER_STILL
+				   && neighbour_top.type != BLOCK_LAVA_FLOW
+				   && neighbour_top.type != BLOCK_LAVA_STILL) {
+					server_world_set_block(&s->world, this->x + x, this->y + y,
+										   this->z + z,
+										   (struct block_data) {
+											   .type = BLOCK_GRASS,
+											   .metadata = 0,
+										   });
+				}
+			}
+		}
+	}
+}
+
 struct block block_grass = {
 	.name = "Grass",
 	.getSideMask = getSideMask,
@@ -67,6 +110,7 @@ struct block block_grass = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
+	.onRandomTick = onRandomTick,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

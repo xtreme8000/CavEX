@@ -36,8 +36,8 @@ struct server_chunk {
 };
 
 #define MAX_REGIONS 4
-#define S_CHUNK_ID(x, z) (((int64_t)(z) << 32) | (((int64_t)(x)&0xFFFFFFFF)))
-#define S_CHUNK_X(id) ((int32_t)((id)&0xFFFFFFFF))
+#define S_CHUNK_ID(x, z) (((int64_t)(z) << 32) | (((int64_t)(x) & 0xFFFFFFFF)))
+#define S_CHUNK_X(id) ((int32_t)((id) & 0xFFFFFFFF))
 #define S_CHUNK_Z(id) ((int32_t)((id) >> 32))
 
 // key not!!! stored in multiples of CHUNK_SIZE
@@ -79,5 +79,7 @@ struct region_archive* server_world_chunk_region(struct server_world* w,
 												 w_coord_t x, w_coord_t z);
 bool server_world_disk_has_chunk(struct server_world* w, w_coord_t x,
 								 w_coord_t z);
+void server_world_random_tick(struct server_world* w, struct random_gen* g,
+							  struct server_local* s);
 
 #endif

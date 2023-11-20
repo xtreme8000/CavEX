@@ -17,6 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 static enum block_material getMaterial(struct block_info* this) {
@@ -66,6 +67,28 @@ static size_t getDroppedItem(struct block_info* this, struct item_data* it,
 	return drop_sapling ? 1 : 0;
 }
 
+static void onRandomTick(struct server_local* s, struct block_info* this) {
+	for(int y = -4; y <= 4; y++) {
+		for(int x = -4; x <= 4; x++) {
+			for(int z = -4; z <= 4; z++) {
+				struct block_data log;
+				if((x != 0 || y != 0 || z != 0)
+				   && server_world_get_block(&s->world, this->x + x,
+											 this->y + y, this->z + z, &log)
+				   && log.type == BLOCK_LOG)
+					return;
+			}
+		}
+	}
+
+	server_world_set_block(&s->world, this->x, this->y, this->z,
+						   (struct block_data) {
+							   .type = BLOCK_AIR,
+							   .metadata = 0,
+						   });
+	server_local_spawn_block_drops(s, this);
+}
+
 struct block block_leaves = {
 	.name = "Leaves",
 	.getSideMask = getSideMask,
@@ -73,6 +96,7 @@ struct block block_leaves = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
+	.onRandomTick = onRandomTick,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,

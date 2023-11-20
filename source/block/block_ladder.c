@@ -92,6 +92,7 @@ struct block block_ladder = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = block_drop_default,
+	.onRandomTick = NULL,
 	.transparent = false,
 	.renderBlock = render_block_ladder,
 	.renderBlockAlways = NULL,

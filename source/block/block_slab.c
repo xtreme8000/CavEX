@@ -103,6 +103,7 @@ struct block block_slab = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
+	.onRandomTick = NULL,
 	.transparent = false,
 	.renderBlock = render_block_slab,
 	.renderBlockAlways = NULL,

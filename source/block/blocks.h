@@ -45,6 +45,7 @@ struct block {
 								enum side, struct block_info*, uint8_t*, bool);
 	size_t (*getDroppedItem)(struct block_info*, struct item_data*,
 							 struct random_gen*);
+	void (*onRandomTick)(struct server_local*, struct block_info*);
 	bool transparent;
 	uint8_t luminance : 4;
 	uint8_t opacity : 4;

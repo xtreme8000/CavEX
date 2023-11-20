@@ -109,6 +109,7 @@ struct block block_trapdoor = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = block_drop_default,
+	.onRandomTick = NULL,
 	.transparent = false,
 	.renderBlock = render_block_trapdoor,
 	.renderBlockAlways = NULL,
