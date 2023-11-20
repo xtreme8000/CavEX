@@ -47,7 +47,7 @@ void camera_ray_pick(struct world* w, float gx0, float gy0, float gz0,
 					 float gx1, float gy1, float gz1,
 					 struct camera_ray_result* res);
 void camera_physics(struct camera* c, float dt);
-void camera_update(struct camera* c);
+void camera_update(struct camera* c, bool in_water);
 void camera_attach(struct camera* c, struct entity* e, float tick_delta,
 				   float dt);
 

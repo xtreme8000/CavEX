@@ -40,6 +40,7 @@ struct tex_gfx texture_clouds;
 struct tex_gfx texture_sun;
 struct tex_gfx texture_moon;
 struct tex_gfx texture_shadow;
+struct tex_gfx texture_water;
 
 struct tex_gfx texture_mob_char;
 
@@ -96,6 +97,8 @@ void tex_init() {
 	tex_gfx_load_file(&texture_sun, "terrain/sun.png", TEX_FMT_RGB16, false);
 	tex_gfx_load_file(&texture_moon, "terrain/moon.png", TEX_FMT_RGB16, false);
 	tex_gfx_load_file(&texture_shadow, "misc/shadow.png", TEX_FMT_IA4, false);
+	tex_gfx_load_file(&texture_water, "misc/water.png", TEX_FMT_RGBA16, false);
+	tex_gfx_wrap_mode(&texture_water, true);
 
 	tex_gfx_load_file(&texture_armor_chain1, "armor/chain_1.png",
 					  TEX_FMT_RGBA16, false);

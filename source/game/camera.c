@@ -179,10 +179,11 @@ void camera_physics(struct camera* c, float dt) {
 	c->ry = glm_clamp(c->ry, glm_rad(0.5F), GLM_PI - glm_rad(0.5F));
 }
 
-void camera_update(struct camera* c) {
+void camera_update(struct camera* c, bool in_water) {
 	assert(c);
 
-	glm_perspective(glm_rad(gstate.config.fov),
+	glm_perspective(glm_rad(gstate.config.fov)
+						* (in_water ? 6.0F / 7.0F : 1.0F),
 					(float)gfx_width() / (float)gfx_height(), 0.075F,
 					gstate.config.render_distance, c->projection);
 

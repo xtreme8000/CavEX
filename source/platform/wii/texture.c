@@ -259,6 +259,12 @@ void tex_gfx_load(struct tex_gfx* tex, void* img, size_t width, size_t height,
 	free(img);
 }
 
+void tex_gfx_wrap_mode(struct tex_gfx* tex, bool repeat) {
+	assert(tex);
+	GX_InitTexObjWrapMode(&tex->obj, repeat ? GX_REPEAT : GX_CLAMP,
+						  repeat ? GX_REPEAT : GX_CLAMP);
+}
+
 void tex_gfx_bind(struct tex_gfx* tex, int slot) {
 	assert(tex && slot >= GX_TEXMAP0 && slot < GX_MAX_TEXMAP);
 	GX_LoadTexObj(&tex->obj, slot);
