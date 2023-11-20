@@ -52,6 +52,7 @@ struct server_rpc {
 		struct {
 			bool finished;
 			w_coord_t x, y, z;
+			enum side side;
 		} block_dig;
 		struct {
 			size_t slot;

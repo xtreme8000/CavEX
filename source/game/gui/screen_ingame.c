@@ -181,6 +181,7 @@ static void screen_ingame_update(struct screen* s, float dt) {
 				.payload.block_dig.x = gstate.digging.x,
 				.payload.block_dig.y = gstate.digging.y,
 				.payload.block_dig.z = gstate.digging.z,
+				.payload.block_dig.side = gstate.camera_hit.side,
 				.payload.block_dig.finished = false,
 			});
 		}
@@ -192,6 +193,7 @@ static void screen_ingame_update(struct screen* s, float dt) {
 				.payload.block_dig.x = gstate.digging.x,
 				.payload.block_dig.y = gstate.digging.y,
 				.payload.block_dig.z = gstate.digging.z,
+				.payload.block_dig.side = gstate.camera_hit.side,
 				.payload.block_dig.finished = true,
 			});
 
@@ -215,6 +217,7 @@ static void screen_ingame_update(struct screen* s, float dt) {
 				.payload.block_dig.x = gstate.digging.x,
 				.payload.block_dig.y = gstate.digging.y,
 				.payload.block_dig.z = gstate.digging.z,
+				.payload.block_dig.side = gstate.camera_hit.side,
 				.payload.block_dig.finished = false,
 			});
 		}
