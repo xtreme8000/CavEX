@@ -122,7 +122,7 @@ void items_init() {
 	// milk bucket
 	// brick
 	// clay
-	// sugarcane
+	items[338] = &item_sugarcane;
 	// paper
 	// book
 	// slimeball

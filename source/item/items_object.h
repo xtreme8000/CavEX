@@ -677,3 +677,5 @@ static struct item item_porkchop_cooked = {
 		},
 	},
 };
+
+extern struct item item_sugarcane;

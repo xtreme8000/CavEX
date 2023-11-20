@@ -68,6 +68,7 @@ enum block_type {
 	BLOCK_SNOW = 78,
 	BLOCK_ICE = 79,
 	BLOCK_CACTUS = 81,
+	BLOCK_REED = 83,
 	BLOCK_PORTAL = 90,
 };
 

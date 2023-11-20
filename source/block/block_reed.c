@@ -17,6 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 static enum block_material getMaterial(struct block_info* this) {
@@ -50,6 +51,52 @@ static size_t getDroppedItem(struct block_info* this, struct item_data* it,
 	return 1;
 }
 
+static void onRandomTick(struct server_local* s, struct block_info* this) {
+	// TODO: check for water
+	bool has_support = false;
+	int height = 1;
+	for(int k = 0; k < 2; k++) {
+		struct block_data below;
+		if(!server_world_get_block(&s->world, this->x, this->y - k - 1, this->z,
+								   &below))
+			below.type = BLOCK_AIR;
+
+		if(below.type == BLOCK_REED) {
+			height++;
+			has_support = true;
+		} else {
+			if(below.type == BLOCK_DIRT || below.type == BLOCK_GRASS)
+				has_support = true;
+			break;
+		}
+	}
+
+	if(!has_support) {
+		server_world_set_block(&s->world, this->x, this->y, this->z,
+							   (struct block_data) {
+								   .type = BLOCK_AIR,
+								   .metadata = 0,
+							   });
+		server_local_spawn_block_drops(s, this);
+	} else if(height < 3) {
+		if(this->block->metadata == 0xF) {
+			struct block_data above;
+			if(!server_world_get_block(&s->world, this->x, this->y + 1, this->z,
+									   &above)
+			   || above.type == BLOCK_AIR)
+				server_world_set_block(&s->world, this->x, this->y + 1, this->z,
+									   (struct block_data) {
+										   .type = BLOCK_REED,
+										   .metadata = 0,
+									   });
+		}
+
+		this->block->metadata++;
+		server_world_set_block(&s->world, this->x, this->y, this->z,
+							   *this->block);
+	}
+}
+
 struct block block_reed = {
 	.name = "Reed",
 	.getSideMask = getSideMask,
@@ -57,7 +104,7 @@ struct block block_reed = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
-	.onRandomTick = NULL,
+	.onRandomTick = onRandomTick,
 	.transparent = false,
 	.renderBlock = render_block_cross,
 	.renderBlockAlways = NULL,

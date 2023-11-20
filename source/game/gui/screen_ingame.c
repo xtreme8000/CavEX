@@ -142,8 +142,7 @@ static void screen_ingame_update(struct screen* s, float dt) {
 	   && !gstate.digging.active) {
 		struct item_data item;
 		if(inventory_get_hotbar_item(
-			   windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), &item)
-		   && item_is_block(&item)) {
+			   windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), &item)) {
 			svin_rpc_send(&(struct server_rpc) {
 				.type = SRPC_BLOCK_PLACE,
 				.payload.block_place.x = gstate.camera_hit.x,
