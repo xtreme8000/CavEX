@@ -318,10 +318,11 @@ static void screen_ingame_update(struct screen* s, float dt) {
 
 static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	char str[64];
-	sprintf(str, GAME_NAME " Alpha %i.%i.%i (impl. MC B1.7.3)", VERSION_MAJOR,
+	sprintf(str, GAME_NAME " Alpha %i.%i.%i (impl. B1.7.3)", VERSION_MAJOR,
 			VERSION_MINOR, VERSION_PATCH);
 	gutil_text(4, 4 + 17 * 0, str, 16, true);
 
+#ifndef NDEBUG
 	sprintf(str, "%0.1f fps, wait: gpu %0.1fms, vsync %0.1fms",
 			gstate.stats.fps, gstate.stats.dt_gpu * 1000.0F,
 			gstate.stats.dt_vsync * 1000.0F);
@@ -346,6 +347,7 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 				bd.type, bd.metadata);
 		gutil_text(4, 4 + 17 * 5, str, 16, true);
 	}
+#endif
 
 	int icon_offset = 32;
 	icon_offset += gutil_control_icon(icon_offset, IB_INVENTORY, "Inventory");
