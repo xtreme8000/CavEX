@@ -150,8 +150,9 @@ static bool entity_tick(struct entity* e) {
 		new_vel[1] = -0.6F;
 		entity_try_move(e, new_pos, new_vel, &bbox, 1, &collision, &ground);
 
-		if(glm_vec3_distance2(e->pos_old, e->pos)
-		   < glm_vec3_distance2(e->pos_old, new_pos)) {
+		if(new_pos[1] > e->pos_old[1]
+		   && glm_vec3_distance2(e->pos_old, e->pos)
+			   < glm_vec3_distance2(e->pos_old, new_pos)) {
 			collision_xz = collision;
 			e->on_ground = ground;
 			glm_vec3_copy(new_pos, e->pos);
