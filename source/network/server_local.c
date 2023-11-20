@@ -213,11 +213,11 @@ static void server_local_process(struct server_rpc* call, void* user) {
 						server_local_spawn_block_drops(
 							s,
 							&(struct block_info) {
-							.block = &blk,
-							.neighbours = NULL,
-							.x = call->payload.block_dig.x,
-							.y = call->payload.block_dig.y,
-							.z = call->payload.block_dig.z,
+								.block = &blk,
+								.neighbours = NULL,
+								.x = call->payload.block_dig.x,
+								.y = call->payload.block_dig.y,
+								.z = call->payload.block_dig.z,
 							});
 				}
 			}
@@ -295,6 +295,7 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				(vec2) {s->player.rx, s->player.ry}, NULL, s->player.dimension);
 
 			level_archive_write_inventory(&s->level, &s->player.inventory);
+			level_archive_write(&s->level, LEVEL_TIME, &s->world_time);
 
 			dict_entity_reset(s->entities);
 			server_world_destroy(&s->world);
@@ -325,9 +326,7 @@ static void server_local_process(struct server_rpc* call, void* user) {
 					s->player.has_pos = true;
 				}
 
-				if(level_archive_read(&s->level, LEVEL_TIME, &s->world_time, 0))
-					s->world_time_start = time_get();
-
+				level_archive_read(&s->level, LEVEL_TIME, &s->world_time, 0);
 				dict_entity_reset(s->entities);
 
 				clin_rpc_send(&(struct client_rpc) {
@@ -347,6 +346,8 @@ static void server_local_update(struct server_local* s) {
 
 	if(!s->player.has_pos)
 		return;
+
+	s->world_time++;
 
 	dict_entity_it_t it;
 	dict_entity_it(it, s->entities);
@@ -452,8 +453,6 @@ static void server_local_update(struct server_local* s) {
 									 NULL))
 			clin_rpc_send(&pos);
 
-		s->world_time_start = time_get();
-
 		clin_rpc_send(&(struct client_rpc) {
 			.type = CRPC_TIME_SET,
 			.payload.time_set = s->world_time,
@@ -490,7 +489,6 @@ void server_local_create(struct server_local* s) {
 	assert(s);
 	rand_gen_seed(&s->rand_src);
 	s->world_time = 0;
-	s->world_time_start = time_get();
 	s->player.has_pos = false;
 	s->player.finished_loading = false;
 	string_init(s->level_name);
