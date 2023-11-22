@@ -678,4 +678,214 @@ static struct item item_porkchop_cooked = {
 	},
 };
 
+static struct item item_seeds = {
+	.name = "Seeds",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 9,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_wheat = {
+	.name = "Wheat",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 9,
+			.texture_y = 1,
+		},
+	},
+};
+
+static struct item item_bread = {
+	.name = "Bread",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 9,
+			.texture_y = 2,
+		},
+	},
+};
+
+static struct item item_flint = {
+	.name = "Flint",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 6,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_string = {
+	.name = "String",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 8,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_redstone = {
+	.name = "Redstone",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 8,
+			.texture_y = 3,
+		},
+	},
+};
+
+static struct item item_snow_ball = {
+	.name = "Snowball",
+	.has_damage = false,
+	.max_stack = 16,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 14,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_clay_ball = {
+	.name = "Clay",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 9,
+			.texture_y = 3,
+		},
+	},
+};
+
+static struct item item_glowstone_dust = {
+	.name = "Glowstone Dust",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 9,
+			.texture_y = 4,
+		},
+	},
+};
+
+static struct item item_dye = {
+	.name = "Ink Sac",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 14,
+			.texture_y = 4,
+		},
+	},
+};
+
+static struct item item_bowl = {
+	.name = "Bowl",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 7,
+			.texture_y = 4,
+		},
+	},
+};
+
+static struct item item_mushroom_stew = {
+	.name = "Mushroom Stew",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 8,
+			.texture_y = 4,
+		},
+	},
+};
+
+static struct item item_feather = {
+	.name = "Feather",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 8,
+			.texture_y = 1,
+		},
+	},
+};
+
+static struct item item_gunpowder = {
+	.name = "Gunpowder",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 8,
+			.texture_y = 2,
+		},
+	},
+};
+
 extern struct item item_sugarcane;
