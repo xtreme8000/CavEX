@@ -163,6 +163,9 @@ void particle_generate_side(struct block_info* info, enum side s) {
 static void render_single(struct particle* p, vec3 camera, float delta) {
 	assert(p && camera);
 
+	if(glm_vec3_distance2(p->pos, camera) > glm_pow2(32.0F))
+		return;
+
 	vec3 pos_lerp;
 	glm_vec3_lerp(p->pos_old, p->pos, delta, pos_lerp);
 
