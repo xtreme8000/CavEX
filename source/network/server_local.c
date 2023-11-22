@@ -380,10 +380,11 @@ static void server_local_update(struct server_local* s) {
 		}
 	}
 
-	server_world_random_tick(&s->world, &s->rand_src, s);
-
 	w_coord_t px = WCOORD_CHUNK_OFFSET(floor(s->player.x));
 	w_coord_t pz = WCOORD_CHUNK_OFFSET(floor(s->player.z));
+
+	server_world_random_tick(&s->world, &s->rand_src, s, px, pz,
+							 MAX_VIEW_DISTANCE - 2);
 
 	w_coord_t cx, cz;
 	if(server_world_furthest_chunk(&s->world, MAX_VIEW_DISTANCE, px, pz, &cx,

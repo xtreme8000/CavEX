@@ -22,6 +22,7 @@
 #include "../lighting.h"
 #include "../util.h"
 #include "client_interface.h"
+#include "server_local.h"
 #include "server_world.h"
 
 #define CHUNK_DIST2(x1, x2, z1, z2)                                            \
@@ -343,8 +344,9 @@ struct region_archive* server_world_chunk_region(struct server_world* w,
 }
 
 void server_world_random_tick(struct server_world* w, struct random_gen* g,
-							  struct server_local* s) {
-	assert(w && g);
+							  struct server_local* s, w_coord_t px,
+							  w_coord_t pz, w_coord_t dist) {
+	assert(w && g && s);
 
 	dict_server_chunks_it_t it;
 	dict_server_chunks_it(it, w->chunks);
@@ -353,25 +355,27 @@ void server_world_random_tick(struct server_world* w, struct random_gen* g,
 		struct server_chunk* sc = &dict_server_chunks_ref(it)->value;
 		int64_t id = dict_server_chunks_ref(it)->key;
 
-		// 80 random ticks each chunk
-		for(int k = 0; k < 80; k++) {
-			c_coord_t cx = rand_gen_range(g, 0, CHUNK_SIZE);
-			c_coord_t cz = rand_gen_range(g, 0, CHUNK_SIZE);
+		if(abs(S_CHUNK_X(id) - px) <= dist && abs(S_CHUNK_Z(id) - pz) <= dist) {
+			// 80 random ticks each chunk
+			for(int k = 0; k < 80; k++) {
+				c_coord_t cx = rand_gen_range(g, 0, CHUNK_SIZE);
+				c_coord_t cz = rand_gen_range(g, 0, CHUNK_SIZE);
 
-			w_coord_t x = S_CHUNK_X(id) * CHUNK_SIZE + cx;
-			w_coord_t y = rand_gen_range(g, 0, WORLD_HEIGHT);
-			w_coord_t z = S_CHUNK_Z(id) * CHUNK_SIZE + cz;
+				w_coord_t x = S_CHUNK_X(id) * CHUNK_SIZE + cx;
+				w_coord_t y = rand_gen_range(g, 0, WORLD_HEIGHT);
+				w_coord_t z = S_CHUNK_Z(id) * CHUNK_SIZE + cz;
 
-			struct block_data blk;
-			if(server_chunk_get_block(sc, cx, y, cz, &blk) && blocks[blk.type]
-			   && blocks[blk.type]->onRandomTick) {
-				blocks[blk.type]->onRandomTick(
-					s,
-					&(struct block_info) {.block = &blk,
-										  .neighbours = NULL,
-										  .x = x,
-										  .y = y,
-										  .z = z});
+				struct block_data blk;
+				if(server_chunk_get_block(sc, cx, y, cz, &blk)
+				   && blocks[blk.type] && blocks[blk.type]->onRandomTick) {
+					blocks[blk.type]->onRandomTick(
+						s,
+						&(struct block_info) {.block = &blk,
+											  .neighbours = NULL,
+											  .x = x,
+											  .y = y,
+											  .z = z});
+				}
 			}
 		}
 

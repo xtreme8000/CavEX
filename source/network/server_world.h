@@ -80,6 +80,7 @@ struct region_archive* server_world_chunk_region(struct server_world* w,
 bool server_world_disk_has_chunk(struct server_world* w, w_coord_t x,
 								 w_coord_t z);
 void server_world_random_tick(struct server_world* w, struct random_gen* g,
-							  struct server_local* s);
+							  struct server_local* s, w_coord_t px,
+							  w_coord_t pz, w_coord_t dist);
 
 #endif
