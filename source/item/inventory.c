@@ -21,9 +21,12 @@
 
 #include "inventory.h"
 
-bool inventory_create(struct inventory* inv, size_t capacity) {
+bool inventory_create(struct inventory* inv, struct inventory_logic* logic,
+					  void* user, size_t capacity) {
 	assert(inv && capacity > 0);
 
+	inv->user = user;
+	inv->logic = logic;
 	inv->capacity = capacity;
 	inv->items = malloc(sizeof(struct item_data) * capacity);
 
@@ -33,6 +36,9 @@ bool inventory_create(struct inventory* inv, size_t capacity) {
 	inventory_clear(inv);
 
 	ilist_inventory_init_field(inv);
+
+	if(inv->logic && inv->logic->on_create)
+		inv->logic->on_create(inv);
 
 	return true;
 }
@@ -50,6 +56,10 @@ void inventory_copy(struct inventory* inv, struct inventory* from) {
 
 void inventory_destroy(struct inventory* inv) {
 	assert(inv && inv->items);
+
+	if(inv->logic && inv->logic->on_destroy)
+		inv->logic->on_destroy(inv);
+
 	free(inv->items);
 }
 
@@ -80,72 +90,6 @@ void inventory_consume(struct inventory* inv, size_t slot) {
 			inv->items[slot].count = 0;
 		}
 	}
-}
-
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
-bool inventory_collect(struct inventory* inv, struct item_data* item,
-					   uint8_t* slot_priority, size_t slot_length, bool* mask) {
-	assert(inv && item && item->id != 0 && mask);
-
-	struct item* it = item_get(item);
-
-	if(!it)
-		return false;
-
-	while(item->count > 0) {
-		bool has_canidate_equal = false;
-		size_t candidate_equal = 0;
-		bool has_canidate_empty = false;
-		size_t candidate_empty = 0;
-
-		for(size_t k = 0; k < slot_length; k++) {
-			uint8_t slot = slot_priority[k];
-
-			if(inv->items[slot].id == item->id
-			   && inv->items[slot].durability == item->durability
-			   && inv->items[slot].count < it->max_stack) {
-				has_canidate_equal = true;
-				candidate_equal = slot;
-				break;
-			}
-
-			if(!has_canidate_empty && inv->items[slot].id == 0) {
-				has_canidate_empty = true;
-				candidate_empty = slot;
-			}
-		}
-
-		if(has_canidate_equal || has_canidate_empty) {
-			size_t candidate
-				= has_canidate_equal ? candidate_equal : candidate_empty;
-			size_t additional
-				= min(it->max_stack - inv->items[candidate].count, item->count);
-			inv->items[candidate].id = item->id;
-			inv->items[candidate].durability = item->durability;
-			inv->items[candidate].count += additional;
-			item->count -= additional;
-			mask[candidate] = true;
-		} else {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool inventory_collect_inventory(struct inventory* inv, struct item_data* item,
-								 bool* mask) {
-	uint8_t priorities[INVENTORY_SIZE_HOTBAR + INVENTORY_SIZE_MAIN];
-
-	for(size_t k = 0; k < INVENTORY_SIZE_HOTBAR; k++)
-		priorities[k] = k + INVENTORY_SLOT_HOTBAR;
-
-	for(size_t k = 0; k < INVENTORY_SIZE_MAIN; k++)
-		priorities[k + INVENTORY_SIZE_HOTBAR] = k + INVENTORY_SLOT_MAIN;
-
-	return inventory_collect(inv, item, priorities,
-							 sizeof(priorities) / sizeof(*priorities), mask);
 }
 
 size_t inventory_get_hotbar(struct inventory* inv) {
@@ -286,15 +230,30 @@ static bool inventory_place_one_item(struct inventory* inv, size_t slot) {
 	return true;
 }
 
-bool inventory_action(struct inventory* inv, size_t slot, bool right) {
+bool inventory_action(struct inventory* inv, size_t slot, bool right,
+					  set_inv_slot_t changes) {
 	assert(inv && slot < inv->capacity);
 
-	if(right) {
-		return (inv->picked_item.id == 0) ?
-			inventory_pick_item_split(inv, slot) :
-			inventory_place_one_item(inv, slot);
-	} else {
-		return (inv->picked_item.id == 0) ? inventory_pick_item(inv, slot) :
-											inventory_place_item(inv, slot);
+	bool result = true;
+
+	if(inv->logic && inv->logic->pre_action
+	   && !inv->logic->pre_action(inv, slot, right, changes))
+		result = false;
+
+	if(result) {
+		if(right) {
+			result = (inv->picked_item.id == 0) ?
+				inventory_pick_item_split(inv, slot) :
+				inventory_place_one_item(inv, slot);
+		} else {
+			result = (inv->picked_item.id == 0) ?
+				inventory_pick_item(inv, slot) :
+				inventory_place_item(inv, slot);
+		}
 	}
+
+	if(inv->logic && inv->logic->post_action)
+		inv->logic->post_action(inv, slot, right, result, changes);
+
+	return result;
 }

@@ -26,14 +26,15 @@
 #include "../item/window_container.h"
 #include "../platform/thread.h"
 #include "client_interface.h"
+#include "inventory_logic.h"
 #include "server_interface.h"
 #include "server_local.h"
 
 #define CHUNK_DIST2(x1, x2, z1, z2)                                            \
 	(((x1) - (x2)) * ((x1) - (x2)) + ((z1) - (z2)) * ((z1) - (z2)))
 
-static struct entity* spawn_item(vec3 pos, struct item_data* it, bool throw,
-								 struct server_local* s) {
+struct entity* server_local_spawn_item(vec3 pos, struct item_data* it,
+									   bool throw, struct server_local* s) {
 	uint32_t entity_id = entity_gen_id(s->entities);
 	struct entity* e = dict_entity_safe_get(s->entities, entity_id);
 	entity_item(entity_id, e, true, &s->world, *it);
@@ -82,9 +83,33 @@ void server_local_spawn_block_drops(struct server_local* s,
 													  &s->rand_src);
 
 		for(size_t k = 0; k < count; k++)
-			spawn_item((vec3) {blk_info->x + 0.5F, blk_info->y + 0.5F,
+			server_local_spawn_item((vec3) {blk_info->x + 0.5F,
+											blk_info->y + 0.5F,
 							   blk_info->z + 0.5F},
 					   items + k, false, s);
+	}
+}
+
+void server_local_send_inv_changes(set_inv_slot_t changes,
+								   struct inventory* inv, uint8_t window) {
+	assert(changes && inv);
+
+	set_inv_slot_it_t it;
+	set_inv_slot_it(it, changes);
+
+	while(!set_inv_slot_end_p(it)) {
+		size_t slot = *set_inv_slot_ref(it);
+
+		clin_rpc_send(&(struct client_rpc) {
+			.type = CRPC_INVENTORY_SLOT,
+			.payload.inventory_slot.window = window,
+			.payload.inventory_slot.slot = slot,
+			.payload.inventory_slot.item = (slot == SPECIAL_SLOT_PICKED_ITEM) ?
+				inv->picked_item :
+				inv->items[slot],
+		});
+
+		set_inv_slot_next(it);
 	}
 }
 
@@ -111,15 +136,12 @@ static void server_local_process(struct server_rpc* call, void* user) {
 									 call->payload.hotbar_slot.slot);
 			break;
 		case SRPC_WINDOW_CLICK: {
-			bool accept = false;
-			if(call->payload.window_click.window == WINDOWC_INVENTORY) {
-				if(!(inventory_get_picked_item(&s->player.inventory, NULL)
-					 && call->payload.window_click.slot
-						 == INVENTORY_SLOT_OUTPUT))
-					accept = inventory_action(
-						&s->player.inventory, call->payload.window_click.slot,
-						call->payload.window_click.right_click);
-			}
+			set_inv_slot_t changes;
+			set_inv_slot_init(changes);
+
+			bool accept = inventory_action(
+				s->player.active_inventory, call->payload.window_click.slot,
+				call->payload.window_click.right_click, changes);
 
 			clin_rpc_send(&(struct client_rpc) {
 				.type = CRPC_WINDOW_TRANSACTION,
@@ -129,60 +151,20 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				.payload.window_transaction.window
 				= call->payload.window_click.window,
 			});
+
+			server_local_send_inv_changes(changes, s->player.active_inventory,
+										  call->payload.window_click.window);
+			set_inv_slot_clear(changes);
 			break;
 		}
-		case SRPC_WINDOW_CLOSE:
-			if(call->payload.window_click.window == WINDOWC_INVENTORY) {
-				bool slots_changed[INVENTORY_SIZE];
-				memset(slots_changed, false, sizeof(slots_changed));
-
-				inventory_clear_slot(&s->player.inventory,
-									 INVENTORY_SLOT_OUTPUT);
-				slots_changed[INVENTORY_SLOT_OUTPUT] = true;
-
-				for(size_t k = INVENTORY_SLOT_CRAFTING;
-					k < INVENTORY_SLOT_CRAFTING + INVENTORY_SIZE_CRAFTING;
-					k++) {
-					struct item_data item;
-					inventory_get_slot(&s->player.inventory, k, &item);
-
-					if(item.id != 0) {
-						inventory_clear_slot(&s->player.inventory, k);
-						slots_changed[k] = true;
-						spawn_item(
-							(vec3) {s->player.x, s->player.y, s->player.z},
-							&item, true, s);
-					}
-				}
-
-				for(size_t k = 0; k < INVENTORY_SIZE; k++) {
-					if(slots_changed[k])
-						clin_rpc_send(&(struct client_rpc) {
-							.type = CRPC_INVENTORY_SLOT,
-							.payload.inventory_slot.window = WINDOWC_INVENTORY,
-							.payload.inventory_slot.slot = k,
-							.payload.inventory_slot.item
-							= s->player.inventory.items[k],
-						});
-				}
-
-				struct item_data picked_item;
-				if(inventory_get_picked_item(&s->player.inventory,
-											 &picked_item)) {
-					inventory_clear_picked_item(&s->player.inventory);
-					spawn_item((vec3) {s->player.x, s->player.y, s->player.z},
-							   &picked_item, true, s);
-
-					clin_rpc_send(&(struct client_rpc) {
-						.type = CRPC_INVENTORY_SLOT,
-						.payload.inventory_slot.window = WINDOWC_INVENTORY,
-						.payload.inventory_slot.slot = SPECIAL_SLOT_PICKED_ITEM,
-						.payload.inventory_slot.item
-						= s->player.inventory.picked_item,
-					});
-				}
-			}
+		case SRPC_WINDOW_CLOSE: {
+			if(s->player.active_inventory && s->player.active_inventory->logic
+			   && s->player.active_inventory->logic->on_close)
+				s->player.active_inventory->logic->on_close(
+					s->player.active_inventory);
+			s->player.active_inventory = &s->player.inventory;
 			break;
+		}
 		case SRPC_BLOCK_DIG:
 			if(s->player.has_pos && call->payload.block_dig.y >= 0
 			   && call->payload.block_dig.y < WORLD_HEIGHT
@@ -328,6 +310,7 @@ static void server_local_process(struct server_rpc* call, void* user) {
 
 				level_archive_read(&s->level, LEVEL_TIME, &s->world_time, 0);
 				dict_entity_reset(s->entities);
+				s->player.active_inventory = &s->player.inventory;
 
 				clin_rpc_send(&(struct client_rpc) {
 					.type = CRPC_WORLD_RESET,
@@ -493,7 +476,10 @@ void server_local_create(struct server_local* s) {
 	s->player.has_pos = false;
 	s->player.finished_loading = false;
 	string_init(s->level_name);
-	inventory_create(&s->player.inventory, INVENTORY_SIZE);
+
+	inventory_create(&s->player.inventory, &inventory_logic_player, s,
+					 INVENTORY_SIZE);
+	s->player.active_inventory = &s->player.inventory;
 	dict_entity_init(s->entities);
 
 	struct thread t;

@@ -94,22 +94,11 @@ static bool entity_server_tick(struct entity* e, struct server_local* s) {
 					 e->pos,
 					 (vec3) {s->player.x, s->player.y - 0.6F, s->player.z})
 				  < glm_pow2(2.0F)) { // allow pickup after 2s
-		bool slots_changed[INVENTORY_SIZE];
-		memset(slots_changed, false, sizeof(slots_changed));
-
 		// TODO: case where item cannot be picked up completely
-		inventory_collect_inventory(&s->player.inventory, &e->data.item.item,
-									slots_changed);
-
-		for(size_t k = 0; k < INVENTORY_SIZE; k++) {
-			if(slots_changed[k])
-				clin_rpc_send(&(struct client_rpc) {
-					.type = CRPC_INVENTORY_SLOT,
-					.payload.inventory_slot.window = WINDOWC_INVENTORY,
-					.payload.inventory_slot.slot = k,
-					.payload.inventory_slot.item = s->player.inventory.items[k],
-				});
-		}
+		if(s->player.active_inventory && s->player.active_inventory->logic
+		   && s->player.active_inventory->logic->on_collect)
+			s->player.active_inventory->logic->on_collect(
+				s->player.active_inventory, &e->data.item.item);
 
 		clin_rpc_send(&(struct client_rpc) {
 			.type = CRPC_PICKUP_ITEM,

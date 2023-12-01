@@ -34,6 +34,7 @@
 #include "game/gui/screen.h"
 #include "graphics/gfx_util.h"
 #include "graphics/gui_util.h"
+#include "item/recipe.h"
 #include "network/client_interface.h"
 #include "network/server_interface.h"
 #include "network/server_local.h"
@@ -70,6 +71,7 @@ int main(void) {
 	input_init();
 	blocks_init();
 	items_init();
+	recipe_init();
 	gfx_setup();
 
 	screen_set(&screen_select_world);

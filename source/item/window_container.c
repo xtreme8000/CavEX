@@ -68,7 +68,7 @@ bool windowc_new_action(struct window_container* wc, uint16_t* action_id,
 	if(!next)
 		return false;
 
-	if(!inventory_create(next, INVENTORY_SIZE)) // TODO
+	if(!inventory_create(next, NULL, NULL, INVENTORY_SIZE)) // TODO
 		return false;
 
 	if(!ilist_inventory_empty_p(wc->invs))
@@ -78,7 +78,7 @@ bool windowc_new_action(struct window_container* wc, uint16_t* action_id,
 	next->revision.action_type = action_type;
 	next->revision.action_slot = action_slot;
 
-	inventory_action(next, action_slot, action_type);
+	inventory_action(next, action_slot, action_type, NULL);
 
 	*action_id = wc->next_action_id;
 	wc->next_action_id++;
@@ -150,7 +150,7 @@ void windowc_slot_change(struct window_container* wc, size_t slot,
 		struct inventory* current = ilist_inventory_ref(it);
 		inventory_copy(current, prev);
 		inventory_action(current, current->revision.action_slot,
-						 current->revision.action_type);
+						 current->revision.action_type, NULL);
 
 		prev = current;
 		ilist_inventory_next(it);

@@ -20,6 +20,7 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
+#include <m-lib/m-dict.h>
 #include <m-lib/m-i-list.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -40,6 +41,10 @@
 
 #define SPECIAL_SLOT_PICKED_ITEM 255
 
+DICT_SET_DEF(set_inv_slot, size_t)
+
+struct inventory_logic;
+
 struct inventory {
 	struct item_data picked_item;
 	struct item_data* items;
@@ -50,20 +55,30 @@ struct inventory {
 		bool action_type;
 		size_t action_slot;
 	} revision; // for window container
+	struct inventory_logic* logic;
+	void* user;
 	ILIST_INTERFACE(ilist_inventory, struct inventory);
+};
+
+struct inventory_logic {
+	void (*on_create)(struct inventory* inv);
+	void (*on_destroy)(struct inventory* inv);
+	bool (*pre_action)(struct inventory* inv, size_t slot, bool right,
+					   set_inv_slot_t changes);
+	void (*post_action)(struct inventory* inv, size_t slot, bool right,
+						bool accepted, set_inv_slot_t changes);
+	bool (*on_collect)(struct inventory* inv, struct item_data* item);
+	void (*on_close)(struct inventory* inv);
 };
 
 ILIST_DEF(ilist_inventory, struct inventory, M_POD_OPLIST)
 
-bool inventory_create(struct inventory* inv, size_t capacity);
+bool inventory_create(struct inventory* inv, struct inventory_logic* logic,
+					  void* user, size_t capacity);
 void inventory_copy(struct inventory* inv, struct inventory* from);
 void inventory_destroy(struct inventory* inv);
 void inventory_clear(struct inventory* inv);
 void inventory_consume(struct inventory* inv, size_t slot);
-bool inventory_collect(struct inventory* inv, struct item_data* item,
-					   uint8_t* slot_priority, size_t slot_length, bool* mask);
-bool inventory_collect_inventory(struct inventory* inv, struct item_data* item,
-								 bool* mask);
 size_t inventory_get_hotbar(struct inventory* inv);
 void inventory_set_hotbar(struct inventory* inv, size_t slot);
 bool inventory_get_hotbar_item(struct inventory* inv, struct item_data* item);
@@ -75,6 +90,7 @@ bool inventory_get_slot(struct inventory* inv, size_t slot,
 void inventory_clear_picked_item(struct inventory* inv);
 void inventory_set_picked_item(struct inventory* inv, struct item_data item);
 bool inventory_get_picked_item(struct inventory* inv, struct item_data* item);
-bool inventory_action(struct inventory* inv, size_t slot, bool right);
+bool inventory_action(struct inventory* inv, size_t slot, bool right,
+					  set_inv_slot_t changes);
 
 #endif

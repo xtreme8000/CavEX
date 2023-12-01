@@ -34,6 +34,8 @@ struct item_data {
 enum item_type {
 	ITEM_COAL = 263,
 	ITEM_DIAMOND = 264,
+	ITEM_DIAMOND_PICKAXE = 278,
+	ITEM_STICK = 280,
 	ITEM_SEED = 295,
 	ITEM_WHEAT = 296,
 	ITEM_BREAD = 297,
@@ -52,10 +54,10 @@ enum item_type {
 struct server_local;
 
 enum armor_type {
-	ARMOR_TYPE_HELMET,
-	ARMOR_TYPE_CHESTPLATE,
-	ARMOR_TYPE_LEGGINGS,
-	ARMOR_TYPE_BOOTS,
+	ARMOR_TYPE_HELMET = 0,
+	ARMOR_TYPE_CHESTPLATE = 1,
+	ARMOR_TYPE_LEGGINGS = 2,
+	ARMOR_TYPE_BOOTS = 3,
 };
 
 enum armor_tier {

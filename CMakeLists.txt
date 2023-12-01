@@ -97,6 +97,7 @@ add_executable(cavex
 				source/item/inventory.c
 				source/item/items.c
 				source/item/tool.c
+				source/item/recipe.c
 				source/item/items/item_sugarcane.c
 
 				source/network/client_interface.c
@@ -105,6 +106,7 @@ add_executable(cavex
 				source/network/server_interface.c
 				source/network/server_local.c
 				source/network/server_world.c
+				source/network/inventory_player.c
 
 				source/graphics/gfx_util.c
 				source/graphics/gui_util.c
