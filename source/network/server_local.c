@@ -41,8 +41,10 @@ struct entity* server_local_spawn_item(vec3 pos, struct item_data* it,
 	e->teleport(e, pos);
 
 	if(throw) {
-		float rx = glm_rad(-s->player.rx);
-		float ry = glm_rad(s->player.ry + 90.0F);
+		float rx = glm_rad(-s->player.rx
+						   + (rand_gen_flt(&s->rand_src) - 0.5F) * 22.5F);
+		float ry = glm_rad(s->player.ry + 90.0F
+						   + (rand_gen_flt(&s->rand_src) - 0.5F) * 22.5F);
 		e->vel[0] = sinf(rx) * sinf(ry) * 0.25F;
 		e->vel[1] = cosf(ry) * 0.25F;
 		e->vel[2] = cosf(rx) * sinf(ry) * 0.25F;
@@ -85,8 +87,8 @@ void server_local_spawn_block_drops(struct server_local* s,
 		for(size_t k = 0; k < count; k++)
 			server_local_spawn_item((vec3) {blk_info->x + 0.5F,
 											blk_info->y + 0.5F,
-							   blk_info->z + 0.5F},
-					   items + k, false, s);
+											blk_info->z + 0.5F},
+									items + k, false, s);
 	}
 }
 
