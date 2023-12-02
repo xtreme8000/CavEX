@@ -206,7 +206,7 @@ void camera_attach(struct camera* c, struct entity* e, float tick_delta,
 	c->z = pos_lerp[2];
 
 	float jdx, jdy;
-	if(input_joystick(dt, &jdx, &jdy)) {
+	if(e->data.local_player.capture_input && input_joystick(dt, &jdx, &jdy)) {
 		c->rx -= jdx * 2.0F;
 		c->ry -= jdy * 2.0F;
 	}
