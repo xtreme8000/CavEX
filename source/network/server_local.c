@@ -213,56 +213,60 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				int x, y, z;
 				blocks_side_offset(call->payload.block_place.side, &x, &y, &z);
 
-				struct item_data it_data;
-				inventory_get_hotbar_item(&s->player.inventory, &it_data);
-				struct item* it = item_get(&it_data);
+				struct block_data blk_where, blk_on;
+				if(server_world_get_block(
+					   &s->world, call->payload.block_place.x + x,
+					   call->payload.block_place.y + y,
+					   call->payload.block_place.z + z, &blk_where)
+				   && server_world_get_block(
+					   &s->world, call->payload.block_place.x,
+					   call->payload.block_place.y, call->payload.block_place.z,
+					   &blk_on)) {
+					struct block_info where = (struct block_info) {
+						.block = &blk_where,
+						.neighbours = NULL,
+						.x = call->payload.block_place.x + x,
+						.y = call->payload.block_place.y + y,
+						.z = call->payload.block_place.z + z,
+					};
 
-				if(it && it->onItemPlace) {
-					struct block_data blk_where, blk_on;
-					if(server_world_get_block(
-						   &s->world, call->payload.block_place.x + x,
-						   call->payload.block_place.y + y,
-						   call->payload.block_place.z + z, &blk_where)
-					   && server_world_get_block(
-						   &s->world, call->payload.block_place.x,
-						   call->payload.block_place.y,
-						   call->payload.block_place.z, &blk_on)) {
-						struct block_info where = (struct block_info) {
-							.block = &blk_where,
-							.neighbours = NULL,
-							.x = call->payload.block_place.x + x,
-							.y = call->payload.block_place.y + y,
-							.z = call->payload.block_place.z + z,
-						};
+					struct block_info on = (struct block_info) {
+						.block = &blk_on,
+						.neighbours = NULL,
+						.x = call->payload.block_place.x,
+						.y = call->payload.block_place.y,
+						.z = call->payload.block_place.z,
+					};
 
-						struct block_info on = (struct block_info) {
-							.block = &blk_on,
-							.neighbours = NULL,
-							.x = call->payload.block_place.x,
-							.y = call->payload.block_place.y,
-							.z = call->payload.block_place.z,
-						};
+					struct item_data it_data;
+					inventory_get_hotbar_item(&s->player.inventory, &it_data);
+					struct item* it = item_get(&it_data);
 
-						if((!blocks[blk_where.type]
-							|| blocks[blk_where.type]->place_ignore)
-						   && it->onItemPlace(s, &it_data, &where, &on,
-											  call->payload.block_place.side)) {
-							size_t slot
-								= inventory_get_hotbar(&s->player.inventory);
-							inventory_consume(&s->player.inventory,
-											  slot + INVENTORY_SLOT_HOTBAR);
+					if(blocks[blk_on.type]
+					   && blocks[blk_on.type]->onRightClick) {
+						blocks[blk_on.type]->onRightClick(
+							s, &it_data, &where, &on,
+							call->payload.block_place.side);
+					} else if((!blocks[blk_where.type]
+							   || blocks[blk_where.type]->place_ignore)
+							  && it && it->onItemPlace
+							  && it->onItemPlace(
+								  s, &it_data, &where, &on,
+								  call->payload.block_place.side)) {
+						size_t slot
+							= inventory_get_hotbar(&s->player.inventory);
+						inventory_consume(&s->player.inventory,
+										  slot + INVENTORY_SLOT_HOTBAR);
 
-							clin_rpc_send(&(struct client_rpc) {
-								.type = CRPC_INVENTORY_SLOT,
-								.payload.inventory_slot.window
-								= WINDOWC_INVENTORY,
-								.payload.inventory_slot.slot
-								= slot + INVENTORY_SLOT_HOTBAR,
-								.payload.inventory_slot.item
-								= s->player.inventory
-									  .items[slot + INVENTORY_SLOT_HOTBAR],
-							});
-						}
+						clin_rpc_send(&(struct client_rpc) {
+							.type = CRPC_INVENTORY_SLOT,
+							.payload.inventory_slot.window = WINDOWC_INVENTORY,
+							.payload.inventory_slot.slot
+							= slot + INVENTORY_SLOT_HOTBAR,
+							.payload.inventory_slot.item
+							= s->player.inventory
+								  .items[slot + INVENTORY_SLOT_HOTBAR],
+						});
 					}
 				}
 			}

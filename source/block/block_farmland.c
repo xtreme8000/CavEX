@@ -68,6 +68,7 @@ struct block block_farmland = {
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
 	.onRandomTick = NULL,
+	.onRightClick = NULL,
 	.transparent = false,
 	.renderBlock = render_block_farmland,
 	.renderBlockAlways = NULL,

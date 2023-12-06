@@ -60,6 +60,7 @@ struct block block_lava = {
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
 	.onRandomTick = NULL,
+	.onRightClick = NULL,
 	.transparent = true,
 	.renderBlock = render_block_fluid,
 	.renderBlockAlways = NULL,

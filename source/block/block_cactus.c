@@ -120,6 +120,7 @@ struct block block_cactus = {
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = block_drop_default,
 	.onRandomTick = onRandomTick,
+	.onRightClick = NULL,
 	.transparent = false,
 	.renderBlock = render_block_cactus,
 	.renderBlockAlways = NULL,

@@ -140,9 +140,6 @@ void screen_ingame_render3D(struct screen* s, mat4 view) {
 static void screen_ingame_update(struct screen* s, float dt) {
 	if(gstate.camera_hit.hit && input_pressed(IB_ACTION2)
 	   && !gstate.digging.active) {
-		struct item_data item;
-		if(inventory_get_hotbar_item(
-			   windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), &item)) {
 			svin_rpc_send(&(struct server_rpc) {
 				.type = SRPC_BLOCK_PLACE,
 				.payload.block_place.x = gstate.camera_hit.x,
@@ -151,6 +148,8 @@ static void screen_ingame_update(struct screen* s, float dt) {
 				.payload.block_place.side = gstate.camera_hit.side,
 			});
 
+		if(inventory_get_hotbar_item(
+			   windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), NULL)) {
 			gstate.held_item_animation.punch.start = time_get();
 			gstate.held_item_animation.punch.place = true;
 		}

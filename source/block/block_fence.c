@@ -56,6 +56,7 @@ struct block block_fence = {
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = block_drop_default,
 	.onRandomTick = NULL,
+	.onRightClick = NULL,
 	.transparent = false,
 	.renderBlock = render_block_fence,
 	.renderBlockAlways = render_block_fence_always,
