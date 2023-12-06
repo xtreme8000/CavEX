@@ -20,3 +20,4 @@
 #include "../item/inventory.h"
 
 extern struct inventory_logic inventory_logic_player;
+extern struct inventory_logic inventory_logic_crafting;

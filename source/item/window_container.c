@@ -21,11 +21,13 @@
 
 #include "window_container.h"
 
-bool windowc_create(struct window_container* wc, enum window_type type) {
+bool windowc_create(struct window_container* wc, enum window_type type,
+					size_t slot_count) {
 	assert(wc);
 
 	ilist_inventory_init(wc->invs);
 
+	wc->slot_count = slot_count;
 	wc->type = type;
 	wc->next_action_id = 0;
 
@@ -68,7 +70,7 @@ bool windowc_new_action(struct window_container* wc, uint16_t* action_id,
 	if(!next)
 		return false;
 
-	if(!inventory_create(next, NULL, NULL, INVENTORY_SIZE)) // TODO
+	if(!inventory_create(next, NULL, NULL, wc->slot_count))
 		return false;
 
 	if(!ilist_inventory_empty_p(wc->invs))

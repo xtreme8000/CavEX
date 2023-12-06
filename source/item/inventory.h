@@ -39,6 +39,14 @@
 #define INVENTORY_SLOT_MAIN 9
 #define INVENTORY_SLOT_HOTBAR 36
 
+#define CRAFTING_SIZE 46
+#define CRAFTING_SIZE_INPUT 9
+
+#define CRAFTING_SLOT_OUTPUT 0
+#define CRAFTING_SLOT_INPUT 1
+#define CRAFTING_SLOT_MAIN 10
+#define CRAFTING_SLOT_HOTBAR 37
+
 #define SPECIAL_SLOT_PICKED_ITEM 255
 
 DICT_SET_DEF(set_inv_slot, size_t)
@@ -62,7 +70,7 @@ struct inventory {
 
 struct inventory_logic {
 	void (*on_create)(struct inventory* inv);
-	void (*on_destroy)(struct inventory* inv);
+	bool (*on_destroy)(struct inventory* inv);
 	bool (*pre_action)(struct inventory* inv, size_t slot, bool right,
 					   set_inv_slot_t changes);
 	void (*post_action)(struct inventory* inv, size_t slot, bool right,

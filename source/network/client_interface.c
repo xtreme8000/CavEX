@@ -122,7 +122,7 @@ void clin_process(struct client_rpc* call) {
 				= malloc(sizeof(struct window_container));
 			assert(gstate.windows[WINDOWC_INVENTORY]);
 			windowc_create(gstate.windows[WINDOWC_INVENTORY],
-						   WINDOW_TYPE_INVENTORY);
+						   WINDOW_TYPE_INVENTORY, INVENTORY_SIZE);
 
 			gstate.world_loaded = false;
 			gstate.world.dimension = call->payload.world_reset.dimension;
@@ -150,6 +150,29 @@ void clin_process(struct client_rpc* call) {
 					gstate.windows[window],
 					call->payload.window_transaction.action_id,
 					call->payload.window_transaction.accepted);
+			break;
+		}
+		case CRPC_OPEN_WINDOW: {
+			uint8_t window = call->payload.window_open.window;
+
+			if(gstate.windows[window]) {
+				windowc_destroy(gstate.windows[window]);
+				free(gstate.windows[window]);
+			}
+
+			gstate.windows[window] = malloc(sizeof(struct window_container));
+
+			if(gstate.windows[window]) {
+				windowc_create(gstate.windows[window],
+							   call->payload.window_open.type,
+							   call->payload.window_open.slot_count);
+
+				if(call->payload.window_open.type == WINDOW_TYPE_WORKBENCH) {
+					screen_crafting_set_windowc(window);
+					screen_set(&screen_crafting);
+				}
+			}
+
 			break;
 		}
 		case CRPC_TIME_SET:

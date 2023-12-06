@@ -51,7 +51,7 @@ void recipe_add(array_recipe_t recipes, struct item_data result, size_t width,
 				size_t height, uint8_t* shape, ...) {
 	assert(recipes && width > 0 && height > 0 && width * height <= 9 && shape);
 
-	int count = 0;
+	size_t count = 0;
 	for(size_t k = 0; k < width * height; k++) {
 		if(shape[k] > count)
 			count = shape[k];

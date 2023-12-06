@@ -160,10 +160,11 @@ static void server_local_process(struct server_rpc* call, void* user) {
 			break;
 		}
 		case SRPC_WINDOW_CLOSE: {
-			if(s->player.active_inventory && s->player.active_inventory->logic
+			if(s->player.active_inventory->logic
 			   && s->player.active_inventory->logic->on_close)
 				s->player.active_inventory->logic->on_close(
 					s->player.active_inventory);
+
 			s->player.active_inventory = &s->player.inventory;
 			break;
 		}

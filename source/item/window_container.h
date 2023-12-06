@@ -26,6 +26,7 @@
 #include "inventory.h"
 
 #define WINDOWC_INVENTORY 0
+#define WINDOWC_CRAFTING 1 // local server use only
 
 enum window_type {
 	WINDOW_TYPE_CHEST = 0,
@@ -37,11 +38,13 @@ enum window_type {
 
 struct window_container {
 	enum window_type type;
+	size_t slot_count;
 	uint16_t next_action_id;
 	ilist_inventory_t invs;
 };
 
-bool windowc_create(struct window_container* wc, enum window_type type);
+bool windowc_create(struct window_container* wc, enum window_type type,
+					size_t slot_count);
 void windowc_destroy(struct window_container* wc);
 
 struct inventory* windowc_get_latest(struct window_container* wc);

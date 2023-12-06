@@ -57,10 +57,15 @@ void inventory_copy(struct inventory* inv, struct inventory* from) {
 void inventory_destroy(struct inventory* inv) {
 	assert(inv && inv->items);
 
+	bool free_mem = false;
+
 	if(inv->logic && inv->logic->on_destroy)
-		inv->logic->on_destroy(inv);
+		free_mem = inv->logic->on_destroy(inv);
 
 	free(inv->items);
+
+	if(free_mem)
+		free(inv);
 }
 
 void inventory_clear(struct inventory* inv) {

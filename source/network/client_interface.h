@@ -21,6 +21,7 @@
 #define CLIENT_INTERFACE_H
 
 #include "../item/items.h"
+#include "../item/window_container.h"
 #include "../world.h"
 
 #include "../cglm/cglm.h"
@@ -38,6 +39,7 @@ enum client_rpc_type {
 	CRPC_PICKUP_ITEM,
 	CRPC_ENTITY_DESTROY,
 	CRPC_ENTITY_MOVE,
+	CRPC_OPEN_WINDOW,
 };
 
 struct client_rpc {
@@ -77,6 +79,11 @@ struct client_rpc {
 			uint16_t action_id;
 			bool accepted;
 		} window_transaction;
+		struct {
+			uint8_t window;
+			enum window_type type;
+			uint8_t slot_count;
+		} window_open;
 		struct {
 			uint32_t entity_id;
 			struct item_data item;
