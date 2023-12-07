@@ -648,8 +648,280 @@ static struct item item_diamond_boots = {
 	},
 };
 
+static struct item item_leather_helmet = {
+	.name = "Leather Helmet",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_HELMET,
+	.armor.tier = ARMOR_TIER_CLOTH,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 0,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_leather_chestplate = {
+	.name = "Leather Chestplate",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_CHESTPLATE,
+	.armor.tier = ARMOR_TIER_CLOTH,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 0,
+			.texture_y = 1,
+		},
+	},
+};
+
+static struct item item_leather_leggings = {
+	.name = "Leather Leggings",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_LEGGINGS,
+	.armor.tier = ARMOR_TIER_CLOTH,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 0,
+			.texture_y = 2,
+		},
+	},
+};
+
+static struct item item_leather_boots = {
+	.name = "Leather Boots",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_BOOTS,
+	.armor.tier = ARMOR_TIER_CLOTH,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 0,
+			.texture_y = 3,
+		},
+	},
+};
+
+static struct item item_chain_helmet = {
+	.name = "Chain Helmet",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_HELMET,
+	.armor.tier = ARMOR_TIER_CHAIN,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 1,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_chain_chestplate = {
+	.name = "Chain Chestplate",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_CHESTPLATE,
+	.armor.tier = ARMOR_TIER_CHAIN,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 1,
+			.texture_y = 1,
+		},
+	},
+};
+
+static struct item item_chain_leggings = {
+	.name = "Chain Leggings",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_LEGGINGS,
+	.armor.tier = ARMOR_TIER_CHAIN,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 1,
+			.texture_y = 2,
+		},
+	},
+};
+
+static struct item item_chain_boots = {
+	.name = "Chain Boots",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_BOOTS,
+	.armor.tier = ARMOR_TIER_CHAIN,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 1,
+			.texture_y = 3,
+		},
+	},
+};
+
+static struct item item_iron_helmet = {
+	.name = "Iron Helmet",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_HELMET,
+	.armor.tier = ARMOR_TIER_IRON,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 2,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_iron_chestplate = {
+	.name = "Iron Chestplate",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_CHESTPLATE,
+	.armor.tier = ARMOR_TIER_IRON,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 2,
+			.texture_y = 1,
+		},
+	},
+};
+
+static struct item item_iron_leggings = {
+	.name = "Iron Leggings",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_LEGGINGS,
+	.armor.tier = ARMOR_TIER_IRON,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 2,
+			.texture_y = 2,
+		},
+	},
+};
+
+static struct item item_iron_boots = {
+	.name = "Iron Boots",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_BOOTS,
+	.armor.tier = ARMOR_TIER_IRON,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 2,
+			.texture_y = 3,
+		},
+	},
+};
+
+static struct item item_gold_helmet = {
+	.name = "Gold Helmet",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_HELMET,
+	.armor.tier = ARMOR_TIER_GOLD,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 4,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_gold_chestplate = {
+	.name = "Gold Chestplate",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_CHESTPLATE,
+	.armor.tier = ARMOR_TIER_GOLD,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 4,
+			.texture_y = 1,
+		},
+	},
+};
+
+static struct item item_gold_leggings = {
+	.name = "Gold Leggings",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_LEGGINGS,
+	.armor.tier = ARMOR_TIER_GOLD,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 4,
+			.texture_y = 2,
+		},
+	},
+};
+
+static struct item item_gold_boots = {
+	.name = "Gold Boots",
+	.has_damage = true,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = true,
+	.armor.type = ARMOR_TYPE_BOOTS,
+	.armor.tier = ARMOR_TIER_GOLD,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 4,
+			.texture_y = 3,
+		},
+	},
+};
+
 static struct item item_porkchop = {
-	.name = "Porkchop",
+	.name = "Raw Porkchop",
 	.has_damage = false,
 	.max_stack = 1,
 	.renderItem = render_item_flat,
@@ -884,6 +1156,276 @@ static struct item item_gunpowder = {
 		.item = {
 			.texture_x = 8,
 			.texture_y = 2,
+		},
+	},
+};
+
+static struct item item_leather = {
+	.name = "Leather",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 7,
+			.texture_y = 6,
+		},
+	},
+};
+
+static struct item item_brick = {
+	.name = "Brick",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 6,
+			.texture_y = 1,
+		},
+	},
+};
+
+static struct item item_paper = {
+	.name = "Paper",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 10,
+			.texture_y = 3,
+		},
+	},
+};
+
+static struct item item_book = {
+	.name = "Book",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 11,
+			.texture_y = 3,
+		},
+	},
+};
+
+static struct item item_sugar = {
+	.name = "Sugar",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 13,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_cake = {
+	.name = "Cake",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 13,
+			.texture_y = 1,
+		},
+	},
+};
+
+static struct item item_bed = {
+	.name = "Bed",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 13,
+			.texture_y = 2,
+		},
+	},
+};
+
+static struct item item_shears = {
+	.name = "Shears",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 13,
+			.texture_y = 5,
+		},
+	},
+};
+
+static struct item item_fish = {
+	.name = "Raw Fish",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 9,
+			.texture_y = 5,
+		},
+	},
+};
+
+static struct item item_fish_cooked = {
+	.name = "Cooked Fish",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 10,
+			.texture_y = 5,
+		},
+	},
+};
+
+static struct item item_cookie = {
+	.name = "Cookie",
+	.has_damage = false,
+	.max_stack = 8,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 12,
+			.texture_y = 5,
+		},
+	},
+};
+
+static struct item item_apple_golden = {
+	.name = "Golden Apple",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 11,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_door_wood = {
+	.name = "Wooden Door",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 11,
+			.texture_y = 2,
+		},
+	},
+};
+
+static struct item item_door_iron = {
+	.name = "Iron Door",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 12,
+			.texture_y = 2,
+		},
+	},
+};
+
+static struct item item_slime_ball = {
+	.name = "Slimeball",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 14,
+			.texture_y = 1,
+		},
+	},
+};
+
+static struct item item_egg = {
+	.name = "Egg",
+	.has_damage = false,
+	.max_stack = 16,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 12,
+			.texture_y = 0,
+		},
+	},
+};
+
+static struct item item_bone = {
+	.name = "Bone",
+	.has_damage = false,
+	.max_stack = 64,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 12,
+			.texture_y = 1,
+		},
+	},
+};
+
+static struct item item_saddle = {
+	.name = "Saddle",
+	.has_damage = false,
+	.max_stack = 1,
+	.renderItem = render_item_flat,
+	.armor.is_armor = false,
+	.tool.type = TOOL_TYPE_ANY,
+	.render_data = {
+		.item = {
+			.texture_x = 8,
+			.texture_y = 6,
 		},
 	},
 };
