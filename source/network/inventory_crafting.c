@@ -39,19 +39,8 @@ static bool inv_pre_action(struct inventory* inv, size_t slot, bool right,
 	if(slot == CRAFTING_SLOT_OUTPUT) {
 		struct item_data output;
 		if(!right && inventory_get_slot(inv, CRAFTING_SLOT_OUTPUT, &output)) {
-			for(size_t k = CRAFTING_SLOT_INPUT;
-				k < CRAFTING_SLOT_INPUT + CRAFTING_SIZE_INPUT; k++) {
-				struct item_data it;
-
-				if(inventory_get_slot(inv, k, &it) && it.count > 1) {
-					it.count--;
-					inventory_set_slot(inv, k, it);
-				} else {
-					inventory_clear_slot(inv, k);
-				}
-
-				set_inv_slot_push(changes, k);
-			}
+			bool crafted = false;
+			bool default_action;
 
 			struct item_data picked;
 			if(inventory_get_picked_item(inv, &picked)) {
@@ -63,10 +52,30 @@ static bool inv_pre_action(struct inventory* inv, size_t slot, bool right,
 					picked.count += output.count;
 					inventory_set_picked_item(inv, picked);
 					set_inv_slot_push(changes, SPECIAL_SLOT_PICKED_ITEM);
-					return false;
+					default_action = false;
+					crafted = true;
 				}
 			} else {
-				return true;
+				default_action = true;
+				crafted = true;
+			}
+
+			if(crafted) {
+				for(size_t k = CRAFTING_SLOT_INPUT;
+					k < CRAFTING_SLOT_INPUT + CRAFTING_SIZE_INPUT; k++) {
+					struct item_data it;
+
+					if(inventory_get_slot(inv, k, &it) && it.count > 1) {
+						it.count--;
+						inventory_set_slot(inv, k, it);
+					} else {
+						inventory_clear_slot(inv, k);
+					}
+
+					set_inv_slot_push(changes, k);
+				}
+
+				return default_action;
 			}
 		}
 
