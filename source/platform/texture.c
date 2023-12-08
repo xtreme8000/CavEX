@@ -34,6 +34,7 @@ struct tex_gfx texture_font;
 struct tex_gfx texture_anim;
 struct tex_gfx texture_gui_inventory;
 struct tex_gfx texture_gui_crafting;
+struct tex_gfx texture_gui_furnace;
 struct tex_gfx texture_gui2;
 struct tex_gfx texture_controls;
 struct tex_gfx texture_pointer;
@@ -90,6 +91,8 @@ void tex_init() {
 	tex_gfx_load_file(&texture_gui_inventory, "gui/inventory.png",
 					  TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_gui_crafting, "gui/crafting.png", TEX_FMT_RGBA16,
+					  false);
+	tex_gfx_load_file(&texture_gui_furnace, "gui/furnace.png", TEX_FMT_RGBA16,
 					  false);
 	tex_gfx_load_file(&texture_gui2, "gui_2.png", TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_items, "items.png", TEX_FMT_RGBA16, false);

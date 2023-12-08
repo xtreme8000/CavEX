@@ -27,6 +27,7 @@
 
 #include "items.h"
 
+// player inventory
 #define INVENTORY_SIZE 45
 #define INVENTORY_SIZE_HOTBAR 9
 #define INVENTORY_SIZE_ARMOR 4
@@ -39,6 +40,7 @@
 #define INVENTORY_SLOT_MAIN 9
 #define INVENTORY_SLOT_HOTBAR 36
 
+// crafting
 #define CRAFTING_SIZE 46
 #define CRAFTING_SIZE_INPUT 9
 
@@ -47,6 +49,16 @@
 #define CRAFTING_SLOT_MAIN 10
 #define CRAFTING_SLOT_HOTBAR 37
 
+// furnace
+#define FURNACE_SIZE 39
+#define FURNACE_SIZE_INPUT 2
+
+#define FURNACE_SLOT_INPUT 0
+#define FURNACE_SLOT_OUTPUT 2
+#define FURNACE_SLOT_MAIN 3
+#define FURNACE_SLOT_HOTBAR 30
+
+// picked item slot
 #define SPECIAL_SLOT_PICKED_ITEM 255
 
 DICT_SET_DEF(set_inv_slot, size_t)

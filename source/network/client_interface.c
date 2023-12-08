@@ -167,9 +167,16 @@ void clin_process(struct client_rpc* call) {
 							   call->payload.window_open.type,
 							   call->payload.window_open.slot_count);
 
-				if(call->payload.window_open.type == WINDOW_TYPE_WORKBENCH) {
-					screen_crafting_set_windowc(window);
-					screen_set(&screen_crafting);
+				switch(call->payload.window_open.type) {
+					case WINDOW_TYPE_WORKBENCH:
+						screen_crafting_set_windowc(window);
+						screen_set(&screen_crafting);
+						break;
+					case WINDOW_TYPE_FURNACE:
+						screen_furnace_set_windowc(window);
+						screen_set(&screen_furnace);
+						break;
+					default: break;
 				}
 			}
 

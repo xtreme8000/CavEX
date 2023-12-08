@@ -26,7 +26,10 @@
 #include "inventory.h"
 
 #define WINDOWC_INVENTORY 0
-#define WINDOWC_CRAFTING 1 // local server use only
+
+// local server use only
+#define WINDOWC_CRAFTING 1
+#define WINDOWC_FURNACE 2
 
 enum window_type {
 	WINDOW_TYPE_CHEST = 0,

@@ -17,6 +17,8 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/client_interface.h"
+#include "../network/inventory_logic.h"
 #include "../network/server_local.h"
 #include "blocks.h"
 
@@ -111,6 +113,23 @@ static bool onItemPlace(struct server_local* s, struct item_data* it,
 	return true;
 }
 
+static void onRightClick(struct server_local* s, struct item_data* it,
+						 struct block_info* where, struct block_info* on,
+						 enum side on_side) {
+	if(s->player.active_inventory == &s->player.inventory) {
+		clin_rpc_send(&(struct client_rpc) {
+			.type = CRPC_OPEN_WINDOW,
+			.payload.window_open.window = WINDOWC_FURNACE,
+			.payload.window_open.type = WINDOW_TYPE_FURNACE,
+			.payload.window_open.slot_count = FURNACE_SIZE,
+		});
+
+		struct inventory* inv = malloc(sizeof(struct inventory));
+		inventory_create(inv, &inventory_logic_furnace, s, FURNACE_SIZE);
+		s->player.active_inventory = inv;
+	}
+}
+
 struct block block_furnaceoff = {
 	.name = "Furnace",
 	.getSideMask = getSideMask,
@@ -119,7 +138,7 @@ struct block block_furnaceoff = {
 	.getTextureIndex = getTextureIndex1,
 	.getDroppedItem = block_drop_default,
 	.onRandomTick = NULL,
-	.onRightClick = NULL,
+	.onRightClick = onRightClick,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
@@ -154,7 +173,7 @@ struct block block_furnaceon = {
 	.getTextureIndex = getTextureIndex2,
 	.getDroppedItem = block_drop_default,
 	.onRandomTick = NULL,
-	.onRightClick = NULL,
+	.onRightClick = onRightClick,
 	.transparent = false,
 	.renderBlock = render_block_full,
 	.renderBlockAlways = NULL,
