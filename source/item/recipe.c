@@ -649,42 +649,49 @@ bool recipe_match(array_recipe_t recipes, struct item_data slots[9],
 
 		for(size_t y = 0; y <= 3 - current->height; y++) {
 			for(size_t x = 0; x <= 3 - current->width; x++) {
-				bool match = true;
+				bool match_outside_empty = true;
 
 				// check that outside of pattern is empty
-				for(size_t py = 0; py < 3 && match; py++) {
-					for(size_t px = 0; px < 3 && match; px++) {
+				for(size_t py = 0; py < 3 && match_outside_empty; py++) {
+					for(size_t px = 0; px < 3 && match_outside_empty; px++) {
 						if((px < x || px >= x + current->width || py < y
 							|| py >= y + current->height)
 						   && !slot_empty[px + py * 3])
-							match = false;
+							match_outside_empty = false;
 					}
 				}
 
 				// check pattern itself
-				for(size_t py = 0; py < current->height && match; py++) {
-					for(size_t px = 0; px < current->width && match; px++) {
-						size_t slots_idx = (px + x) + (py + y) * 3;
-						size_t shape_idx = px + py * current->width;
+				for(int flip = 0; flip <= 1; flip++) {
+					bool match = match_outside_empty;
 
-						if(current->shape[shape_idx].item.id == 0) {
-							if(!slot_empty[slots_idx])
-								match = false;
-						} else {
-							if(slot_empty[slots_idx]
-							   || current->shape[shape_idx].item.id
-								   != slots[slots_idx].id
-							   || (current->shape->match_durability
-								   && current->shape[shape_idx].item.durability
-									   != slots[slots_idx].durability))
-								match = false;
+					for(size_t py = 0; py < current->height && match; py++) {
+						for(size_t px = 0; px < current->width && match; px++) {
+							size_t slots_idx = (px + x) + (py + y) * 3;
+							size_t shape_idx
+								= (flip ? (current->width - 1 - px) : px)
+								+ py * current->width;
+
+							if(current->shape[shape_idx].item.id == 0) {
+								if(!slot_empty[slots_idx])
+									match = false;
+							} else {
+								if(slot_empty[slots_idx]
+								   || current->shape[shape_idx].item.id
+									   != slots[slots_idx].id
+								   || (current->shape->match_durability
+									   && current->shape[shape_idx]
+											   .item.durability
+										   != slots[slots_idx].durability))
+									match = false;
+							}
 						}
 					}
-				}
 
-				if(match) {
-					*result = current->result;
-					return true;
+					if(match) {
+						*result = current->result;
+						return true;
+					}
 				}
 			}
 		}
