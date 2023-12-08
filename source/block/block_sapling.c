@@ -70,6 +70,64 @@ static size_t getDroppedItem(struct block_info* this, struct item_data* it,
 	return 1;
 }
 
+static void onRandomTick(struct server_local* s, struct block_info* this) {
+	if(this->block->sky_light < 9 && this->block->torch_light < 9)
+		return;
+
+	int age = this->block->metadata >> 2;
+	int tree_type = this->block->metadata & 3;
+
+	if(age < 3) {
+		this->block->metadata = ((age + 1) << 2) | tree_type;
+		server_world_set_block(&s->world, this->x, this->y, this->z,
+							   *this->block);
+		return;
+	}
+
+	int height = rand_gen_range(&s->rand_src, 4, 7);
+
+	for(int k = 1; k < height; k++) {
+		struct block_data blk;
+		if(server_world_get_block(&s->world, this->x, this->y + k, this->z,
+								  &blk)
+		   && blk.type != BLOCK_AIR) {
+			return;
+		}
+	}
+
+	for(int k = 0; k < height; k++)
+		server_world_set_block(&s->world, this->x, this->y + k, this->z,
+							   (struct block_data) {
+								   .type = BLOCK_LOG,
+								   .metadata = this->block->metadata & 0x3,
+							   });
+
+	for(int y = -3; y <= 0; y++) {
+		int size = (y < -1) ? 2 : 1;
+
+		for(int x = -size; x <= size; x++) {
+			for(int z = -size; z <= size; z++) {
+				struct block_data blk;
+				if((x != 0 || z != 0 || y == 0)
+				   && ((abs(x) != size || abs(z) != size)
+					   || (rand_gen(&s->rand_src) & 1 && y < 0))
+				   && server_world_get_block(&s->world, this->x + x,
+											 this->y + height + y, this->z + z,
+											 &blk)
+				   && blk.type == BLOCK_AIR) {
+					server_world_set_block(
+						&s->world, this->x + x, this->y + height + y,
+						this->z + z,
+						(struct block_data) {
+							.type = BLOCK_LEAVES,
+							.metadata = this->block->metadata & 0x3,
+						});
+				}
+			}
+		}
+	}
+}
+
 struct block block_sapling = {
 	.name = "Sapling",
 	.getSideMask = getSideMask,
@@ -77,7 +135,7 @@ struct block block_sapling = {
 	.getMaterial = getMaterial,
 	.getTextureIndex = getTextureIndex,
 	.getDroppedItem = getDroppedItem,
-	.onRandomTick = NULL,
+	.onRandomTick = onRandomTick,
 	.onRightClick = NULL,
 	.transparent = false,
 	.renderBlock = render_block_cross,
