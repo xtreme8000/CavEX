@@ -65,7 +65,7 @@ static void onRightClick(struct server_local* s, struct item_data* it,
 		inventory_create(inv, &inventory_logic_crafting, s, CRAFTING_SIZE);
 		s->player.active_inventory = inv;
 	}
-};
+}
 
 struct block block_workbench = {
 	.name = "Workbench",

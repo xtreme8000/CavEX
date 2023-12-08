@@ -63,9 +63,11 @@ static bool entity_tick(struct entity* e) {
 		if(fabsf(e->vel[k]) < 0.005F)
 			e->vel[k] = 0.0F;
 
+	float eye_height = 1.62F;
+
 	struct AABB bbox;
 	aabb_setsize_centered(&bbox, 0.6F, 1.0F, 0.6F);
-	aabb_translate(&bbox, e->pos[0], e->pos[1] + 1.8F / 2.0F - 1.62F,
+	aabb_translate(&bbox, e->pos[0], e->pos[1] + 1.8F / 2.0F - eye_height,
 				   e->pos[2]);
 
 	bool in_water = entity_intersection(e, &bbox, test_in_water);
@@ -121,10 +123,20 @@ static bool entity_tick(struct entity* e) {
 		e->data.local_player.jump_ticks = 0;
 	}
 
-	float eye_height = 1.62F;
-
 	aabb_setsize_centered(&bbox, 0.6F, 1.8F, 0.6F);
 	aabb_translate(&bbox, 0.0F, 1.8F / 2.0F - eye_height, 0.0F);
+
+	// unstuck player
+	struct AABB tmp1 = bbox, tmp2 = bbox;
+	float unstuck_move = 0.01F;
+	aabb_translate(&tmp1, e->pos[0], e->pos[1], e->pos[2]);
+	aabb_translate(&tmp2, e->pos[0], e->pos[1] + unstuck_move, e->pos[2]);
+
+	// is the player stuck in the floor due to inaccuracy?
+	if(entity_aabb_intersection(e, &tmp1)
+	   && !entity_aabb_intersection(e, &tmp2)) {
+		e->pos[1] += unstuck_move;
+	}
 
 	vec3 new_pos, new_vel;
 	glm_vec3_copy(e->pos, new_pos);
