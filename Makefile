@@ -32,10 +32,10 @@ INCLUDES	:=
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS		=	-std=c99 -pedantic -Wextra -Wno-unused-parameter -flto=auto -O3 -Wall -DPLATFORM_WII $(MACHDEP) $(INCLUDE)
+CFLAGS		=	-std=c99 -pedantic -Wextra -Wno-unused-parameter -flto=auto -O3 -Wall -DNDEBUG -DPLATFORM_WII $(MACHDEP) $(INCLUDE)
 CXXFLAGS	=	$(CFLAGS)
 
-LDFLAGS	=	-g $(MACHDEP) -Wl,-Map,$(notdir $@).map
+LDFLAGS	=	$(MACHDEP) -Wl,-Map,$(notdir $@).map
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
