@@ -104,8 +104,9 @@ void* tex_atlas_compute(dict_atlas_src_t atlas, uint8_t* atlas_dst,
 		size_t current_y = (current / 14) * (tile_size + 2 * border_scale)
 			+ 3 * border_scale;
 
-		for(int y = -border_scale; y < tile_size + border_scale; y++) {
-			for(int x = -border_scale; x < tile_size + border_scale; x++) {
+		// int64_t to prevent unreasonable gcc warning
+		for(int64_t y = -border_scale; y < tile_size + border_scale; y++) {
+			for(int64_t x = -border_scale; x < tile_size + border_scale; x++) {
 				uint8_t* src_col = image
 					+ ((clamp_n(x, tile_size) + e->x * tile_size)
 					   + (clamp_n(y, tile_size) + e->y * tile_size) * width)

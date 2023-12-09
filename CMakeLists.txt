@@ -108,6 +108,7 @@ add_executable(cavex
 				source/network/server_interface.c
 				source/network/server_local.c
 				source/network/server_world.c
+				source/network/inventory_logic.c
 				source/network/inventory_player.c
 				source/network/inventory_crafting.c
 				source/network/inventory_furnace.c

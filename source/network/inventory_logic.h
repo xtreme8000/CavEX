@@ -19,60 +19,9 @@
 
 #include "../item/inventory.h"
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
-static bool inventory_collect(struct inventory* inv, struct item_data* item,
-							  uint8_t* slot_priority, size_t slot_length,
-							  set_inv_slot_t changes) {
-	assert(inv && item && item->id != 0 && changes);
-
-	struct item* it = item_get(item);
-
-	if(!it)
-		return false;
-
-	while(item->count > 0) {
-		bool has_canidate_equal = false;
-		size_t candidate_equal = 0;
-		bool has_canidate_empty = false;
-		size_t candidate_empty = 0;
-
-		for(size_t k = 0; k < slot_length; k++) {
-			uint8_t slot = slot_priority[k];
-
-			if(inv->items[slot].id == item->id
-			   && inv->items[slot].durability == item->durability
-			   && inv->items[slot].count < it->max_stack) {
-				has_canidate_equal = true;
-				candidate_equal = slot;
-				break;
-			}
-
-			if(!has_canidate_empty && inv->items[slot].id == 0) {
-				has_canidate_empty = true;
-				candidate_empty = slot;
-			}
-		}
-
-		if(has_canidate_equal || has_canidate_empty) {
-			size_t candidate
-				= has_canidate_equal ? candidate_equal : candidate_empty;
-			size_t additional
-				= min(it->max_stack - inv->items[candidate].count, item->count);
-			inv->items[candidate].id = item->id;
-			inv->items[candidate].durability = item->durability;
-			inv->items[candidate].count += additional;
-			item->count -= additional;
-			set_inv_slot_push(changes, candidate);
-		} else {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-#undef min
+bool inventory_collect(struct inventory* inv, struct item_data* item,
+					   uint8_t* slot_priority, size_t slot_length,
+					   set_inv_slot_t changes);
 
 extern struct inventory_logic inventory_logic_player;
 extern struct inventory_logic inventory_logic_crafting;
