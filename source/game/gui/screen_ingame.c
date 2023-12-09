@@ -395,6 +395,16 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 						  * inventory_get_hotbar(windowc_get_latest(
 							  gstate.windows[WINDOWC_INVENTORY])),
 				  height - 32 * 8 / 5 - 23 * 2, 208, 0, 24, 24, 24 * 2, 24 * 2);
+
+	for(int k = 0; k < 10; k++) {
+		// draw hearts
+		gutil_texquad((width - 182 * 2) / 2 + k * 8 * 2,
+					  height - 32 * 8 / 5 - (22 + 10) * 2, 16, 229, 9, 9, 9 * 2,
+					  9 * 2);
+		gutil_texquad((width - 182 * 2) / 2 + k * 8 * 2,
+					  height - 32 * 8 / 5 - (22 + 10) * 2, 52, 229, 9, 9, 9 * 2,
+					  9 * 2);
+	}
 }
 
 struct screen screen_ingame = {
