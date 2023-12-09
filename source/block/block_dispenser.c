@@ -70,9 +70,9 @@ static bool onItemPlace(struct server_local* s, struct item_data* it,
 	double dz = s->player.z - (where->z + 0.5);
 
 	if(fabs(dx) > fabs(dz)) {
-		metadata = (dx >= 0) ? 3 : 1;
+		metadata = (dx >= 0) ? 5 : 4;
 	} else {
-		metadata = (dz >= 0) ? 0 : 2;
+		metadata = (dz >= 0) ? 3 : 2;
 	}
 
 	server_world_set_block(&s->world, where->x, where->y, where->z,
