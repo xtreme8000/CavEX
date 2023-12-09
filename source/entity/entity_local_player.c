@@ -21,6 +21,8 @@
 #include "../platform/input.h"
 #include "entity.h"
 
+#define EYE_HEIGHT 1.62F
+
 static void liquid_aabb(struct AABB* out, struct block_info* blk_info) {
 	int block_height = (blk_info->block->metadata & 0x8) ?
 		16 :
@@ -63,11 +65,9 @@ static bool entity_tick(struct entity* e) {
 		if(fabsf(e->vel[k]) < 0.005F)
 			e->vel[k] = 0.0F;
 
-	float eye_height = 1.62F;
-
 	struct AABB bbox;
 	aabb_setsize_centered(&bbox, 0.6F, 1.0F, 0.6F);
-	aabb_translate(&bbox, e->pos[0], e->pos[1] + 1.8F / 2.0F - eye_height,
+	aabb_translate(&bbox, e->pos[0], e->pos[1] + 1.8F / 2.0F - EYE_HEIGHT,
 				   e->pos[2]);
 
 	bool in_water = entity_intersection(e, &bbox, test_in_water);
@@ -124,7 +124,7 @@ static bool entity_tick(struct entity* e) {
 	}
 
 	aabb_setsize_centered(&bbox, 0.6F, 1.8F, 0.6F);
-	aabb_translate(&bbox, 0.0F, 1.8F / 2.0F - eye_height, 0.0F);
+	aabb_translate(&bbox, 0.0F, 1.8F / 2.0F - EYE_HEIGHT, 0.0F);
 
 	// unstuck player
 	struct AABB tmp1 = bbox, tmp2 = bbox;
@@ -187,7 +187,7 @@ static bool entity_tick(struct entity* e) {
 
 		struct block_data blk;
 		if(entity_get_block(e, floorf(e->pos[0]),
-							floorf(e->pos[1] - eye_height), floorf(e->pos[2]),
+							floorf(e->pos[1] - EYE_HEIGHT), floorf(e->pos[2]),
 							&blk)
 		   && blk.type == BLOCK_LADDER) {
 			if(collision_xz)
@@ -213,6 +213,16 @@ static bool entity_tick(struct entity* e) {
 	}
 
 	return false;
+}
+
+bool entity_local_player_block_collide(vec3 pos, struct block_info* blk_info) {
+	assert(pos && blk_info);
+
+	struct AABB bbox;
+	aabb_setsize_centered(&bbox, 0.6F, 1.8F, 0.6F);
+	aabb_translate(&bbox, pos[0], 1.8F / 2.0F - EYE_HEIGHT + pos[1], pos[2]);
+
+	return entity_block_aabb_test(&bbox, blk_info);
 }
 
 void entity_local_player(uint32_t id, struct entity* e, struct world* w) {

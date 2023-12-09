@@ -63,22 +63,38 @@ static bool onItemPlace(struct server_local* s, struct item_data* it,
 						enum side on_side) {
 	if(on_side == SIDE_TOP && on->block->type == it->id
 	   && on->block->metadata == it->durability) {
-		server_world_set_block(&s->world, on->x, on->y, on->z,
-							   (struct block_data) {
-								   .type = BLOCK_DOUBLE_SLAB,
-								   .metadata = it->durability,
-								   .sky_light = 0,
-								   .torch_light = 0,
-							   });
+		struct block_data blk = (struct block_data) {
+			.type = BLOCK_DOUBLE_SLAB,
+			.metadata = it->durability,
+			.sky_light = 0,
+			.torch_light = 0,
+		};
+
+		struct block_info blk_info = *on;
+		blk_info.block = &blk;
+
+		if(entity_local_player_block_collide(
+			   (vec3) {s->player.x, s->player.y, s->player.z}, &blk_info))
+			return false;
+
+		server_world_set_block(&s->world, on->x, on->y, on->z, blk);
 		return true;
 	} else if(where->block->type == BLOCK_AIR) {
-		server_world_set_block(&s->world, where->x, where->y, where->z,
-							   (struct block_data) {
-								   .type = it->id,
-								   .metadata = it->durability,
-								   .sky_light = 0,
-								   .torch_light = 0,
-							   });
+		struct block_data blk = (struct block_data) {
+			.type = it->id,
+			.metadata = it->durability,
+			.sky_light = 0,
+			.torch_light = 0,
+		};
+
+		struct block_info blk_info = *where;
+		blk_info.block = &blk;
+
+		if(entity_local_player_block_collide(
+			   (vec3) {s->player.x, s->player.y, s->player.z}, &blk_info))
+			return false;
+
+		server_world_set_block(&s->world, where->x, where->y, where->z, blk);
 		return true;
 	}
 

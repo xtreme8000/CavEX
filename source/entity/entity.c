@@ -145,8 +145,7 @@ void entity_shadow(struct entity* e, struct AABB* a, mat4 view) {
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
-static bool entity_block_aabb_test(struct AABB* entity,
-								   struct block_info* blk_info) {
+bool entity_block_aabb_test(struct AABB* entity, struct block_info* blk_info) {
 	assert(entity && blk_info);
 
 	struct block* b = blocks[blk_info->block->type];

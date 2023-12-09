@@ -207,13 +207,21 @@ void blocks_side_offset(enum side s, int* x, int* y, int* z) {
 bool block_place_default(struct server_local* s, struct item_data* it,
 						 struct block_info* where, struct block_info* on,
 						 enum side on_side) {
-	server_world_set_block(&s->world, where->x, where->y, where->z,
-						   (struct block_data) {
-							   .type = it->id,
-							   .metadata = it->durability,
-							   .sky_light = 0,
-							   .torch_light = 0,
-						   });
+	struct block_data blk = (struct block_data) {
+		.type = it->id,
+		.metadata = it->durability,
+		.sky_light = 0,
+		.torch_light = 0,
+	};
+
+	struct block_info blk_info = *where;
+	blk_info.block = &blk;
+
+	if(entity_local_player_block_collide(
+		   (vec3) {s->player.x, s->player.y, s->player.z}, &blk_info))
+		return false;
+
+	server_world_set_block(&s->world, where->x, where->y, where->z, blk);
 	return true;
 }
 

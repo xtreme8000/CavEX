@@ -71,6 +71,8 @@ DICT_DEF2(dict_entity, uint32_t, M_BASIC_OPLIST, struct entity, M_POD_OPLIST)
 #include "../world.h"
 
 void entity_local_player(uint32_t id, struct entity* e, struct world* w);
+bool entity_local_player_block_collide(vec3 pos, struct block_info* blk_info);
+
 void entity_item(uint32_t id, struct entity* e, bool server, void* world,
 				 struct item_data it);
 
@@ -93,6 +95,7 @@ bool entity_intersection_threshold(struct entity* e, struct AABB* aabb,
 bool entity_intersection(struct entity* e, struct AABB* a,
 						 bool (*test)(struct AABB* entity,
 									  struct block_info* blk_info));
+bool entity_block_aabb_test(struct AABB* entity, struct block_info* blk_info);
 bool entity_aabb_intersection(struct entity* e, struct AABB* a);
 void entity_try_move(struct entity* e, vec3 pos, vec3 vel, struct AABB* bbox,
 					 size_t coord, bool* collision_xz, bool* on_ground);

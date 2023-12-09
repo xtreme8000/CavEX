@@ -92,13 +92,21 @@ static bool onItemPlace(struct server_local* s, struct item_data* it,
 		default: return false;
 	}
 
-	server_world_set_block(&s->world, where->x, where->y, where->z,
-						   (struct block_data) {
-							   .type = it->id,
-							   .metadata = metadata,
-							   .sky_light = 0,
-							   .torch_light = 0,
-						   });
+	struct block_data blk = (struct block_data) {
+		.type = it->id,
+		.metadata = metadata,
+		.sky_light = 0,
+		.torch_light = 0,
+	};
+
+	struct block_info blk_info = *where;
+	blk_info.block = &blk;
+
+	if(entity_local_player_block_collide(
+		   (vec3) {s->player.x, s->player.y, s->player.z}, &blk_info))
+		return false;
+
+	server_world_set_block(&s->world, where->x, where->y, where->z, blk);
 	return true;
 }
 
