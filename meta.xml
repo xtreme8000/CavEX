@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <app version="1">
 	<name>CavEX</name>
-	<version>Alpha 0.2.1</version>
-	<release_date>20230211000000</release_date>
+	<version>Alpha 0.3.0</version>
+	<release_date>20231209000000</release_date>
 	<coder>ByteBit/xtreme8000</coder>
 	<short_description>Beta 1.7.3 for the Wii</short_description>
 <long_description>Your favourite block game on the Nintendo Wii.
 Implements Beta 1.7.3.
-Works with Wiimote + Nunchuk or a Gamecube controller.
+Works with Wiimote + Nunchuk or a Classic Controller.
 
 See https://github.com/xtreme8000/CavEX for more information.
 Licensed under GPLv3.
