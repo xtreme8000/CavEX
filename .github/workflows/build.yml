@@ -50,6 +50,11 @@ jobs:
 
     - name: Move dependencies
       run: |
+        mkdir ./source/cglm/
+        mkdir ./source/lodepng/
+        mkdir ./source/cNBT/
+        mkdir ./source/parson/
+        mkdir ./source/m-lib/
         mv ./tempsource/cglm/include/cglm ./source/cglm
         mv ./tempsource/lodepng/lodepng.* ./source/lodepng/
         mv ./tempsource/cNBT/buffer.* ./source/cNBT/
