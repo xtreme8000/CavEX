@@ -72,9 +72,18 @@ jobs:
         make
       env: 
         C_INCLUDE_PATH: "${{ github.workspace }}/source/"
-        
+
+    - name: Create SD zip
+      run: |
+        mkdir -p ./apps/cavex/saves/
+        mv assets ./apps/cavex/
+        mv CavEX.dol ./apps/cavex/boot.dol
+        mv config.json ./apps/cavex/
+        mv icon.png ./apps/cavex/
+        mv meta.xml ./apps/cavex/
+      
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: DOL file
-        path: CavEX.dol
+        name: SD card folder
+        path: apps
