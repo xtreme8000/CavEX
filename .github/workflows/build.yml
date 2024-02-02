@@ -72,7 +72,7 @@ jobs:
       run: |
         mkdir -p ./apps/cavex/saves/
         mv assets ./apps/cavex/
-        mv resources/* ./apps/
+        mv resources/*.shader ./apps/cavex/assets/
         mv CavEX.dol ./apps/cavex/boot.dol
         mv config.json ./apps/cavex/
         mv icon.png ./apps/cavex/
