@@ -150,9 +150,16 @@ jobs:
       env: 
         C_INCLUDE_PATH: "${{ github.workspace }}/source/"
 
+    - name: Create zip
+      run: |
+        mkdir -p ./apps/cavex/saves/
+        mv assets ./apps/cavex/
+        mv build_pc/cavex ./apps/cavex/cavex
+        mv config_pc.json ./apps/cavex/config.json
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: debug
-        path: .
+        name: PC zip
+        path: apps
 
