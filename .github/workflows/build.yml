@@ -1,0 +1,85 @@
+name: DOL
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: DevkitPPC build
+    runs-on: ubuntu-latest
+    container: 
+      image: devkitpro/devkitppc:latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install SDL2 for Wii
+      run: |
+        wget https://wii.leseratte10.de/devkitPro/wii/wii-sdl2-2.28.5-5-any.pkg.tar.zst
+        sudo dkp-pacman -U --noconfirm wii-sdl2-2.28.5-5-any.pkg.tar.zst
+
+    - name: Checkout lodepng
+      uses: actions/checkout@v4
+      with:
+        repository: 'lvandeve/lodepng'
+        path: tempsource/lodepng
+
+    - name: Checkout mlib
+      uses: actions/checkout@v4
+      with:
+        repository: 'P-p-H-d/mlib'
+        path: tempsource/m-lib
+
+    - name: Checkout cNBT
+      uses: actions/checkout@v4
+      with:
+        repository: 'chmod222/cNBT'
+        path: tempsource/cNBT
+
+    - name: Checkout parson
+      uses: actions/checkout@v4
+      with:
+        repository: 'kgabis/parson'
+        path: tempsource/parson
+
+    - name: Checkout cglm
+      uses: actions/checkout@v4
+      with:
+        repository: 'recp/cglm'
+        path: tempsource/cglm
+
+    - name: Move dependencies
+      run: |
+        mv ./tempsource/cglm/include/cglm ./source/cglm
+        mv ./tempsource/lodepng/lodepng.* ./source/lodepng/
+        mv ./tempsource/cNBT/buffer.* ./source/cNBT/
+        mv ./tempsource/cNBT/list.h ./source/cNBT/
+        mv ./tempsource/cNBT/nbt_*.c ./source/cNBT/
+        mv ./tempsource/cNBT/nbt.h ./source/cNBT/
+        mv ./tempsource/parson/parson.* ./source/parson/
+        mv ./tempsource/m-lib/*.h ./source/m-lib/
+
+    - name: Remove dependency makefiles
+      run: |
+        rm source/cNBT/Makefile
+        rm source/cNBT/afl_check*
+        rm source/cNBT/check*
+        rm source/lodepng/pngdetail*
+        rm source/lodepng/lodepng_bench*
+        rm source/lodepng/lodepng_unit*
+        rm -r source/lodepng/examples
+        rm source/parson/Makefile
+
+    - name: Make
+      run: |
+        sudo chmod +x /etc/profile.d/devkit-env.sh
+        /etc/profile.d/devkit-env.sh
+        make
+      env: 
+        C_INCLUDE_PATH: "${{ github.workspace }}/source/"
+        
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: DOL file
+        path: CavEx.dol
