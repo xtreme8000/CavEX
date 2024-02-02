@@ -64,7 +64,7 @@ jobs:
       run: |
         sudo chmod +x /etc/profile.d/devkit-env.sh
         /etc/profile.d/devkit-env.sh
-        make
+        make -j 4
       env: 
         C_INCLUDE_PATH: "${{ github.workspace }}/source/"
 
@@ -147,7 +147,7 @@ jobs:
         mkdir build_pc
         cd build_pc
         cmake ..
-        make
+        make -j 4
       env: 
         C_INCLUDE_PATH: "${{ github.workspace }}/source/"
 
@@ -158,7 +158,7 @@ jobs:
         mv resources/*.shader ./apps/cavex/assets/
         mv build_pc/cavex ./apps/cavex/cavex
         mv config_pc.json ./apps/cavex/config.json
-        tar -czvf cavex.tar.gz ./apps/
+        tar -czvf cavex.tar.gz ./apps/cavex/
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
