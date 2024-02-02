@@ -158,10 +158,11 @@ jobs:
         mv resources/*.shader ./apps/cavex/assets/
         mv build_pc/cavex ./apps/cavex/cavex
         mv config_pc.json ./apps/cavex/config.json
+        tar -czvf cavex.tar.gz ./apps/
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: PC zip
-        path: apps
+        name: PC tgz
+        path: cavex.tar.gz
 
