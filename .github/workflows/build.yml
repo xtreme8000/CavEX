@@ -138,6 +138,9 @@ jobs:
         mv ./tempsource/parson/parson.* ./source/parson/
         mv ./tempsource/m-lib/*.h ./source/m-lib/
 
+    - name: Install Linux dependencies
+      run: sudo apt-get -y install libglfw3-dev libglew-dev zlib1g-dev
+
     - name: Make
       run: |
         mkdir build_pc
