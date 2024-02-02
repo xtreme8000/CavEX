@@ -155,7 +155,7 @@ jobs:
       run: |
         mkdir -p ./apps/cavex/saves/
         mv assets ./apps/cavex/
-        mv resources ./apps/cavex/
+        mv resources/*.shader ./apps/cavex/assets/
         mv build_pc/cavex ./apps/cavex/cavex
         mv config_pc.json ./apps/cavex/config.json
 
