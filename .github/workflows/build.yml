@@ -83,7 +83,7 @@ jobs:
         mv meta.xml ./apps/cavex/
       
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: SD card folder
+        name: SD card app folder
         path: apps
