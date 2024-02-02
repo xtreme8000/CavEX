@@ -13,11 +13,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Install SDL2 for Wii
-      run: |
-        wget https://wii.leseratte10.de/devkitPro/wii/wii-sdl2-2.28.5-5-any.pkg.tar.zst
-        sudo dkp-pacman -U --noconfirm wii-sdl2-2.28.5-5-any.pkg.tar.zst
-
     - name: Checkout lodepng
       uses: actions/checkout@v4
       with:
