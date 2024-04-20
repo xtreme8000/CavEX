@@ -28,7 +28,7 @@
 
 #define BLK_INDEX(x, y, z)                                                     \
 	((x) + ((z) + (y) * (CHUNK_SIZE + 2)) * (CHUNK_SIZE + 2))
-#define BLK_INDEX2(x, y, z) ((x) + ((z) + (y)*CHUNK_SIZE) * CHUNK_SIZE)
+#define BLK_INDEX2(x, y, z) ((x) + ((z) + (y) * CHUNK_SIZE) * CHUNK_SIZE)
 #define BLK_DATA(b, x, y, z) ((b)[BLK_INDEX((x) + 1, (y) + 1, (z) + 1)])
 
 #ifndef MAX
@@ -166,92 +166,96 @@ static void chunk_mesher_vertex_light(struct block_data* bd,
 									  uint8_t* light_data) {
 	assert(bd && light_data);
 
+	const int shade_table[5] = {0, 5, 3, 1, 0};
+
 	for(c_coord_t y = 0; y < CHUNK_SIZE + 2; y++) {
 		for(c_coord_t z = 0; z < CHUNK_SIZE + 2; z++) {
 			for(c_coord_t x = 0; x < CHUNK_SIZE + 2; x++) {
-				struct block_data b1[4] = {
-					BLK_DATA(bd, x + 0, y - 1, z + 0),
-					BLK_DATA(bd, x - 1, y - 1, z + 0),
-					BLK_DATA(bd, x + 0, y - 1, z - 1),
-					BLK_DATA(bd, x - 1, y - 1, z - 1),
-				};
-
-				struct block_data b2[4] = {
-					BLK_DATA(bd, x - 1, y + 0, z + 0),
-					b1[1],
-					BLK_DATA(bd, x - 1, y + 0, z - 1),
-					b1[3],
-				};
-
-				struct block_data b3[4] = {
-					BLK_DATA(bd, x + 0, y + 0, z - 1),
-					b2[2],
-					b1[2],
-					b1[3],
-				};
-
 				// TODO: clean up horrible code
 
-				int shade_table[5] = {0, 1, 3, 5, 0};
+				if(x != CHUNK_SIZE + 1 && z != CHUNK_SIZE + 1) {
+					struct block_data b1[4] = {
+						BLK_DATA(bd, x + 0, y - 1, z + 0),
+						BLK_DATA(bd, x - 1, y - 1, z + 0),
+						BLK_DATA(bd, x + 0, y - 1, z - 1),
+						BLK_DATA(bd, x - 1, y - 1, z - 1),
+					};
 
-				int sum_sky, sum_torch, count;
-
-				sum_sky = sum_torch = count = 0;
-				for(int k = 0; k < 4; k++) {
-					if(!blocks[b1[k].type]
-					   || (blocks[b1[k].type]->can_see_through
-						   && !blocks[b1[k].type]->ignore_lighting)) {
-						sum_sky += b1[k].sky_light;
-						sum_torch += b1[k].torch_light;
-						count++;
+					int sum_sky = 0, sum_torch = 0, count = 0;
+					for(int k = 0; k < 4; k++) {
+						if(!blocks[b1[k].type]
+						   || (blocks[b1[k].type]->can_see_through
+							   && !blocks[b1[k].type]->ignore_lighting)) {
+							sum_sky += b1[k].sky_light;
+							sum_torch += b1[k].torch_light;
+							count++;
+						}
 					}
+
+					sum_torch = count > 0 ? (sum_torch + count - 1) / count : 0;
+					sum_sky = count > 0 ? (sum_sky + count - 1) / count : 0;
+					sum_torch = MAX(sum_torch - shade_table[count], 0);
+					sum_sky = MAX(sum_sky - shade_table[count], 0);
+
+					light_data[BLK_INDEX(x, y, z) * 3 + 0]
+						= (sum_torch << 4) | sum_sky;
 				}
 
-				sum_torch = count > 0 ? (sum_torch + count - 1) / count : 0;
-				sum_sky = count > 0 ? (sum_sky + count - 1) / count : 0;
-				sum_torch = MAX(sum_torch - shade_table[4 - count], 0);
-				sum_sky = MAX(sum_sky - shade_table[4 - count], 0);
+				if(y != CHUNK_SIZE + 1 && z != CHUNK_SIZE + 1) {
+					struct block_data b2[4] = {
+						BLK_DATA(bd, x - 1, y + 0, z + 0),
+						BLK_DATA(bd, x - 1, y - 1, z + 0),
+						BLK_DATA(bd, x - 1, y + 0, z - 1),
+						BLK_DATA(bd, x - 1, y - 1, z - 1),
+					};
 
-				light_data[BLK_INDEX(x, y, z) * 3 + 0]
-					= (sum_torch << 4) | sum_sky;
-
-				sum_sky = sum_torch = count = 0;
-				for(int k = 0; k < 4; k++) {
-					if(!blocks[b2[k].type]
-					   || (blocks[b2[k].type]->can_see_through
-						   && !blocks[b2[k].type]->ignore_lighting)) {
-						sum_sky += b2[k].sky_light;
-						sum_torch += b2[k].torch_light;
-						count++;
+					int sum_sky = 0, sum_torch = 0, count = 0;
+					for(int k = 0; k < 4; k++) {
+						if(!blocks[b2[k].type]
+						   || (blocks[b2[k].type]->can_see_through
+							   && !blocks[b2[k].type]->ignore_lighting)) {
+							sum_sky += b2[k].sky_light;
+							sum_torch += b2[k].torch_light;
+							count++;
+						}
 					}
+
+					sum_torch = count > 0 ? (sum_torch + count - 1) / count : 0;
+					sum_sky = count > 0 ? (sum_sky + count - 1) / count : 0;
+					sum_torch = MAX(sum_torch - shade_table[count], 0);
+					sum_sky = MAX(sum_sky - shade_table[count], 0);
+
+					light_data[BLK_INDEX(x, y, z) * 3 + 1]
+						= (sum_torch << 4) | sum_sky;
 				}
 
-				sum_torch = count > 0 ? (sum_torch + count - 1) / count : 0;
-				sum_sky = count > 0 ? (sum_sky + count - 1) / count : 0;
-				sum_torch = MAX(sum_torch - shade_table[4 - count], 0);
-				sum_sky = MAX(sum_sky - shade_table[4 - count], 0);
+				if(x != CHUNK_SIZE + 1 && y != CHUNK_SIZE + 1) {
+					struct block_data b3[4] = {
+						BLK_DATA(bd, x + 0, y + 0, z - 1),
+						BLK_DATA(bd, x - 1, y + 0, z - 1),
+						BLK_DATA(bd, x + 0, y - 1, z - 1),
+						BLK_DATA(bd, x - 1, y - 1, z - 1),
+					};
 
-				light_data[BLK_INDEX(x, y, z) * 3 + 1]
-					= (sum_torch << 4) | sum_sky;
-
-				sum_sky = sum_torch = count = 0;
-				for(int k = 0; k < 4; k++) {
-					if(!blocks[b3[k].type]
-					   || (blocks[b3[k].type]->can_see_through
-						   && !blocks[b3[k].type]->ignore_lighting)) {
-						sum_sky += b3[k].sky_light;
-						sum_torch += b3[k].torch_light;
-						count++;
+					int sum_sky = 0, sum_torch = 0, count = 0;
+					for(int k = 0; k < 4; k++) {
+						if(!blocks[b3[k].type]
+						   || (blocks[b3[k].type]->can_see_through
+							   && !blocks[b3[k].type]->ignore_lighting)) {
+							sum_sky += b3[k].sky_light;
+							sum_torch += b3[k].torch_light;
+							count++;
+						}
 					}
+
+					sum_torch = count > 0 ? (sum_torch + count - 1) / count : 0;
+					sum_sky = count > 0 ? (sum_sky + count - 1) / count : 0;
+					sum_torch = MAX(sum_torch - shade_table[count], 0);
+					sum_sky = MAX(sum_sky - shade_table[count], 0);
+
+					light_data[BLK_INDEX(x, y, z) * 3 + 2]
+						= (sum_torch << 4) | sum_sky;
 				}
-
-				sum_torch = count > 0 ? (sum_torch + count - 1) / count : 0;
-				sum_sky = count > 0 ? (sum_sky + count - 1) / count : 0;
-				sum_torch = MAX(sum_torch - shade_table[4 - count], 0);
-				sum_sky = MAX(sum_sky - shade_table[4 - count], 0);
-
-				light_data[BLK_INDEX(x, y, z) * 3 + 2]
-					= (sum_torch << 4) | sum_sky;
 			}
 		}
 	}
