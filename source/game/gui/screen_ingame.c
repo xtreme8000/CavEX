@@ -370,13 +370,20 @@ static void screen_ingame_render2D(struct screen* s, int width, int height) {
 	icon_offset += gutil_control_icon(icon_offset, IB_JUMP, "Jump");
 	if(gstate.camera_hit.hit) {
 		struct item_data item;
-		if(inventory_get_hotbar_item(
-			   windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]), &item)
-		   && item_get(&item)) {
+		struct block_data bd
+			= world_get_block(&gstate.world, gstate.camera_hit.x,
+							  gstate.camera_hit.y, gstate.camera_hit.z);
+		if(blocks[bd.type]->onRightClick) {
+			icon_offset += gutil_control_icon(icon_offset, IB_ACTION2, "Use");
+		} else if(inventory_get_hotbar_item(
+					  windowc_get_latest(gstate.windows[WINDOWC_INVENTORY]),
+					  &item)
+				  && item_get(&item)) {
 			icon_offset
 				+= gutil_control_icon(icon_offset, IB_ACTION2,
 									  item_is_block(&item) ? "Place" : "Use");
 		}
+
 		icon_offset += gutil_control_icon(icon_offset, IB_ACTION1, "Mine");
 	} else {
 		icon_offset += gutil_control_icon(icon_offset, IB_ACTION1, "Punch");
