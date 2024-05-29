@@ -127,9 +127,11 @@ void clin_process(struct client_rpc* call) {
 			gstate.world_loaded = false;
 			gstate.world.dimension = call->payload.world_reset.dimension;
 
-			gstate.local_player = dict_entity_safe_get(
+			struct entity** local_player_ptr = dict_entity_safe_get(
 				gstate.entities, call->payload.world_reset.local_entity);
-			gstate.local_player_id = call->payload.world_reset.local_entity;
+			*local_player_ptr = malloc(sizeof(struct entity));
+			assert(*local_player_ptr);
+			gstate.local_player = *local_player_ptr;
 			entity_local_player(call->payload.world_reset.local_entity,
 								gstate.local_player, &gstate.world);
 
@@ -220,10 +222,11 @@ void clin_process(struct client_rpc* call) {
 
 			break;
 		case CRPC_SPAWN_ITEM: {
-			struct entity* e = dict_entity_safe_get(
+			struct entity** e_ptr = dict_entity_safe_get(
 				gstate.entities, call->payload.spawn_item.entity_id);
-			gstate.local_player = dict_entity_safe_get(
-				gstate.entities, gstate.local_player_id);
+			*e_ptr = malloc(sizeof(struct entity));
+			struct entity* e = *e_ptr;
+			assert(e); 
 			entity_item(call->payload.spawn_item.entity_id, e, false,
 						&gstate.world, call->payload.spawn_item.item);
 			e->teleport(e, call->payload.spawn_item.pos);
@@ -232,8 +235,8 @@ void clin_process(struct client_rpc* call) {
 			if(gstate.local_player
 			   && call->payload.pickup_item.collector_id
 				   == gstate.local_player->id) {
-				struct entity* e = dict_entity_get(
-					gstate.entities, call->payload.pickup_item.entity_id);
+				struct entity* e = *(dict_entity_get(
+					gstate.entities, call->payload.pickup_item.entity_id));
 				if(e)
 					glm_vec3_copy((vec3) {gstate.camera.x,
 										  gstate.camera.y - 0.2F,
@@ -242,12 +245,14 @@ void clin_process(struct client_rpc* call) {
 			}
 		} break;
 		case CRPC_ENTITY_DESTROY:
+			free(*dict_entity_get(gstate.entities,
+								call->payload.entity_destroy.entity_id));
 			dict_entity_erase(gstate.entities,
 							  call->payload.entity_destroy.entity_id);
 			break;
 		case CRPC_ENTITY_MOVE: {
-			struct entity* e = dict_entity_get(
-				gstate.entities, call->payload.entity_move.entity_id);
+			struct entity* e = *(dict_entity_get(
+				gstate.entities, call->payload.entity_move.entity_id));
 			if(e)
 				glm_vec3_copy(call->payload.entity_move.pos, e->network_pos);
 		} break;

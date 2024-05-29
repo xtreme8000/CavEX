@@ -36,7 +36,11 @@
 struct entity* server_local_spawn_item(vec3 pos, struct item_data* it,
 									   bool throw, struct server_local* s) {
 	uint32_t entity_id = entity_gen_id(s->entities);
-	struct entity* e = dict_entity_safe_get(s->entities, entity_id);
+	struct entity** e_ptr = dict_entity_safe_get(s->entities, entity_id);
+	*e_ptr = malloc(sizeof(struct entity));
+	struct entity* e = *e_ptr;
+	assert(e);
+
 	entity_item(entity_id, e, true, &s->world, *it);
 	e->teleport(e, pos);
 
@@ -344,7 +348,7 @@ static void server_local_update(struct server_local* s) {
 
 	while(!dict_entity_end_p(it)) {
 		uint32_t key = dict_entity_ref(it)->key;
-		struct entity* e = &dict_entity_ref(it)->value;
+		struct entity* e = dict_entity_ref(it)->value;
 
 		if(e->tick_server) {
 			bool remove = (e->delay_destroy == 0) || e->tick_server(e, s);
@@ -356,6 +360,7 @@ static void server_local_update(struct server_local* s) {
 					.payload.entity_destroy.entity_id = key,
 				});
 
+				free(e);
 				dict_entity_erase(s->entities, key);
 			} else if(e->delay_destroy < 0) {
 				clin_rpc_send(&(struct client_rpc) {
