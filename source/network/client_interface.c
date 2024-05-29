@@ -116,6 +116,14 @@ void clin_process(struct client_rpc* call) {
 				}
 			}
 
+			dict_entity_it_t it;
+			dict_entity_it(it, gstate.entities);
+
+			while(!dict_entity_end_p(it)) {
+				free(dict_entity_ref(it)->value);
+				dict_entity_next(it);
+			}
+
 			dict_entity_reset(gstate.entities);
 
 			gstate.windows[WINDOWC_INVENTORY]
