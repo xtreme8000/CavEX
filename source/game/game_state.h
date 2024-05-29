@@ -55,6 +55,7 @@ struct game_state {
 	struct camera camera;
 	struct camera_ray_result camera_hit;
 	struct world world;
+	uint32_t local_player_id;
 	struct entity* local_player;
 	dict_entity_t entities;
 	uint64_t world_time;

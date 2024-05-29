@@ -129,6 +129,7 @@ void clin_process(struct client_rpc* call) {
 
 			gstate.local_player = dict_entity_safe_get(
 				gstate.entities, call->payload.world_reset.local_entity);
+			gstate.local_player_id = call->payload.world_reset.local_entity;
 			entity_local_player(call->payload.world_reset.local_entity,
 								gstate.local_player, &gstate.world);
 
@@ -221,6 +222,8 @@ void clin_process(struct client_rpc* call) {
 		case CRPC_SPAWN_ITEM: {
 			struct entity* e = dict_entity_safe_get(
 				gstate.entities, call->payload.spawn_item.entity_id);
+			gstate.local_player = dict_entity_safe_get(
+				gstate.entities, gstate.local_player_id);
 			entity_item(call->payload.spawn_item.entity_id, e, false,
 						&gstate.world, call->payload.spawn_item.item);
 			e->teleport(e, call->payload.spawn_item.pos);
