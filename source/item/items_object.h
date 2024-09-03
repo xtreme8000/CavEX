@@ -1340,36 +1340,6 @@ static struct item item_apple_golden = {
 	},
 };
 
-static struct item item_door_wood = {
-	.name = "Wooden Door",
-	.has_damage = false,
-	.max_stack = 1,
-	.renderItem = render_item_flat,
-	.armor.is_armor = false,
-	.tool.type = TOOL_TYPE_ANY,
-	.render_data = {
-		.item = {
-			.texture_x = 11,
-			.texture_y = 2,
-		},
-	},
-};
-
-static struct item item_door_iron = {
-	.name = "Iron Door",
-	.has_damage = false,
-	.max_stack = 1,
-	.renderItem = render_item_flat,
-	.armor.is_armor = false,
-	.tool.type = TOOL_TYPE_ANY,
-	.render_data = {
-		.item = {
-			.texture_x = 12,
-			.texture_y = 2,
-		},
-	},
-};
-
 static struct item item_slime_ball = {
 	.name = "Slimeball",
 	.has_damage = false,
@@ -1431,3 +1401,5 @@ static struct item item_saddle = {
 };
 
 extern struct item item_sugarcane;
+extern struct item item_door_wood;
+extern struct item item_door_iron;
