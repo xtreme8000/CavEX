@@ -91,11 +91,10 @@ static size_t getDroppedItem(struct block_info* this, struct item_data* it,
 static void onRightClick(struct server_local* s, struct item_data* it,
 						 struct block_info* where, struct block_info* on,
 						 enum side on_side) {
-	bool is_top = on->block->metadata & 0x08;
+	w_coord_t other_y = (on->block->metadata & 0x08) ? on->y - 1 : on->y + 1;
 	struct block_data other;
 
-	if(!server_world_get_block(&s->world, on->x, is_top ? on->y - 1 : on->y + 1,
-							   on->z, &other)
+	if(!server_world_get_block(&s->world, on->x, other_y, on->z, &other)
 	   || on->block->type != other.type)
 		return;
 
@@ -104,8 +103,7 @@ static void onRightClick(struct server_local* s, struct item_data* it,
 	other.metadata ^= 0x04;
 
 	server_world_set_block(&s->world, on->x, on->y, on->z, *on->block);
-	server_world_set_block(&s->world, on->x, is_top ? on->y - 1 : on->y + 1,
-						   on->z, other);
+	server_world_set_block(&s->world, on->x, other_y, on->z, other);
 }
 
 struct block block_wooden_door = {
