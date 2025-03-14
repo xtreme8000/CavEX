@@ -17,6 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../network/server_local.h"
 #include "blocks.h"
 
 static enum block_material getMaterial1(struct block_info* this) {
@@ -76,8 +77,33 @@ static uint8_t getTextureIndex2(struct block_info* this, enum side side) {
 
 static size_t getDroppedItem(struct block_info* this, struct item_data* it,
 							 struct random_gen* g) {
-	// TODO
-	return 0;
+	if(it) {
+		it->id = (this->block->type == BLOCK_WOODEN_DOOR) ? ITEM_DOOR_WOOD :
+															ITEM_DOOR_IRON;
+		it->durability = 0;
+		it->count = 1;
+	}
+
+	// drop item only for top block
+	return (this->block->metadata & 0x08) ? 1 : 0;
+}
+
+static void onRightClick(struct server_local* s, struct item_data* it,
+						 struct block_info* where, struct block_info* on,
+						 enum side on_side) {
+	w_coord_t other_y = (on->block->metadata & 0x08) ? on->y - 1 : on->y + 1;
+	struct block_data other;
+
+	if(!server_world_get_block(&s->world, on->x, other_y, on->z, &other)
+	   || on->block->type != other.type)
+		return;
+
+	// flip open/closed state
+	on->block->metadata ^= 0x04;
+	other.metadata ^= 0x04;
+
+	server_world_set_block(&s->world, on->x, on->y, on->z, *on->block);
+	server_world_set_block(&s->world, on->x, other_y, on->z, other);
 }
 
 struct block block_wooden_door = {
@@ -88,7 +114,7 @@ struct block block_wooden_door = {
 	.getTextureIndex = getTextureIndex1,
 	.getDroppedItem = getDroppedItem,
 	.onRandomTick = NULL,
-	.onRightClick = NULL,
+	.onRightClick = onRightClick,
 	.transparent = false,
 	.renderBlock = render_block_door,
 	.renderBlockAlways = NULL,

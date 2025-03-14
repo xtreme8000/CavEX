@@ -483,8 +483,9 @@ void world_render_completed(struct world* w, bool new_render) {
 	ilist_chunks2_it(it, w->gpu_busy_chunks);
 
 	while(!ilist_chunks2_end_p(it)) {
-		chunk_unref(ilist_chunks2_ref(it));
-		ilist_chunks2_next(it);
+		struct chunk* c = ilist_chunks2_ref(it);
+		ilist_chunks2_remove(w->gpu_busy_chunks, it);
+		chunk_unref(c);
 	}
 
 	ilist_chunks2_reset(w->gpu_busy_chunks);
