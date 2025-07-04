@@ -43,6 +43,7 @@ struct thread_channel {
 
 #ifdef PLATFORM_WII
 #include <gccore.h>
+#include <unistd.h>
 
 struct thread {
 	lwp_t native;
