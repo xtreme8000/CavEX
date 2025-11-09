@@ -145,10 +145,12 @@ int main(void) {
 			float px, py, prot;
 			input_pointer(&px, &py, &prot);
 
-			float xFov = gstate.config.fov;
-			float yFov = xFov / (gfx_width()/gfx_height());
+			float aspectRatio = gfx_width()/gfx_height();
 
-			float newRX = c->rx-((px-gfx_width()/2)/(gfx_width()/xFov)*(3.14/180));
+			float xFov = gstate.config.fov;
+			float yFov = xFov / aspectRatio;
+
+			float newRX = c->rx-((px-gfx_width()/2)/(gfx_width()/xFov)*aspectRatio*2*(3.14/180));
 			float newRY = c->ry+((py-gfx_height()/2)/(gfx_height()/yFov)*(3.14/180));
 
 			camera_ray_pick(&gstate.world, c->x, c->y, c->z,
