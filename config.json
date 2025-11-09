@@ -22,6 +22,7 @@
 		"gui_right": [3, 203, 903, 913, 923],
 		"gui_click": [4, 204],
 		"gui_click_alt": [5, 205],
-		"screenshot": [7],
+		"screenshot": [ 7 ],
+		"lock_camera": [101],
 	}
 }

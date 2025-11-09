@@ -401,6 +401,7 @@ static const char* input_config_translate(enum input_button key) {
 		case IB_GUI_CLICK: return "input.gui_click";
 		case IB_GUI_CLICK_ALT: return "input.gui_click_alt";
 		case IB_SCREENSHOT: return "input.screenshot";
+		case IB_LOCK_CAMERA: return "input.lock_camera";
 		default: return NULL;
 	}
 }
