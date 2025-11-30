@@ -411,8 +411,8 @@ void gfx_draw_quads(size_t vertex_count, const int16_t* vertices,
 
 	assert(vertex_count < 256);
 
-	float tmp[vertex_count * 3];
-	for(size_t k = 0; k < vertex_count * 3; k++)
+	float tmp[vertex_count * 2];
+	for(size_t k = 0; k < vertex_count * 2; k++)
 		tmp[k] = texcoords[k] / 256.0F;
 
 	glEnableVertexAttribArray(0);
