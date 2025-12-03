@@ -29,6 +29,7 @@ enum input_button {
 	IB_RIGHT,
 	IB_ACTION1,
 	IB_ACTION2,
+	IB_LOCK_CAMERA,
 	IB_JUMP,
 	IB_SNEAK,
 	IB_INVENTORY,
