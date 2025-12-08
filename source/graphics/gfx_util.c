@@ -24,7 +24,7 @@
 #include "../platform/gfx.h"
 #include "gfx_util.h"
 
-void gutil_clouds(mat4 view_matrix, float brightness) {
+void gutil_clouds(mat4 view_matrix, float daytime) {
 	assert(view_matrix);
 
 	float cloud_pos = (gstate.world_time
@@ -52,11 +52,14 @@ void gutil_clouds(mat4 view_matrix, float brightness) {
 	int ox = roundf(gstate.camera.x / 12.0F) + roundf(cloud_pos / 12.0F);
 	int oy = roundf(gstate.camera.z / 12.0F);
 
-	uint8_t shade[6] = {
-		roundf(brightness * 1.0F * 255),  roundf(brightness * 0.75F * 255),
-		roundf(brightness * 0.84F * 255), roundf(brightness * 0.84F * 255),
-		roundf(brightness * 0.92F * 255), roundf(brightness * 0.92F * 255),
-	};
+	float brightness = daytime_brightness(daytime);
+	vec3 cloud_color = {brightness * 0.9F + 0.1F, brightness * 0.9F + 0.1F,
+						brightness * 0.85F + 0.15F};
+	vec3 shade[4];
+	glm_vec3_scale(cloud_color, 1.0F * 255.0F, (float*)(shade + 0));
+	glm_vec3_scale(cloud_color, 0.7F * 255.0F, (float*)(shade + 1));
+	glm_vec3_scale(cloud_color, 0.8F * 255.0F, (float*)(shade + 2));
+	glm_vec3_scale(cloud_color, 0.9F * 255.0F, (float*)(shade + 3));
 
 	for(int k = 0; k < 2; k++) {
 		if(k == 1)
@@ -94,41 +97,37 @@ void gutil_clouds(mat4 view_matrix, float brightness) {
 							min[0], box[2], box[1], min[0], min[2], box[1],
 						},
 						(uint8_t[]) {
-							shade[0], shade[0], shade[0], 0xBF,
-							shade[0], shade[0], shade[0], 0xBF,
-							shade[0], shade[0], shade[0], 0xBF,
-							shade[0], shade[0], shade[0], 0xBF,
+							shade[0][0], shade[0][1], shade[0][2], 0xCC,
+							shade[0][0], shade[0][1], shade[0][2], 0xCC,
+							shade[0][0], shade[0][1], shade[0][2], 0xCC,
+							shade[0][0], shade[0][1], shade[0][2], 0xCC,
 
-							shade[1], shade[1], shade[1], 0xBF,
-							shade[1], shade[1], shade[1], 0xBF,
-							shade[1], shade[1], shade[1], 0xBF,
-							shade[1], shade[1], shade[1], 0xBF,
+							shade[1][0], shade[1][1], shade[1][2], 0xCC,
+							shade[1][0], shade[1][1], shade[1][2], 0xCC,
+							shade[1][0], shade[1][1], shade[1][2], 0xCC,
+							shade[1][0], shade[1][1], shade[1][2], 0xCC,
 
-							shade[2], shade[2], shade[2], 0xBF,
-							shade[2], shade[2], shade[2], 0xBF,
-							shade[2], shade[2], shade[2], 0xBF,
-							shade[2], shade[2], shade[2], 0xBF,
+							shade[2][0], shade[2][1], shade[2][2], 0xCC,
+							shade[2][0], shade[2][1], shade[2][2], 0xCC,
+							shade[2][0], shade[2][1], shade[2][2], 0xCC,
+							shade[2][0], shade[2][1], shade[2][2], 0xCC,
 
-							shade[3], shade[3], shade[3], 0xBF,
-							shade[3], shade[3], shade[3], 0xBF,
-							shade[3], shade[3], shade[3], 0xBF,
-							shade[3], shade[3], shade[3], 0xBF,
+							shade[2][0], shade[2][1], shade[2][2], 0xCC,
+							shade[2][0], shade[2][1], shade[2][2], 0xCC,
+							shade[2][0], shade[2][1], shade[2][2], 0xCC,
+							shade[2][0], shade[2][1], shade[2][2], 0xCC,
 
-							shade[4], shade[4], shade[4], 0xBF,
-							shade[4], shade[4], shade[4], 0xBF,
-							shade[4], shade[4], shade[4], 0xBF,
-							shade[4], shade[4], shade[4], 0xBF,
+							shade[3][0], shade[3][1], shade[3][2], 0xCC,
+							shade[3][0], shade[3][1], shade[3][2], 0xCC,
+							shade[3][0], shade[3][1], shade[3][2], 0xCC,
+							shade[3][0], shade[3][1], shade[3][2], 0xCC,
 
-							shade[5], shade[5], shade[5], 0xBF,
-							shade[5], shade[5], shade[5], 0xBF,
-							shade[5], shade[5], shade[5], 0xBF,
-							shade[5], shade[5], shade[5], 0xBF,
+							shade[3][0], shade[3][1], shade[3][2], 0xCC,
+							shade[3][0], shade[3][1], shade[3][2], 0xCC,
+							shade[3][0], shade[3][1], shade[3][2], 0xCC,
+							shade[3][0], shade[3][1], shade[3][2], 0xCC,
 						},
-						(uint16_t[]) {
-							0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-							0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-							0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-						});
+						(uint16_t[48]) {0});
 				}
 			}
 		}

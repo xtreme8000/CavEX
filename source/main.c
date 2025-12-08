@@ -214,7 +214,7 @@ int main(void) {
 			world_render(&gstate.world, &gstate.camera, true);
 
 			if(gstate.world.dimension == WORLD_DIM_OVERWORLD)
-				gutil_clouds(gstate.camera.view, daytime_brightness(daytime));
+				gutil_clouds(gstate.camera.view, daytime);
 		}
 
 		gfx_mode_gui();
