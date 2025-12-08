@@ -211,7 +211,10 @@ void camera_attach(struct camera* c, struct entity* e, float tick_delta,
 		c->ry -= jdy * 2.0F;
 	}
 
-	c->ry = glm_clamp(c->ry, glm_rad(0.5F), GLM_PI - glm_rad(0.5F));
+	if(c->rx >= GLM_PIf * 2.0F || c->rx < 0.0F)
+		c->rx -= floorf(c->rx / (GLM_PIf * 2.0F)) * GLM_PIf * 2.0F;
+
+	c->ry = glm_clamp(c->ry, glm_rad(0.5F), GLM_PIf - glm_rad(0.5F));
 
 	e->orient[0] = c->rx;
 	e->orient[1] = c->ry;
