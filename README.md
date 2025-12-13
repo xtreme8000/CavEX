@@ -34,15 +34,13 @@
 
 ## Build instructions
 
-You need to download these libraries yourself and place their source files to the following directories. They are required for any platform.
+Before building the project, you need to checkout its dependencies. Luckily, this is as easy as running the command
 
-| library | files | destination |
-| --- | --- | --- |
-| [LodePNG](https://github.com/lvandeve/lodepng) | `lodepng.h` and `lodepng.c` | `source/lodepng/` |
-| [cglm](https://github.com/recp/cglm) | `include/cglm/` | `source/cglm/` |
-| [cNBT](https://github.com/chmod222/cNBT) | `buffer.c`, `buffer.h`, `list.h`, `nbt_loading.c`, `nbt_parsing.c`, `nbt_treeops.c`, `nbt_util.c` and `nbt.h` | `source/cNBT/` |
-| [parson](https://github.com/kgabis/parson) | `parson.h` and `parson.c` | `source/parson/` |
-| [M*LIB](https://github.com/P-p-H-d/mlib) | any root `*.h` | compiler include path |
+```bash
+git submodule update --init
+```
+
+This will download all the needed libraries. You still need to download the system libraries for the target machine you are building for, as explained in the respective subsections.
 
 ### Wii
 
