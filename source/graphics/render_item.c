@@ -46,7 +46,7 @@ static inline uint8_t DIM_LIGHT(uint8_t l, uint8_t* table) {
 }
 
 void render_item_init() {
-	displaylist_init(&dl, 320, 3 * 2 + 2 * 1 + 1);
+	displaylist_init(&dl, 320, false);
 	memset(vertex_light, 0x0F, sizeof(vertex_light));
 	memset(vertex_light_inv, 0xFF, sizeof(vertex_light_inv));
 }

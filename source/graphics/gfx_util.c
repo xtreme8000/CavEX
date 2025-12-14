@@ -21,8 +21,69 @@
 
 #include "../daytime.h"
 #include "../game/game_state.h"
+#include "../platform/displaylist.h"
 #include "../platform/gfx.h"
 #include "gfx_util.h"
+#include "stars_data.h"
+
+static struct displaylist dl_stars;
+
+void gutil_init() {
+	size_t star_amount = sizeof(stars_data) / sizeof(*stars_data);
+	displaylist_init(&dl_stars, star_amount * 4, true);
+
+	for(size_t k = 0; k < star_amount; k++) {
+		vec3 angle = {
+			sinf(stars_data[k][0]) * cosf(stars_data[k][1]),
+			sinf(stars_data[k][1]),
+			cosf(stars_data[k][0]) * cosf(stars_data[k][1]),
+		};
+
+		vec3 pos, s, t;
+		glm_vec3_scale(angle, 100.0F, pos);
+
+		glm_vec3_crossn(angle, (vec3) {0.0F, 1.0F, 0.0F}, s);
+		glm_vec3_crossn(s, angle, t);
+		glm_vec3_normalize(s);
+		glm_vec3_normalize(t);
+		glm_vec3_scale(s, stars_data[k][2] * 2.0F, s);
+		glm_vec3_scale(t, stars_data[k][2] * 2.0F, t);
+		glm_vec3_rotate(s, stars_data[k][3], angle);
+		glm_vec3_rotate(t, stars_data[k][3], angle);
+
+		vec3 v1, v2, v3, v4;
+		glm_vec3_add(pos, s, v1);
+		glm_vec3_add(v1, t, v1);
+
+		glm_vec3_add(pos, s, v2);
+		glm_vec3_sub(v2, t, v2);
+
+		glm_vec3_sub(pos, s, v3);
+		glm_vec3_sub(v3, t, v3);
+
+		glm_vec3_sub(pos, s, v4);
+		glm_vec3_add(v4, t, v4);
+
+		displaylist_pos(&dl_stars, v1[0] * 256.0F, v1[1] * 256.0F,
+						v1[2] * 256.0F);
+		displaylist_color_rgba(&dl_stars, 0xFF, 0xFF, 0xFF, 0xFF);
+		displaylist_texcoord(&dl_stars, 0, 0);
+		displaylist_pos(&dl_stars, v2[0] * 256.0F, v2[1] * 256.0F,
+						v2[2] * 256.0F);
+		displaylist_color_rgba(&dl_stars, 0xFF, 0xFF, 0xFF, 0xFF);
+		displaylist_texcoord(&dl_stars, 0, 0);
+		displaylist_pos(&dl_stars, v3[0] * 256.0F, v3[1] * 256.0F,
+						v3[2] * 256.0F);
+		displaylist_color_rgba(&dl_stars, 0xFF, 0xFF, 0xFF, 0xFF);
+		displaylist_texcoord(&dl_stars, 0, 0);
+		displaylist_pos(&dl_stars, v4[0] * 256.0F, v4[1] * 256.0F,
+						v4[2] * 256.0F);
+		displaylist_color_rgba(&dl_stars, 0xFF, 0xFF, 0xFF, 0xFF);
+		displaylist_texcoord(&dl_stars, 0, 0);
+	}
+
+	displaylist_finalize(&dl_stars, star_amount * 4);
+}
 
 void gutil_clouds(mat4 view_matrix, float daytime) {
 	assert(view_matrix);
@@ -140,7 +201,7 @@ void gutil_clouds(mat4 view_matrix, float daytime) {
 	gfx_fog(false);
 }
 
-void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
+void gutil_sky_box(mat4 view_matrix, float daytime, vec3 color_top,
 				   vec3 color_bottom) {
 	assert(view_matrix && color_top && color_bottom);
 
@@ -151,11 +212,7 @@ void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
 	gfx_texture(false);
 	gfx_fog(true);
 
-	mat4 model_view;
-	glm_translate_to(view_matrix,
-					 (vec3) {gstate.camera.x, gstate.camera.y, gstate.camera.z},
-					 model_view);
-	gfx_matrix_modelview(model_view);
+	gfx_matrix_modelview(view_matrix);
 	gfx_fog_pos(0, 0, gstate.config.fog_distance);
 
 	// render a bit larger for possible inaccuracy
@@ -168,28 +225,38 @@ void gutil_sky_box(mat4 view_matrix, float celestial_angle, vec3 color_top,
 								color_top[0], color_top[1], color_top[2], 0xFF,
 								color_top[0], color_top[1], color_top[2], 0xFF,
 								color_top[0], color_top[1], color_top[2], 0xFF},
-				   (uint16_t[]) {0, 0, 0, 0, 0, 0, 0, 0});
+				   (uint16_t[8]) {0});
 
 	gfx_draw_quads(
 		4,
-		(int16_t[]) {-size, -32, -size, size, -32, -size, size, -32, size,
-					 -size, -32, size},
+		(int16_t[]) {-size, -16, -size, size, -16, -size, size, -16, size,
+					 -size, -16, size},
 		(uint8_t[]) {color_bottom[0], color_bottom[1], color_bottom[2], 0xFF,
 					 color_bottom[0], color_bottom[1], color_bottom[2], 0xFF,
 					 color_bottom[0], color_bottom[1], color_bottom[2], 0xFF,
 					 color_bottom[0], color_bottom[1], color_bottom[2], 0xFF},
-		(uint16_t[]) {0, 0, 0, 0, 0, 0, 0, 0});
+		(uint16_t[8]) {0});
 
 	gfx_fog(false);
-	gfx_texture(true);
 	gfx_blending(MODE_BLEND2);
 
-	mat4 tmp;
-	glm_translate_to(view_matrix,
-					 (vec3) {gstate.camera.x, gstate.camera.y, gstate.camera.z},
-					 tmp);
-	glm_rotate_x(tmp, glm_rad(celestial_angle * 360.0F), model_view);
-	gfx_matrix_modelview(model_view);
+	mat4 celestial_mat;
+	glm_rotate_x(view_matrix,
+				 glm_rad(daytime_celestial_angle(daytime) * 360.0F),
+				 celestial_mat);
+	gfx_matrix_modelview(celestial_mat);
+
+	float stars_brightness = daytime_star_brightness(daytime);
+
+	if(stars_brightness > 0.0F) {
+		uint8_t col = stars_brightness * 0xFF;
+		gfx_texture_constant(col, col, col, col);
+		displaylist_render(&dl_stars);
+		gfx_texture(false);
+	}
+	gfx_blending(MODE_BLEND2);
+
+	gfx_texture(true);
 
 	gfx_bind_texture(&texture_sun);
 	gfx_draw_quads(

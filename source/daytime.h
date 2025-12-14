@@ -27,6 +27,7 @@
 
 float daytime_brightness(float time);
 float daytime_celestial_angle(float time);
+float daytime_star_brightness(float time);
 void daytime_sky_colors(float time, vec3 top_plane, vec3 bottom_plane,
 						vec3 atmosphere);
 

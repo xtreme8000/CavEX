@@ -72,6 +72,7 @@ void gfx_write_buffers(bool color, bool depth, bool depth_test);
 void gfx_depth_range(float near, float far);
 void gfx_depth_func(enum depth_func func);
 void gfx_texture(bool enable);
+void gfx_texture_constant(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 void gfx_lighting(bool enable);
 void gfx_cull_func(enum cull_func func);
 void gfx_scissor(bool enable, uint32_t x, uint32_t y, uint32_t width,

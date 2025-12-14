@@ -27,7 +27,7 @@
 struct camera {
 	float x, y, z;
 	float rx, ry;
-	mat4 view, projection;
+	mat4 view, view_origin, projection;
 	vec4 frustum_planes[6];
 	struct camera_controller {
 		float vx, vy, vz;

@@ -456,6 +456,17 @@ void gfx_texture(bool enable) {
 	GX_SetTevOp(GX_TEVSTAGE0, enable ? GX_MODULATE : GX_PASSCLR);
 }
 
+void gfx_texture_constant(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+	gfx_texture(true);
+	GX_SetTevKColor(GX_KCOLOR0, (GXColor) {r, g, b, a});
+	GX_SetTevKColorSel(GX_TEVSTAGE0, GX_TEV_KCSEL_K0);
+	GX_SetTevKAlphaSel(GX_TEVSTAGE0, GX_TEV_KASEL_K0_A);
+	GX_SetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_KONST, GX_CC_RASC,
+					 GX_CC_ZERO);
+	GX_SetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_KONST, GX_CA_RASA,
+					 GX_CA_ZERO);
+}
+
 void gfx_lighting(bool enable) {
 	GX_SetVtxDesc(GX_VA_CLR0, enable ? GX_INDEX8 : GX_DIRECT);
 }

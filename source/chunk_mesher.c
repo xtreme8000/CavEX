@@ -478,7 +478,7 @@ static void chunk_mesher_rebuild(struct block_data* bd, w_coord_t cx,
 static void chunk_mesher_build(struct chunk_mesher_rpc* req) {
 	for(int k = 0; k < 13; k++) {
 		req->result.has_displist[k] = false;
-		displaylist_init(req->result.mesh + k, 64, 3 * 2 + 2 * 1 + 1);
+		displaylist_init(req->result.mesh + k, 64, false);
 	}
 
 	size_t vertices[13];

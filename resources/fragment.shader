@@ -2,12 +2,14 @@
 
 uniform sampler2D tex;
 uniform bool enable_texture;
+uniform bool enable_texture_constant;
 uniform bool enable_alpha;
 
 uniform bool enable_fog;
 uniform vec2 fog_delta;
 uniform float fog_distance;
 uniform vec3 fog_color;
+uniform vec4 texture_const_color;
 
 varying vec3 v_pos;
 varying vec4 v_color;
@@ -16,8 +18,13 @@ varying vec2 v_texcoord;
 void main() {
 	vec4 tex_color = vec4(1.0);
 
-	if(enable_texture)
-		tex_color = texture2D(tex, v_texcoord);
+	if(enable_texture) {
+		if(enable_texture_constant) {
+			tex_color = texture_const_color;
+		} else {
+			tex_color = texture2D(tex, v_texcoord);
+		}
+	}
 
 	float v_fog = 0.0;
 

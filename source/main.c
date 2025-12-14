@@ -73,6 +73,7 @@ int main(void) {
 	items_init();
 	recipe_init();
 	gfx_setup();
+	gutil_init();
 
 	screen_set(&screen_select_world);
 
@@ -186,9 +187,8 @@ int main(void) {
 							 world_dimension_light(&gstate.world));
 
 			if(gstate.world.dimension == WORLD_DIM_OVERWORLD)
-				gutil_sky_box(gstate.camera.view,
-							  daytime_celestial_angle(daytime), top_plane_color,
-							  bottom_plane_color);
+				gutil_sky_box(gstate.camera.view_origin, daytime,
+							  top_plane_color, bottom_plane_color);
 
 			gstate.stats.chunks_rendered
 				= world_render(&gstate.world, &gstate.camera, false);

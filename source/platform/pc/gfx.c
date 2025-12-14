@@ -352,6 +352,16 @@ void gfx_depth_func(enum depth_func func) {
 
 void gfx_texture(bool enable) {
 	glUniform1i(glGetUniformLocation(shader_prog, "enable_texture"), enable);
+	glUniform1i(glGetUniformLocation(shader_prog, "enable_texture_constant"),
+				false);
+}
+
+void gfx_texture_constant(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+	glUniform1i(glGetUniformLocation(shader_prog, "enable_texture"), true);
+	glUniform1i(glGetUniformLocation(shader_prog, "enable_texture_constant"),
+				true);
+	glUniform4f(glGetUniformLocation(shader_prog, "texture_const_color"),
+				r / 255.0F, g / 255.0F, b / 255.0F, a / 255.0F);
 }
 
 void gfx_lighting(bool enable) {

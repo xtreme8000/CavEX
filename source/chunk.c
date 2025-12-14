@@ -46,8 +46,9 @@ void chunk_init(struct chunk* c, struct world* world, w_coord_t x, w_coord_t y,
 	c->y = y;
 	c->z = z;
 
-	for(int k = 0; k < 13; k++)
+	for(size_t k = 0; k < 13; k++)
 		c->has_displist[k] = false;
+
 	c->rebuild_displist = false;
 	c->world = world;
 	c->reference_count = 0;
@@ -61,7 +62,7 @@ static void chunk_destroy(struct chunk* c) {
 
 	free(c->blocks);
 
-	for(int k = 0; k < 13; k++) {
+	for(size_t k = 0; k < 13; k++) {
 		if(c->has_displist[k])
 			displaylist_destroy(c->mesh + k);
 	}
@@ -139,7 +140,7 @@ static void chunk_trigger_neighbour_update(struct chunk* c, c_coord_t x,
 		{0, CHUNK_SIZE, 0}, {0, 0, -1},			{0, 0, CHUNK_SIZE},
 	};
 
-	for(int k = 0; k < 6; k++) {
+	for(size_t k = 0; k < 6; k++) {
 		if(cond[k]) {
 			struct chunk* other
 				= world_find_chunk(c->world, c->x + offset[k][0],

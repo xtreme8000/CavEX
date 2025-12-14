@@ -74,7 +74,7 @@ uint32_t hash_u32(uint32_t x) {
 void hsv2rgb(float* h, float* s, float* v) {
 	assert(h && s && v);
 
-	int i = floor((*h) * 6.0F);
+	int i = floorf((*h) * 6.0F);
 	float f = (*h) * 6.0F - i;
 	float p = (*v) * (1.0F - *s);
 	float q = (*v) * (1.0F - f * (*s));

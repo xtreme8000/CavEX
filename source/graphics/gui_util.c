@@ -72,8 +72,8 @@ void gutil_texquad_rt(int x, int y, int tx, int ty, int sx, int sy, int width,
 
 void gutil_texquad_rt_any(int x, int y, float angle, int tx, int ty, int sx,
 						  int sy, float width, float height) {
-	width *= 0.707107F; // 1 / sqrt(2)
-	height *= 0.707107F;
+	width *= GLM_SQRT1_2f;
+	height *= GLM_SQRT1_2f;
 	angle -= glm_rad(45.0F);
 
 	gfx_draw_quads(

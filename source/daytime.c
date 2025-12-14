@@ -24,8 +24,9 @@
 #include "util.h"
 
 float daytime_brightness(float time) {
-	return (gstate.world.dimension == WORLD_DIM_OVERWORLD) ? glm_clamp(
-			   cos(daytime_celestial_angle(time) * 2.0F * GLM_PI) * 2.0F + 0.5F,
+	return (gstate.world.dimension == WORLD_DIM_OVERWORLD) ?
+		glm_clamp(cosf(daytime_celestial_angle(time) * 2.0F * GLM_PIf) * 2.0F
+					  + 0.5F,
 			   0.0F, 1.0F) :
 															 0.0F;
 }
@@ -36,7 +37,14 @@ float daytime_celestial_angle(float time) {
 	if(X < 0)
 		X += 1;
 
-	return X + ((1.0F - (cos(X * GLM_PI) + 1.0F) / 2.0F) - X) / 3.0F;
+	return X + ((1.0F - (cosf(X * GLM_PIf) + 1.0F) / 2.0F) - X) / 3.0F;
+}
+
+float daytime_star_brightness(float time) {
+	float x = glm_clamp(
+		0.25F - cosf(daytime_celestial_angle(time) * 2.0F * GLM_PIf) * 2.0F,
+		0.0F, 1.0F);
+	return x * x * 0.5F;
 }
 
 void daytime_sky_colors(float time, vec3 top_plane, vec3 bottom_plane,
@@ -46,26 +54,32 @@ void daytime_sky_colors(float time, vec3 top_plane, vec3 bottom_plane,
 	if(gstate.world.dimension == WORLD_DIM_OVERWORLD) {
 		float brightness_mul = daytime_brightness(time);
 
-		vec3 world_sky_color = {
+		/* vec3 world_sky_color = {
 			0.6222222F - (0.7F / 3.0F) * 0.05F,
 			0.5F + (0.7F / 3.0F) * 0.1F,
 			1.0F,
 		};
 
-		hsv2rgb(world_sky_color + 0, world_sky_color + 1, world_sky_color + 2);
+		hsv2rgb(world_sky_color + 0, world_sky_color + 1, world_sky_color +
+		2); */
+
+		vec3 world_sky_color = {
+			0.5333333F,
+			0.7333333F,
+			1.0F,
+		};
+
 		glm_vec3_scale(world_sky_color, brightness_mul, world_sky_color);
 
 		vec3 fog_color = {
-			0.7529412F * brightness_mul * 0.94F + 0.06F,
-			0.8470588F * brightness_mul * 0.94F + 0.06F,
-			1.0F * brightness_mul * 0.91F + 0.09F,
+			0.7529412F * (brightness_mul * 0.94F + 0.06F),
+			0.8470588F * (brightness_mul * 0.94F + 0.06F),
+			1.0F * (brightness_mul * 0.91F + 0.09F),
 		};
 
 		vec3 atmosphere_color;
-		glm_vec3_lerp(fog_color, world_sky_color, 0.29F, atmosphere_color);
-		glm_vec3_scale(atmosphere_color,
-					   powf(0.8F, (1.0F - brightness_mul) * 11.0F),
-					   atmosphere_color);
+		// 1 − (1 / (4 − 0)) ^ 0.25
+		glm_vec3_lerp(fog_color, world_sky_color, 0.2929F, atmosphere_color);
 
 		vec3 bottom_plane_color = {0.04F, 0.04F, 0.1F};
 		glm_vec3_muladd(world_sky_color, (vec3) {0.2F, 0.2F, 0.6F},

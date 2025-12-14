@@ -391,7 +391,7 @@ static void server_local_update(struct server_local* s) {
 	// iterate over all chunks that should be loaded
 	bool c_nearest = false;
 	w_coord_t c_nearest_x, c_nearest_z;
-	w_coord_t c_nearest_dist2;
+	w_coord_t c_nearest_dist2 = INT_MAX;
 	for(w_coord_t z = pz - MAX_VIEW_DISTANCE; z <= pz + MAX_VIEW_DISTANCE;
 		z++) {
 		for(w_coord_t x = px - MAX_VIEW_DISTANCE; x <= px + MAX_VIEW_DISTANCE;

@@ -192,6 +192,11 @@ void camera_update(struct camera* c, bool in_water) {
 					   c->z + cosf(c->rx) * sinf(c->ry)},
 			   (vec3) {0, 1, 0}, c->view);
 
+	glm_lookat(GLM_VEC3_ZERO,
+			   (vec3) {sinf(c->rx) * sinf(c->ry), cosf(c->ry),
+					   cosf(c->rx) * sinf(c->ry)},
+			   (vec3) {0, 1, 0}, c->view_origin);
+
 	mat4 view_proj;
 	glm_mat4_mul(c->projection, c->view, view_proj);
 	glm_frustum_planes(view_proj, c->frustum_planes);
