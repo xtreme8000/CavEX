@@ -27,6 +27,7 @@
 #include "stars_data.h"
 
 static struct displaylist dl_stars;
+static struct displaylist dl_sunset;
 
 void gutil_init() {
 	size_t star_amount = sizeof(stars_data) / sizeof(*stars_data);
@@ -64,25 +65,76 @@ void gutil_init() {
 		glm_vec3_sub(pos, s, v4);
 		glm_vec3_add(v4, t, v4);
 
-		displaylist_pos(&dl_stars, v1[0] * 256.0F, v1[1] * 256.0F,
-						v1[2] * 256.0F);
+		glm_vec3_scale(v1, 256.0F, v1);
+		glm_vec3_scale(v2, 256.0F, v2);
+		glm_vec3_scale(v3, 256.0F, v3);
+		glm_vec3_scale(v4, 256.0F, v4);
+
+		displaylist_pos(&dl_stars, v1[0], v1[1], v1[2]);
 		displaylist_color_rgba(&dl_stars, 0xFF, 0xFF, 0xFF, 0xFF);
 		displaylist_texcoord(&dl_stars, 0, 0);
-		displaylist_pos(&dl_stars, v2[0] * 256.0F, v2[1] * 256.0F,
-						v2[2] * 256.0F);
+		displaylist_pos(&dl_stars, v2[0], v2[1], v2[2]);
 		displaylist_color_rgba(&dl_stars, 0xFF, 0xFF, 0xFF, 0xFF);
 		displaylist_texcoord(&dl_stars, 0, 0);
-		displaylist_pos(&dl_stars, v3[0] * 256.0F, v3[1] * 256.0F,
-						v3[2] * 256.0F);
+		displaylist_pos(&dl_stars, v3[0], v3[1], v3[2]);
 		displaylist_color_rgba(&dl_stars, 0xFF, 0xFF, 0xFF, 0xFF);
 		displaylist_texcoord(&dl_stars, 0, 0);
-		displaylist_pos(&dl_stars, v4[0] * 256.0F, v4[1] * 256.0F,
-						v4[2] * 256.0F);
+		displaylist_pos(&dl_stars, v4[0], v4[1], v4[2]);
 		displaylist_color_rgba(&dl_stars, 0xFF, 0xFF, 0xFF, 0xFF);
 		displaylist_texcoord(&dl_stars, 0, 0);
 	}
 
 	displaylist_finalize(&dl_stars, star_amount * 4);
+
+	size_t subdiv_total = 6;
+	displaylist_init(&dl_sunset, 4 * 16 * subdiv_total, true);
+
+	for(size_t subdiv = 0; subdiv < subdiv_total; subdiv++) {
+		for(size_t k = 0; k < 16; k++) {
+			float angle_1 = (k + 1) * GLM_PIf * 2.0F / 16.0F;
+			float angle_2 = k * GLM_PIf * 2.0F / 16.0F;
+
+			vec3 pos_center = {0, 100 * 256.0F, 0};
+			vec3 pos_a1 = {sinf(angle_1) * 120.0F, cosf(angle_1) * 120.0F,
+						   -cosf(angle_1) * 40.0F};
+			vec3 pos_a2 = {sinf(angle_2) * 120.0F, cosf(angle_2) * 120.0F,
+						   -cosf(angle_2) * 40.0F};
+
+			glm_vec3_scale(pos_a1, 256.0F, pos_a1);
+			glm_vec3_scale(pos_a2, 256.0F, pos_a2);
+
+			vec3 v1, v2, v3, v4;
+			glm_vec3_lerp(pos_center, pos_a2, subdiv / (float)subdiv_total, v1);
+			glm_vec3_lerp(pos_center, pos_a1, subdiv / (float)subdiv_total, v2);
+			glm_vec3_lerp(pos_center, pos_a1,
+						  (subdiv + 1) / (float)subdiv_total, v3);
+			glm_vec3_lerp(pos_center, pos_a2,
+						  (subdiv + 1) / (float)subdiv_total, v4);
+
+			vec4 c1, c2;
+			glm_vec4_lerp(GLM_VEC4_ONE, (vec4) {1.0F, 1.0F, 1.0F, 0.0F},
+						  subdiv / (float)subdiv_total, c1);
+			glm_vec4_lerp(GLM_VEC4_ONE, (vec4) {1.0F, 1.0F, 1.0F, 0.0F},
+						  (subdiv + 1) / (float)subdiv_total, c2);
+			glm_vec4_scale(c1, 255.0F, c1);
+			glm_vec4_scale(c2, 255.0F, c2);
+
+			displaylist_pos(&dl_sunset, v1[0], v1[1], v1[2]);
+			displaylist_color_rgba(&dl_sunset, c1[0], c1[1], c1[2], c1[3]);
+			displaylist_texcoord(&dl_sunset, 0, 0);
+			displaylist_pos(&dl_sunset, v2[0], v2[1], v2[2]);
+			displaylist_color_rgba(&dl_sunset, c1[0], c1[1], c1[2], c1[3]);
+			displaylist_texcoord(&dl_sunset, 0, 0);
+			displaylist_pos(&dl_sunset, v3[0], v3[1], v3[2]);
+			displaylist_color_rgba(&dl_sunset, c2[0], c2[1], c2[2], c2[3]);
+			displaylist_texcoord(&dl_sunset, 0, 0);
+			displaylist_pos(&dl_sunset, v4[0], v4[1], v4[2]);
+			displaylist_color_rgba(&dl_sunset, c2[0], c2[1], c2[2], c2[3]);
+			displaylist_texcoord(&dl_sunset, 0, 0);
+		}
+	}
+
+	displaylist_finalize(&dl_sunset, 4 * 16 * subdiv_total);
 }
 
 void gutil_clouds(mat4 view_matrix, float daytime) {
@@ -252,10 +304,30 @@ void gutil_sky_box(mat4 view_matrix, float daytime, vec3 color_top,
 		uint8_t col = stars_brightness * 0xFF;
 		gfx_texture_constant(col, col, col, col);
 		displaylist_render(&dl_stars);
-		gfx_texture(false);
 	}
-	gfx_blending(MODE_BLEND2);
 
+	vec4 sunset_color;
+	float sunset_shift;
+	bool sunset_visible
+		= daytime_sunset_colors(daytime, sunset_color, &sunset_shift);
+
+	if(sunset_visible) {
+		mat4 sunset_mat;
+		glm_rotate_x(view_matrix, glm_rad(90.0F), sunset_mat);
+		glm_rotate_z(
+			sunset_mat,
+			glm_rad(daytime_celestial_angle(daytime) > 0.5F ? 180.0F : 0.0F),
+			sunset_mat);
+		glm_scale_to(sunset_mat, (vec3) {1.0F, 1.0F, sunset_shift}, sunset_mat);
+		gfx_matrix_modelview(sunset_mat);
+		gfx_blending(MODE_BLEND);
+		gfx_texture_constant(sunset_color[0], sunset_color[1], sunset_color[2],
+							 sunset_color[3]);
+		displaylist_render(&dl_sunset);
+	}
+
+	gfx_matrix_modelview(celestial_mat);
+	gfx_blending(MODE_BLEND2);
 	gfx_texture(true);
 
 	gfx_bind_texture(&texture_sun);

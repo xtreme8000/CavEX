@@ -27,8 +27,8 @@ float daytime_brightness(float time) {
 	return (gstate.world.dimension == WORLD_DIM_OVERWORLD) ?
 		glm_clamp(cosf(daytime_celestial_angle(time) * 2.0F * GLM_PIf) * 2.0F
 					  + 0.5F,
-			   0.0F, 1.0F) :
-															 0.0F;
+				  0.0F, 1.0F) :
+		0.0F;
 }
 
 float daytime_celestial_angle(float time) {
@@ -45,6 +45,25 @@ float daytime_star_brightness(float time) {
 		0.25F - cosf(daytime_celestial_angle(time) * 2.0F * GLM_PIf) * 2.0F,
 		0.0F, 1.0F);
 	return x * x * 0.5F;
+}
+
+bool daytime_sunset_colors(float time, vec4 color, float* shift) {
+	assert(color && shift);
+
+	float sun_horizon_dist
+		= cosf(daytime_celestial_angle(time) * GLM_PIf * 2.0F) * 1.25F + 0.5F;
+
+	float s = 0.01F + 0.99F * sinf(sun_horizon_dist * GLM_PIf);
+	*shift = s * s;
+
+	color[0] = sun_horizon_dist * 0.3F + 0.7F;
+	color[1] = sun_horizon_dist * sun_horizon_dist * 0.7F + 0.2F;
+	color[2] = 0.2F;
+	color[3] = *shift;
+
+	glm_vec4_scale(color, 255.0F, color);
+
+	return sun_horizon_dist >= 0.0F && sun_horizon_dist <= 1.0F;
 }
 
 void daytime_sky_colors(float time, vec3 top_plane, vec3 bottom_plane,
