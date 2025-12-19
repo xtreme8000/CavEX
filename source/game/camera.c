@@ -26,6 +26,8 @@
 
 #include "../cglm/cglm.h"
 
+const float cameraSensitivity = 0.0002;
+
 // all vectors normalized
 static float plane_distance(vec3 n, vec3 p0, vec3 l0, vec3 l) {
 	float d = glm_vec3_dot(n, l);
@@ -104,10 +106,12 @@ void camera_ray_pick(struct world* w, float gx0, float gy0, float gz0,
 void camera_physics(struct camera* c, float dt) {
 	assert(c);
 
-	float jdx, jdy;
-	if(input_joystick(dt, &jdx, &jdy)) {
-		c->rx -= jdx * 2.0F;
-		c->ry -= jdy * 2.0F;
+	if(!input_held(IB_LOCK_CAMERA)){
+		float px, py, prot;
+		if(input_pointer(&px, &py, &prot)) {
+			c->rx -= (px-gfx_width()/2)*cameraSensitivity;
+			c->ry += (py-gfx_height()/2)*cameraSensitivity;
+		}
 	}
 
 	float acc_x = 0, acc_y = 0, acc_z = 0;
@@ -210,10 +214,12 @@ void camera_attach(struct camera* c, struct entity* e, float tick_delta,
 	c->y = pos_lerp[1];
 	c->z = pos_lerp[2];
 
-	float jdx, jdy;
-	if(e->data.local_player.capture_input && input_joystick(dt, &jdx, &jdy)) {
-		c->rx -= jdx * 2.0F;
-		c->ry -= jdy * 2.0F;
+	if(!input_held(IB_LOCK_CAMERA)){
+		float px, py, prot;
+		if(e->data.local_player.capture_input && input_pointer(&px, &py, &prot)) {
+			c->rx -= (px-gfx_width()/2)*cameraSensitivity;
+			c->ry += (py-gfx_height()/2)*cameraSensitivity;
+		}
 	}
 
 	if(c->rx >= GLM_PIf * 2.0F || c->rx < 0.0F)
