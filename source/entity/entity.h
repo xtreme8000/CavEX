@@ -66,7 +66,7 @@ struct entity {
 	} data;
 };
 
-DICT_DEF2(dict_entity, uint32_t, M_BASIC_OPLIST, struct entity, M_POD_OPLIST)
+DICT_DEF2(dict_entity, uint32_t, M_BASIC_OPLIST, struct entity*, M_POD_OPLIST)
 
 #include "../world.h"
 

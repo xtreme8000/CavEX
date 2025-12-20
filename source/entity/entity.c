@@ -306,7 +306,7 @@ void entities_client_tick(dict_entity_t dict) {
 	dict_entity_it(it, dict);
 
 	while(!dict_entity_end_p(it)) {
-		struct entity* e = &dict_entity_ref(it)->value;
+		struct entity* e = dict_entity_ref(it)->value;
 
 		if(e->tick_client)
 			e->tick_client(e);
@@ -321,7 +321,7 @@ void entities_client_render(dict_entity_t dict, struct camera* c,
 	dict_entity_it(it, dict);
 
 	while(!dict_entity_end_p(it)) {
-		struct entity* e = &dict_entity_ref(it)->value;
+		struct entity* e = dict_entity_ref(it)->value;
 		if(e->render
 		   && glm_vec3_distance2(e->pos, (vec3) {c->x, c->y, c->z})
 			   < glm_pow2(32.0F))
