@@ -1,0 +1,168 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  wii:
+    name: DevkitPPC build
+    runs-on: ubuntu-latest
+    container: 
+      image: devkitpro/devkitppc:latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Checkout lodepng
+      uses: actions/checkout@v4
+      with:
+        repository: 'lvandeve/lodepng'
+        path: tempsource/lodepng
+
+    - name: Checkout mlib
+      uses: actions/checkout@v4
+      with:
+        repository: 'P-p-H-d/mlib'
+        path: tempsource/m-lib
+
+    - name: Checkout cNBT
+      uses: actions/checkout@v4
+      with:
+        repository: 'chmod222/cNBT'
+        path: tempsource/cNBT
+
+    - name: Checkout parson
+      uses: actions/checkout@v4
+      with:
+        repository: 'kgabis/parson'
+        path: tempsource/parson
+
+    - name: Checkout cglm
+      uses: actions/checkout@v4
+      with:
+        repository: 'recp/cglm'
+        path: tempsource/cglm
+
+    - name: Move dependencies
+      run: |
+        mkdir ./source/cglm/
+        mkdir ./source/lodepng/
+        mkdir ./source/cNBT/
+        mkdir ./source/parson/
+        mkdir ./source/m-lib/
+        mv ./tempsource/cglm/include/cglm/* ./source/cglm/
+        mv ./tempsource/lodepng/lodepng.h ./source/lodepng/lodepng.h
+        mv ./tempsource/lodepng/lodepng.cpp ./source/lodepng/lodepng.c
+        mv ./tempsource/cNBT/buffer.* ./source/cNBT/
+        mv ./tempsource/cNBT/list.h ./source/cNBT/
+        mv ./tempsource/cNBT/nbt_*.c ./source/cNBT/
+        mv ./tempsource/cNBT/nbt.h ./source/cNBT/
+        mv ./tempsource/parson/parson.* ./source/parson/
+        mv ./tempsource/m-lib/*.h ./source/m-lib/
+
+    - name: Make
+      run: |
+        sudo chmod +x /etc/profile.d/devkit-env.sh
+        /etc/profile.d/devkit-env.sh
+        make -j 4
+      env: 
+        C_INCLUDE_PATH: "${{ github.workspace }}/source/"
+
+    - name: Create SD zip
+      run: |
+        mkdir -p ./apps/cavex/saves/
+        mv assets ./apps/cavex/
+        mv resources/*.shader ./apps/cavex/assets/
+        mv CavEX.dol ./apps/cavex/boot.dol
+        mv config.json ./apps/cavex/
+        mv icon.png ./apps/cavex/
+        mv meta.xml ./apps/cavex/
+      
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: SD card app folder
+        path: apps
+
+  pc:
+    name: PC build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Checkout lodepng
+      uses: actions/checkout@v4
+      with:
+        repository: 'lvandeve/lodepng'
+        path: tempsource/lodepng
+
+    - name: Checkout mlib
+      uses: actions/checkout@v4
+      with:
+        repository: 'P-p-H-d/mlib'
+        path: tempsource/m-lib
+
+    - name: Checkout cNBT
+      uses: actions/checkout@v4
+      with:
+        repository: 'chmod222/cNBT'
+        path: tempsource/cNBT
+
+    - name: Checkout parson
+      uses: actions/checkout@v4
+      with:
+        repository: 'kgabis/parson'
+        path: tempsource/parson
+
+    - name: Checkout cglm
+      uses: actions/checkout@v4
+      with:
+        repository: 'recp/cglm'
+        path: tempsource/cglm
+
+    - name: Move dependencies
+      run: |
+        mkdir ./source/cglm/
+        mkdir ./source/lodepng/
+        mkdir ./source/cNBT/
+        mkdir ./source/parson/
+        mkdir ./source/m-lib/
+        mv ./tempsource/cglm/include/cglm/* ./source/cglm/
+        mv ./tempsource/lodepng/lodepng.h ./source/lodepng/lodepng.h
+        mv ./tempsource/lodepng/lodepng.cpp ./source/lodepng/lodepng.c
+        mv ./tempsource/cNBT/buffer.* ./source/cNBT/
+        mv ./tempsource/cNBT/list.h ./source/cNBT/
+        mv ./tempsource/cNBT/nbt_*.c ./source/cNBT/
+        mv ./tempsource/cNBT/nbt.h ./source/cNBT/
+        mv ./tempsource/parson/parson.* ./source/parson/
+        mv ./tempsource/m-lib/*.h ./source/m-lib/
+
+    - name: Install Linux dependencies
+      run: sudo apt-get -y install libglfw3-dev libglew-dev zlib1g-dev
+
+    - name: Make
+      run: |
+        mkdir build_pc
+        cd build_pc
+        cmake ..
+        make -j 4
+      env: 
+        C_INCLUDE_PATH: "${{ github.workspace }}/source/"
+
+    - name: Create zip
+      run: |
+        mkdir -p ./apps/cavex/saves/
+        mv assets ./apps/cavex/
+        mv resources/*.shader ./apps/cavex/assets/
+        mv build_pc/cavex ./apps/cavex/cavex
+        mv config_pc.json ./apps/cavex/config.json
+        tar -czvf cavex.tar.gz ./apps/cavex/
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: PC tgz
+        path: cavex.tar.gz
+
